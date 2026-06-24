@@ -1,26 +1,37 @@
-import type { Config } from 'src/payload-types'
-
 import configPromise from '@payload-config'
-import { type DataFromGlobalSlug, getPayload } from 'payload'
+import { getPayload } from 'payload'
 import { unstable_cache } from 'next/cache'
 
-type Global = keyof Config['globals']
+/**
+ * Header and Footer are no longer Payload globals — they are tenant-scoped
+ * collections (one document per tenant). This fetches the single document for a
+ * given site, cached under a per-tenant tag so revalidating one site's header
+ * does not bust another's.
+ */
+type TenantGlobalSlug = 'header' | 'footer'
 
-async function getGlobal<T extends Global>(slug: T, depth = 0): Promise<DataFromGlobalSlug<T>> {
+async function getTenantGlobal(slug: TenantGlobalSlug, tenantSlug: string, depth = 1) {
   const payload = await getPayload({ config: configPromise })
 
-  const global = await payload.findGlobal({
-    slug,
+  const result = await payload.find({
+    collection: slug,
     depth,
+    limit: 1,
+    pagination: false,
+    where: {
+      'tenant.slug': {
+        equals: tenantSlug,
+      },
+    },
   })
 
-  return global
+  return result.docs?.[0] || null
 }
 
 /**
- * Returns a unstable_cache function mapped with the cache tag for the slug
+ * Returns an unstable_cache function tagged per tenant + global slug.
  */
-export const getCachedGlobal = <T extends Global>(slug: T, depth = 0) =>
-  unstable_cache(async () => getGlobal<T>(slug, depth), [slug], {
-    tags: [`global_${slug}`],
+export const getCachedGlobal = (slug: TenantGlobalSlug, tenantSlug: string, depth = 1) =>
+  unstable_cache(async () => getTenantGlobal(slug, tenantSlug, depth), [slug, tenantSlug], {
+    tags: [`${slug}_${tenantSlug}`],
   })

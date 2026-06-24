@@ -1,4 +1,19 @@
+import type { Tenant } from '@/payload-types'
+
 import canUseDOM from './canUseDOM'
+
+/**
+ * The public origin for a given tenant, derived from its first configured
+ * domain (e.g. "https://smagssans.dk"). Falls back to the shared server URL
+ * when a tenant has no domain yet (local dev, freshly created sites).
+ */
+export const getTenantServerURL = (tenant?: Tenant | null) => {
+  const domain = tenant?.domains?.[0]?.domain
+  if (domain) {
+    return domain.startsWith('http') ? domain : `https://${domain}`
+  }
+  return getServerSideURL()
+}
 
 export const getServerSideURL = () => {
   return (

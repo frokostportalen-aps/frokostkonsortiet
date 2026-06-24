@@ -9,12 +9,12 @@ import {
   lexicalEditor,
 } from '@payloadcms/richtext-lexical'
 
-import { authenticated } from '../../access/authenticated'
-import { authenticatedOrPublished } from '../../access/authenticatedOrPublished'
+import { createByTenant, mutateByTenant, readByTenantOrPublished } from '../../access/byTenant'
 import { Banner } from '../../blocks/Banner/config'
 import { Code } from '../../blocks/Code/config'
 import { MediaBlock } from '../../blocks/MediaBlock/config'
 import { generatePreviewPath } from '../../utilities/generatePreviewPath'
+import { tenantSlugFromDoc } from '../../utilities/tenantSlugFromDoc'
 import { populateAuthors } from './hooks/populateAuthors'
 import { revalidateDelete, revalidatePost } from './hooks/revalidatePost'
 
@@ -30,10 +30,10 @@ import { slugField } from 'payload'
 export const Posts: CollectionConfig<'posts'> = {
   slug: 'posts',
   access: {
-    create: authenticated,
-    delete: authenticated,
-    read: authenticatedOrPublished,
-    update: authenticated,
+    create: createByTenant,
+    delete: mutateByTenant,
+    read: readByTenantOrPublished,
+    update: mutateByTenant,
   },
   // This config controls what's populated by default when a post is referenced
   // https://payloadcms.com/docs/queries/select#defaultpopulate-collection-config-property
@@ -50,17 +50,19 @@ export const Posts: CollectionConfig<'posts'> = {
   admin: {
     defaultColumns: ['title', 'slug', 'updatedAt'],
     livePreview: {
-      url: ({ data, req }) =>
+      url: async ({ data, req }) =>
         generatePreviewPath({
           slug: data?.slug,
           collection: 'posts',
+          tenantSlug: await tenantSlugFromDoc(req.payload, data?.tenant),
           req,
         }),
     },
-    preview: (data, { req }) =>
+    preview: async (data, { req }) =>
       generatePreviewPath({
         slug: data?.slug as string,
         collection: 'posts',
+        tenantSlug: await tenantSlugFromDoc(req.payload, (data as { tenant?: unknown })?.tenant),
         req,
       }),
     useAsTitle: 'title',

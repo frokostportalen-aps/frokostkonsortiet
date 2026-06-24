@@ -1,12 +1,21 @@
-import type { GlobalConfig } from 'payload'
+import type { CollectionConfig } from 'payload'
 
 import { link } from '@/fields/link'
+import { createByTenant, mutateByTenant } from '@/access/byTenant'
 import { revalidateFooter } from './hooks/revalidateFooter'
 
-export const Footer: GlobalConfig = {
+/**
+ * Formerly a global. Now a tenant-scoped collection (one document per tenant,
+ * enforced by the multi-tenant plugin's `isGlobal` option) so each site has its
+ * own footer navigation.
+ */
+export const Footer: CollectionConfig = {
   slug: 'footer',
   access: {
     read: () => true,
+    create: createByTenant,
+    update: mutateByTenant,
+    delete: mutateByTenant,
   },
   fields: [
     {

@@ -5,11 +5,13 @@ export const beforeSyncWithSearch: BeforeSync = async ({ req, originalDoc, searc
     doc: { relationTo: collection },
   } = searchDoc
 
-  const { slug, id, categories, title, meta } = originalDoc
+  const { slug, id, categories, title, meta, tenant } = originalDoc
 
   const modifiedDoc: DocToSync = {
     ...searchDoc,
     slug,
+    // Carry the source document's tenant so search results stay scoped per site.
+    tenant: tenant && typeof tenant === 'object' ? tenant.id : tenant,
     meta: {
       ...meta,
       title: meta?.title || title,

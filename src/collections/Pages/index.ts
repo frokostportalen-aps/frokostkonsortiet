@@ -1,7 +1,6 @@
 import type { CollectionConfig } from 'payload'
 
-import { authenticated } from '../../access/authenticated'
-import { authenticatedOrPublished } from '../../access/authenticatedOrPublished'
+import { createByTenant, mutateByTenant, readByTenantOrPublished } from '../../access/byTenant'
 import { Archive } from '../../blocks/ArchiveBlock/config'
 import { CallToAction } from '../../blocks/CallToAction/config'
 import { Content } from '../../blocks/Content/config'
@@ -11,6 +10,7 @@ import { hero } from '@/heros/config'
 import { slugField } from 'payload'
 import { populatePublishedAt } from '../../hooks/populatePublishedAt'
 import { generatePreviewPath } from '../../utilities/generatePreviewPath'
+import { tenantSlugFromDoc } from '../../utilities/tenantSlugFromDoc'
 import { revalidateDelete, revalidatePage } from './hooks/revalidatePage'
 
 import {
@@ -24,10 +24,10 @@ import {
 export const Pages: CollectionConfig<'pages'> = {
   slug: 'pages',
   access: {
-    create: authenticated,
-    delete: authenticated,
-    read: authenticatedOrPublished,
-    update: authenticated,
+    create: createByTenant,
+    delete: mutateByTenant,
+    read: readByTenantOrPublished,
+    update: mutateByTenant,
   },
   // This config controls what's populated by default when a page is referenced
   // https://payloadcms.com/docs/queries/select#defaultpopulate-collection-config-property
@@ -39,17 +39,19 @@ export const Pages: CollectionConfig<'pages'> = {
   admin: {
     defaultColumns: ['title', 'slug', 'updatedAt'],
     livePreview: {
-      url: ({ data, req }) =>
+      url: async ({ data, req }) =>
         generatePreviewPath({
           slug: data?.slug,
           collection: 'pages',
+          tenantSlug: await tenantSlugFromDoc(req.payload, data?.tenant),
           req,
         }),
     },
-    preview: (data, { req }) =>
+    preview: async (data, { req }) =>
       generatePreviewPath({
         slug: data?.slug as string,
         collection: 'pages',
+        tenantSlug: await tenantSlugFromDoc(req.payload, (data as { tenant?: unknown })?.tenant),
         req,
       }),
     useAsTitle: 'title',

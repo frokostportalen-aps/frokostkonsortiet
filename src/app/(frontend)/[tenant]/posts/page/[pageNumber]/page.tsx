@@ -8,17 +8,20 @@ import { getPayload } from 'payload'
 import React from 'react'
 import PageClient from './page.client'
 import { notFound } from 'next/navigation'
+import { getAllTenantSlugs, getTenantBySlug } from '@/utilities/getTenant'
+import { getTenantPostsWhere } from '@/utilities/tenantPostsFilter'
 
 export const revalidate = 600
 
 type Args = {
   params: Promise<{
+    tenant: string
     pageNumber: string
   }>
 }
 
 export default async function Page({ params: paramsPromise }: Args) {
-  const { pageNumber } = await paramsPromise
+  const { tenant, pageNumber } = await paramsPromise
   const payload = await getPayload({ config: configPromise })
 
   const sanitizedPageNumber = Number(pageNumber)
@@ -31,6 +34,7 @@ export default async function Page({ params: paramsPromise }: Args) {
     limit: 12,
     page: sanitizedPageNumber,
     overrideAccess: false,
+    where: await getTenantPostsWhere(tenant),
   })
 
   return (
@@ -63,26 +67,32 @@ export default async function Page({ params: paramsPromise }: Args) {
 }
 
 export async function generateMetadata({ params: paramsPromise }: Args): Promise<Metadata> {
-  const { pageNumber } = await paramsPromise
+  const { tenant, pageNumber } = await paramsPromise
+  const tenantDoc = await getTenantBySlug(tenant)
   return {
-    title: `Payload Website Template Posts Page ${pageNumber || ''}`,
+    title: `${tenantDoc?.name ?? 'Frokost Konsortiet'} Posts Page ${pageNumber || ''}`,
   }
 }
 
 export async function generateStaticParams() {
   const payload = await getPayload({ config: configPromise })
-  const { totalDocs } = await payload.count({
-    collection: 'posts',
-    overrideAccess: false,
-  })
+  const slugs = await getAllTenantSlugs()
 
-  const totalPages = Math.ceil(totalDocs / 10)
+  const params: { tenant: string; pageNumber: string }[] = []
 
-  const pages: { pageNumber: string }[] = []
+  for (const tenant of slugs) {
+    const { totalDocs } = await payload.count({
+      collection: 'posts',
+      overrideAccess: false,
+      where: await getTenantPostsWhere(tenant),
+    })
 
-  for (let i = 1; i <= totalPages; i++) {
-    pages.push({ pageNumber: String(i) })
+    const totalPages = Math.ceil(totalDocs / 10)
+
+    for (let i = 1; i <= totalPages; i++) {
+      params.push({ tenant, pageNumber: String(i) })
+    }
   }
 
-  return pages
+  return params
 }

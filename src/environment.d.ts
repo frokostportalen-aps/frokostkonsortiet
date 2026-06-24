@@ -5,6 +5,10 @@ declare global {
       DATABASE_URL: string
       NEXT_PUBLIC_SERVER_URL: string
       VERCEL_PROJECT_PRODUCTION_URL: string
+      // Comma-separated list of every tenant origin, e.g.
+      // "https://frokostkonsortiet.dk,https://smagssans.dk,https://frajorden.dk".
+      // Used for CORS and next/image remote patterns across all sites.
+      TENANT_ORIGINS: string
     }
   }
 }

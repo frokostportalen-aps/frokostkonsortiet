@@ -3,53 +3,55 @@ import { getPayload } from 'payload'
 import config from '@payload-config'
 import { unstable_cache } from 'next/cache'
 
-const getPostsSitemap = unstable_cache(
-  async () => {
-    const payload = await getPayload({ config })
-    const SITE_URL =
-      process.env.NEXT_PUBLIC_SERVER_URL ||
-      process.env.VERCEL_PROJECT_PRODUCTION_URL ||
-      'https://example.com'
+import { getTenantFromHost } from '@/utilities/getTenantFromHost'
+import { getTenantServerURL } from '@/utilities/getURL'
 
-    const results = await payload.find({
-      collection: 'posts',
-      overrideAccess: false,
-      draft: false,
-      depth: 0,
-      limit: 1000,
-      pagination: false,
-      where: {
-        _status: {
-          equals: 'published',
+const getPostsSitemap = (tenantSlug: string, siteUrl: string) =>
+  unstable_cache(
+    async () => {
+      const payload = await getPayload({ config })
+
+      const results = await payload.find({
+        collection: 'posts',
+        overrideAccess: false,
+        draft: false,
+        depth: 0,
+        limit: 1000,
+        pagination: false,
+        where: {
+          and: [{ _status: { equals: 'published' } }, { 'tenant.slug': { equals: tenantSlug } }],
         },
-      },
-      select: {
-        slug: true,
-        updatedAt: true,
-      },
-    })
+        select: {
+          slug: true,
+          updatedAt: true,
+        },
+      })
 
-    const dateFallback = new Date().toISOString()
+      const dateFallback = new Date().toISOString()
 
-    const sitemap = results.docs
-      ? results.docs
-          .filter((post) => Boolean(post?.slug))
-          .map((post) => ({
-            loc: `${SITE_URL}/posts/${post?.slug}`,
-            lastmod: post.updatedAt || dateFallback,
-          }))
-      : []
+      const sitemap = results.docs
+        ? results.docs
+            .filter((post) => Boolean(post?.slug))
+            .map((post) => ({
+              loc: `${siteUrl}/posts/${post?.slug}`,
+              lastmod: post.updatedAt || dateFallback,
+            }))
+        : []
 
-    return sitemap
-  },
-  ['posts-sitemap'],
-  {
-    tags: ['posts-sitemap'],
-  },
-)
+      return sitemap
+    },
+    [`posts-sitemap-${tenantSlug}`],
+    {
+      tags: [`posts-sitemap-${tenantSlug}`],
+    },
+  )
 
 export async function GET() {
-  const sitemap = await getPostsSitemap()
+  const tenant = await getTenantFromHost()
+  if (!tenant?.slug) return getServerSideSitemap([])
+
+  const siteUrl = getTenantServerURL(tenant)
+  const sitemap = await getPostsSitemap(tenant.slug, siteUrl)()
 
   return getServerSideSitemap(sitemap)
 }

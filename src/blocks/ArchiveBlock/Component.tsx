@@ -6,13 +6,23 @@ import React from 'react'
 import RichText from '@/components/RichText'
 
 import { CollectionArchive } from '@/components/CollectionArchive'
+import { getTenantPostsWhere } from '@/utilities/tenantPostsFilter'
 
 export const ArchiveBlock: React.FC<
   ArchiveBlockProps & {
     id?: string
+    tenantSlug?: string
   }
 > = async (props) => {
-  const { id, categories, introContent, limit: limitFromProps, populateBy, selectedDocs } = props
+  const {
+    id,
+    categories,
+    introContent,
+    limit: limitFromProps,
+    populateBy,
+    selectedDocs,
+    tenantSlug,
+  } = props
 
   const limit = limitFromProps || 3
 
@@ -26,19 +36,21 @@ export const ArchiveBlock: React.FC<
       else return category
     })
 
+    // Scope to the current site (the main tenant aggregates across kitchens).
+    const tenantWhere = tenantSlug ? await getTenantPostsWhere(tenantSlug) : {}
+
     const fetchedPosts = await payload.find({
       collection: 'posts',
       depth: 1,
       limit,
-      ...(flattenedCategories && flattenedCategories.length > 0
-        ? {
-            where: {
-              categories: {
-                in: flattenedCategories,
-              },
-            },
-          }
-        : {}),
+      where: {
+        and: [
+          tenantWhere,
+          ...(flattenedCategories && flattenedCategories.length > 0
+            ? [{ categories: { in: flattenedCategories } }]
+            : []),
+        ],
+      },
     })
 
     posts = fetchedPosts.docs

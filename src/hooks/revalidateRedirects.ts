@@ -2,10 +2,18 @@ import type { CollectionAfterChangeHook } from 'payload'
 
 import { revalidateTag } from 'next/cache'
 
-export const revalidateRedirects: CollectionAfterChangeHook = ({ doc, req: { payload } }) => {
-  payload.logger.info(`Revalidating redirects`)
+import { tenantSlugFromDoc } from '../utilities/tenantSlugFromDoc'
 
-  revalidateTag('redirects', 'max')
+export const revalidateRedirects: CollectionAfterChangeHook = async ({
+  doc,
+  req: { payload, context },
+}) => {
+  if (!context.disableRevalidate) {
+    const tenantSlug = await tenantSlugFromDoc(payload, doc?.tenant)
+    const tag = tenantSlug ? `redirects_${tenantSlug}` : 'redirects_all'
+    payload.logger.info(`Revalidating ${tag}`)
+    revalidateTag(tag, 'max')
+  }
 
   return doc
 }

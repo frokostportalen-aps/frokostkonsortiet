@@ -1,4 +1,4 @@
-import type { CollectionSlug, GlobalSlug, Payload, PayloadRequest, File } from 'payload'
+import type { CollectionSlug, Payload, PayloadRequest, File } from 'payload'
 
 import { contactForm as contactFormData } from './contact-form'
 import { contact as contactPageData } from './contact-page'
@@ -18,9 +18,9 @@ const collections: CollectionSlug[] = [
   'forms',
   'form-submissions',
   'search',
+  'header',
+  'footer',
 ]
-
-const globals: GlobalSlug[] = ['header', 'footer']
 
 const categories = ['Technology', 'News', 'Finance', 'Design', 'Software', 'Engineering']
 
@@ -38,30 +38,39 @@ export const seed = async ({
   payload.logger.info('Seeding database...')
 
   // we need to clear the media directory before seeding
-  // as well as the collections and globals
+  // as well as the collections
   // this is because while `yarn seed` drops the database
   // the custom `/api/seed` endpoint does not
-  payload.logger.info(`— Clearing collections and globals...`)
+  payload.logger.info(`— Clearing collections...`)
 
   // clear the database
   await Promise.all(
-    globals.map((global) =>
-      payload.updateGlobal({
-        slug: global,
-        data: {
-          navItems: [],
-        },
-        depth: 0,
-        context: {
-          disableRevalidate: true,
-        },
-      }),
-    ),
-  )
-
-  await Promise.all(
     collections.map((collection) => payload.db.deleteMany({ collection, req, where: {} })),
   )
+
+  // Ensure the main tenant exists; everything seeded below belongs to it.
+  payload.logger.info(`— Ensuring main tenant...`)
+  const existingTenant = await payload.find({
+    collection: 'tenants',
+    where: { slug: { equals: 'frokost-konsortiet' } },
+    limit: 1,
+    pagination: false,
+  })
+
+  const tenant =
+    existingTenant.docs[0] ??
+    (await payload.create({
+      collection: 'tenants',
+      data: {
+        name: 'Frokost Konsortiet',
+        slug: 'frokost-konsortiet',
+        isMain: true,
+        domains: [{ domain: 'localhost:3000' }],
+      },
+      context: { disableRevalidate: true },
+    }))
+
+  const tenantID = tenant.id
 
   await Promise.all(
     collections
@@ -109,22 +118,22 @@ export const seed = async ({
     }),
     payload.create({
       collection: 'media',
-      data: image1,
+      data: { ...image1, tenant: tenantID },
       file: image1Buffer,
     }),
     payload.create({
       collection: 'media',
-      data: image2,
+      data: { ...image2, tenant: tenantID },
       file: image2Buffer,
     }),
     payload.create({
       collection: 'media',
-      data: image2,
+      data: { ...image2, tenant: tenantID },
       file: image3Buffer,
     }),
     payload.create({
       collection: 'media',
-      data: imageHero1,
+      data: { ...imageHero1, tenant: tenantID },
       file: hero1Buffer,
     }),
     categories.map((category) =>
@@ -133,6 +142,7 @@ export const seed = async ({
         data: {
           title: category,
           slug: category,
+          tenant: tenantID,
         },
       }),
     ),
@@ -148,7 +158,7 @@ export const seed = async ({
     context: {
       disableRevalidate: true,
     },
-    data: post1({ heroImage: image1Doc, blockImage: image2Doc, author: demoAuthor }),
+    data: { ...post1({ heroImage: image1Doc, blockImage: image2Doc, author: demoAuthor }), tenant: tenantID },
   })
 
   const post2Doc = await payload.create({
@@ -157,7 +167,7 @@ export const seed = async ({
     context: {
       disableRevalidate: true,
     },
-    data: post2({ heroImage: image2Doc, blockImage: image3Doc, author: demoAuthor }),
+    data: { ...post2({ heroImage: image2Doc, blockImage: image3Doc, author: demoAuthor }), tenant: tenantID },
   })
 
   const post3Doc = await payload.create({
@@ -166,7 +176,7 @@ export const seed = async ({
     context: {
       disableRevalidate: true,
     },
-    data: post3({ heroImage: image3Doc, blockImage: image1Doc, author: demoAuthor }),
+    data: { ...post3({ heroImage: image3Doc, blockImage: image1Doc, author: demoAuthor }), tenant: tenantID },
   })
 
   // update each post with related posts
@@ -197,7 +207,7 @@ export const seed = async ({
   const contactForm = await payload.create({
     collection: 'forms',
     depth: 0,
-    data: contactFormData,
+    data: { ...contactFormData, tenant: tenantID },
   })
 
   payload.logger.info(`— Seeding pages...`)
@@ -206,21 +216,22 @@ export const seed = async ({
     payload.create({
       collection: 'pages',
       depth: 0,
-      data: home({ heroImage: imageHomeDoc, metaImage: image2Doc }),
+      data: { ...home({ heroImage: imageHomeDoc, metaImage: image2Doc }), tenant: tenantID },
     }),
     payload.create({
       collection: 'pages',
       depth: 0,
-      data: contactPageData({ contactForm: contactForm }),
+      data: { ...contactPageData({ contactForm: contactForm }), tenant: tenantID },
     }),
   ])
 
-  payload.logger.info(`— Seeding globals...`)
+  payload.logger.info(`— Seeding header/footer...`)
 
   await Promise.all([
-    payload.updateGlobal({
-      slug: 'header',
+    payload.create({
+      collection: 'header',
       data: {
+        tenant: tenantID,
         navItems: [
           {
             link: {
@@ -242,9 +253,10 @@ export const seed = async ({
         ],
       },
     }),
-    payload.updateGlobal({
-      slug: 'footer',
+    payload.create({
+      collection: 'footer',
       data: {
+        tenant: tenantID,
         navItems: [
           {
             link: {

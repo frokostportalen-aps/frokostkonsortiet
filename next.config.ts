@@ -25,14 +25,19 @@ const nextConfig: NextConfig = {
     ],
     qualities: [100],
     remotePatterns: [
-      ...[NEXT_PUBLIC_SERVER_URL /* 'https://example.com' */].map((item) => {
-        const url = new URL(item)
+      // Allow the shared server URL plus every tenant origin so media optimizes
+      // on each site's own domain.
+      ...[NEXT_PUBLIC_SERVER_URL, ...(process.env.TENANT_ORIGINS?.split(',') ?? [])]
+        .map((item) => item?.trim())
+        .filter(Boolean)
+        .map((item) => {
+          const url = new URL(item)
 
-        return {
-          hostname: url.hostname,
-          protocol: url.protocol.replace(':', '') as 'http' | 'https',
-        }
-      }),
+          return {
+            hostname: url.hostname,
+            protocol: url.protocol.replace(':', '') as 'http' | 'https',
+          }
+        }),
     ],
   },
   webpack: (webpackConfig) => {

@@ -7,11 +7,25 @@ import configPromise from '@payload-config'
 import { getPayload } from 'payload'
 import React from 'react'
 import PageClient from './page.client'
+import { getAllTenantSlugs, getTenantBySlug } from '@/utilities/getTenant'
+import { getTenantPostsWhere } from '@/utilities/tenantPostsFilter'
 
 export const dynamic = 'force-static'
 export const revalidate = 600
 
-export default async function Page() {
+type Args = {
+  params: Promise<{
+    tenant: string
+  }>
+}
+
+export async function generateStaticParams() {
+  const slugs = await getAllTenantSlugs()
+  return slugs.map((tenant) => ({ tenant }))
+}
+
+export default async function Page({ params: paramsPromise }: Args) {
+  const { tenant } = await paramsPromise
   const payload = await getPayload({ config: configPromise })
 
   const posts = await payload.find({
@@ -19,6 +33,7 @@ export default async function Page() {
     depth: 1,
     limit: 12,
     overrideAccess: false,
+    where: await getTenantPostsWhere(tenant),
     select: {
       title: true,
       slug: true,
@@ -56,8 +71,10 @@ export default async function Page() {
   )
 }
 
-export function generateMetadata(): Metadata {
+export async function generateMetadata({ params: paramsPromise }: Args): Promise<Metadata> {
+  const { tenant } = await paramsPromise
+  const tenantDoc = await getTenantBySlug(tenant)
   return {
-    title: `Payload Website Template Posts`,
+    title: `${tenantDoc?.name ?? 'Frokost Konsortiet'} Posts`,
   }
 }

@@ -1,26 +1,33 @@
 import { formBuilderPlugin } from '@payloadcms/plugin-form-builder'
+import { multiTenantPlugin } from '@payloadcms/plugin-multi-tenant'
 import { nestedDocsPlugin } from '@payloadcms/plugin-nested-docs'
 import { redirectsPlugin } from '@payloadcms/plugin-redirects'
 import { seoPlugin } from '@payloadcms/plugin-seo'
 import { searchPlugin } from '@payloadcms/plugin-search'
 import { Plugin } from 'payload'
 import { revalidateRedirects } from '@/hooks/revalidateRedirects'
+import { isSuperAdmin } from '@/access/isSuperAdmin'
 import { GenerateTitle, GenerateURL } from '@payloadcms/plugin-seo/types'
 import { FixedToolbarFeature, HeadingFeature, lexicalEditor } from '@payloadcms/richtext-lexical'
 import { searchFields } from '@/search/fieldOverrides'
 import { beforeSyncWithSearch } from '@/search/beforeSync'
 
 import { Page, Post } from '@/payload-types'
-import { getServerSideURL } from '@/utilities/getURL'
+import { getServerSideURL, getTenantServerURL } from '@/utilities/getURL'
 
 const generateTitle: GenerateTitle<Post | Page> = ({ doc }) => {
-  return doc?.title ? `${doc.title} | Payload Website Template` : 'Payload Website Template'
+  return doc?.title ? `${doc.title} | Frokost Konsortiet` : 'Frokost Konsortiet'
 }
 
-const generateURL: GenerateURL<Post | Page> = ({ doc }) => {
-  const url = getServerSideURL()
+const generateURL: GenerateURL<Post | Page> = ({ collectionConfig, doc }) => {
+  // When the tenant relationship is populated, build the canonical URL on the
+  // site's own domain; otherwise fall back to the shared server URL.
+  const tenant = (doc as { tenant?: unknown })?.tenant
+  const base =
+    tenant && typeof tenant === 'object' ? getTenantServerURL(tenant as never) : getServerSideURL()
+  const prefix = collectionConfig?.slug === 'posts' ? '/posts' : ''
 
-  return doc?.slug ? `${url}/${doc.slug}` : url
+  return doc?.slug ? `${base}${prefix}/${doc.slug}` : base
 }
 
 export const plugins: Plugin[] = [
@@ -88,5 +95,23 @@ export const plugins: Plugin[] = [
         return [...defaultFields, ...searchFields]
       },
     },
+  }),
+  // Added last so collections injected by the plugins above (redirects, forms,
+  // search) already exist and receive the tenant field. header/footer are
+  // marked `isGlobal` so each tenant gets exactly one document.
+  multiTenantPlugin({
+    collections: {
+      pages: {},
+      posts: {},
+      categories: {},
+      media: {},
+      header: { isGlobal: true },
+      footer: { isGlobal: true },
+      redirects: {},
+      forms: {},
+      search: {},
+    },
+    tenantsSlug: 'tenants',
+    userHasAccessToAllTenants: (user) => isSuperAdmin(user),
   }),
 ]

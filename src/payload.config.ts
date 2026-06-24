@@ -8,6 +8,7 @@ import { Categories } from './collections/Categories'
 import { Media } from './collections/Media'
 import { Pages } from './collections/Pages'
 import { Posts } from './collections/Posts'
+import { Tenants } from './collections/Tenants'
 import { Users } from './collections/Users'
 import { Footer } from './Footer/config'
 import { Header } from './Header/config'
@@ -59,10 +60,15 @@ export default buildConfig({
   editor: defaultLexical,
   db: mongooseAdapter({
     url: process.env.DATABASE_URL || '',
+    migrationDir: path.resolve(dirname, 'migrations'),
   }),
-  collections: [Pages, Posts, Media, Categories, Users],
-  cors: [getServerSideURL()].filter(Boolean),
-  globals: [Header, Footer],
+  collections: [Pages, Posts, Media, Categories, Users, Tenants, Header, Footer],
+  // Every tenant serves the admin/API and live preview from its own domain, so
+  // all of them must be allowed origins. Set TENANT_ORIGINS to a comma list.
+  cors: [
+    getServerSideURL(),
+    ...(process.env.TENANT_ORIGINS?.split(',').map((o) => o.trim()) ?? []),
+  ].filter(Boolean),
   plugins,
   secret: process.env.PAYLOAD_SECRET,
   sharp,

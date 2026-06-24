@@ -6,6 +6,8 @@ import { redirect } from 'next/navigation'
 import { NextRequest } from 'next/server'
 
 import configPromise from '@payload-config'
+import { isSuperAdmin } from '@/access/isSuperAdmin'
+import { getUserTenantIDs } from '@payloadcms/plugin-multi-tenant/utilities'
 
 export type PreviewSearchParams = {
   path: string
@@ -35,10 +37,11 @@ export async function GET(req: NextRequest): Promise<Response> {
   let user
 
   try {
-    user = await payload.auth({
+    const authResult = await payload.auth({
       req: req as unknown as PayloadRequest,
       headers: req.headers,
     })
+    user = authResult?.user
   } catch (error) {
     payload.logger.error({ err: error }, 'Error verifying token for live preview')
     return new Response('You are not allowed to preview this page', { status: 403 })
@@ -51,7 +54,25 @@ export async function GET(req: NextRequest): Promise<Response> {
     return new Response('You are not allowed to preview this page', { status: 403 })
   }
 
-  // You can add additional checks here to see if the user is allowed to preview this page
+  // Enforce that the user may preview the tenant encoded in the path. The path
+  // is `/{tenantSlug}/...`; super-admins bypass the check.
+  if (!isSuperAdmin(user)) {
+    const tenantSlug = path.split('/')[1]
+    const { docs } = await payload.find({
+      collection: 'tenants',
+      depth: 0,
+      limit: 1,
+      pagination: false,
+      where: { slug: { equals: tenantSlug } },
+    })
+    const tenantId = docs?.[0]?.id
+    const userTenantIDs = getUserTenantIDs(user)
+
+    if (!tenantId || !userTenantIDs.includes(tenantId)) {
+      draft.disable()
+      return new Response('You are not allowed to preview this page', { status: 403 })
+    }
+  }
 
   draft.enable()
 
