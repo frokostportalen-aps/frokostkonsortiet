@@ -15,7 +15,11 @@ export default async function proxy(req: NextRequest) {
 
   let data: TenantDomainData = EMPTY
   try {
-    const res = await fetch(new URL('/api/tenant-domains', req.url), {
+    // Resolve the domain map against a stable internal origin when provided
+    // (e.g. INTERNAL_URL=http://localhost:3000 in Docker, where the incoming
+    // `*.localhost` host can't be resolved from inside the container).
+    const lookupBase = process.env.INTERNAL_URL || req.url
+    const res = await fetch(new URL('/api/tenant-domains', lookupBase), {
       next: { tags: ['tenant-domains'] },
     })
     if (res.ok) {

@@ -9,6 +9,9 @@ declare global {
       // "https://frokostkonsortiet.dk,https://smagssans.dk,https://frajorden.dk".
       // Used for CORS and next/image remote patterns across all sites.
       TENANT_ORIGINS: string
+      // Optional stable origin the proxy uses to fetch the domain→tenant map
+      // (e.g. http://localhost:3000 inside Docker). Falls back to the request URL.
+      INTERNAL_URL: string
     }
   }
 }

@@ -46,6 +46,8 @@ pnpx create-payload-app my-project -t website
 
 That's it! Changes made in `./src` will be reflected in your app. Follow the on-screen instructions to login and create your first admin user. Then check out [Production](#production) once you're ready to build and serve your app, and [Deployment](#deployment) when you're ready to go live.
 
+> This project is **multi-tenant**: one Payload instance serves several sites on separate domains. For running it locally (including Docker and how to test multiple sites), see [`docs/local-development.md`](docs/local-development.md). For the architecture, see [`docs/adr/0001-multi-tenant-from-single-payload.md`](docs/adr/0001-multi-tenant-from-single-payload.md).
+
 ## How it works
 
 The Payload config is tailored specifically to the needs of most websites. It is pre-configured in the following ways:

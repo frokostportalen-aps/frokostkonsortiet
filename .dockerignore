@@ -1,0 +1,16 @@
+node_modules
+.next
+.git
+.gitignore
+npm-debug.log
+.DS_Store
+*.md
+docs
+media
+build
+dist
+.env.example
+test.env
+tsconfig.tsbuildinfo
+playwright-report
+.pnpm-store

@@ -1,0 +1,27 @@
+# Dev image for local multi-tenant testing (docker-compose.yml).
+#
+# Dependencies are installed in an image layer, NOT into the bind-mounted repo:
+#  - the pnpm store and node_modules share one filesystem → pnpm hardlinks
+#    instead of copying (fast, low memory — avoids ENOMEM in the container)
+#  - nothing is written back into your working tree
+#
+# At runtime only ./src is bind-mounted for live reload; node_modules stays in
+# the image. For the production image see ./Dockerfile.
+FROM node:22.17.0-alpine
+
+RUN apk add --no-cache libc6-compat
+WORKDIR /app
+
+# Pin pnpm via the package.json "packageManager" field; don't prompt to download.
+ENV COREPACK_ENABLE_DOWNLOAD_PROMPT=0
+RUN corepack enable
+
+# Install deps first so this layer caches until the manifest/lockfile change.
+COPY package.json pnpm-lock.yaml ./
+RUN pnpm install --frozen-lockfile
+
+# Bake the rest of the app (overlaid by the ./src bind mount at runtime).
+COPY . .
+
+EXPOSE 3000
+CMD ["pnpm", "dev"]

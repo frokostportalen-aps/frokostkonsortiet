@@ -1,22 +1,42 @@
-version: '3'
-
+# Local multi-tenant testing stack (works great with OrbStack).
+#
+#   docker compose up --build
+#   docker compose exec app pnpm seed:tenants      # first run only
+#
+# Then open (OrbStack/your browser resolve *.localhost to 127.0.0.1 automatically):
+#   http://frokostkonsortiet.localhost:3000   → main site (aggregator)
+#   http://smagssans.localhost:3000           → Smagssans kitchen
+#   http://frajorden.localhost:3000           → Fra Jorden kitchen
+#   http://localhost:3000/admin               → shared Payload admin
+#
+# Dependencies live in the image (see Dockerfile.dev); only ./src is bind-mounted
+# for live reload, so nothing is written back into your working tree.
 services:
-  payload:
-    image: node:18-alpine
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
     ports:
       - '3000:3000'
     volumes:
-      - .:/home/node/app
-      - node_modules:/home/node/app/node_modules
-    working_dir: /home/node/app/
-    command: sh -c "yarn install && yarn dev"
+      - ./src:/app/src
+      - media:/app/public/media
     depends_on:
       - mongo
     env_file:
       - .env
+    environment:
+      # Overrides .env for the container network.
+      DATABASE_URL: mongodb://mongo:27017/frokost-konsortiet
+      NEXT_PUBLIC_SERVER_URL: http://localhost:3000
+      # Proxy resolves the domain map against this stable origin (the *.localhost
+      # request host isn't resolvable from inside the Alpine container).
+      INTERNAL_URL: http://localhost:3000
+      TENANT_ORIGINS: 'http://localhost:3000,http://frokostkonsortiet.localhost:3000,http://smagssans.localhost:3000,http://frajorden.localhost:3000'
+      NODE_OPTIONS: --no-deprecation
 
   mongo:
-    image: mongo:latest
+    image: mongo:7
     ports:
       - '27017:27017'
     command:
@@ -28,4 +48,4 @@ services:
 
 volumes:
   data:
-  node_modules:
+  media:
