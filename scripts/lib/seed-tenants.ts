@@ -12,32 +12,31 @@ const urlForDomain = (domain: string) =>
 
 const mainTenant = TENANTS.find((t) => t.isMain)!
 
-/** Fetch an image, trying food-specific sources first, then stable fallbacks. */
-async function fetchImage(keywords: string, lock: number, baseName: string): Promise<File> {
-  const urls = [
-    `https://loremflickr.com/1200/800/${encodeURIComponent(keywords)}?lock=${lock}`,
-    `https://picsum.photos/seed/${baseName}-${lock}/1200/800`,
-    'https://raw.githubusercontent.com/payloadcms/payload/refs/heads/3.x/templates/website/src/endpoints/seed/image-hero1.webp',
-  ]
-  for (const url of urls) {
+// Used when a configured image URL can't be fetched.
+const FALLBACK_IMAGE =
+  'https://raw.githubusercontent.com/payloadcms/payload/refs/heads/3.x/templates/website/src/endpoints/seed/image-hero1.webp'
+
+/** Fetch a configured image URL, falling back to a bundled placeholder. */
+async function fetchImage(url: string, baseName: string): Promise<File> {
+  for (const candidate of [url, FALLBACK_IMAGE]) {
     try {
-      const res = await fetch(url, { method: 'GET' })
+      const res = await fetch(candidate, { method: 'GET' })
       if (!res.ok) continue
       const data = await res.arrayBuffer()
       if (!data.byteLength) continue
       const mimetype = res.headers.get('content-type')?.split(';')[0] || 'image/jpeg'
       const ext = mimetype.split('/')[1] || 'jpg'
       return {
-        name: `${baseName}-${lock}.${ext}`,
+        name: `${baseName}.${ext}`,
         data: Buffer.from(data),
         mimetype,
         size: data.byteLength,
       }
     } catch {
-      // try next source
+      // try the fallback
     }
   }
-  throw new Error(`Could not fetch image for "${keywords}"`)
+  throw new Error(`Could not fetch image: ${url}`)
 }
 
 const customLink = (label: string, url: string, appearance: 'default' | 'outline' = 'default') => ({
@@ -171,8 +170,6 @@ export async function seedTenants(payload: Payload): Promise<void> {
     payload.logger.info('✓ super-admin: admin@example.com / password')
   }
 
-  let lock = 1
-
   for (const t of TENANTS) {
     const domains = t.domains.map((domain) => ({ domain }))
 
@@ -210,8 +207,8 @@ export async function seedTenants(payload: Payload): Promise<void> {
     }
 
     // Media (hero + a second image for the media blocks).
-    const heroFile = await fetchImage(t.imageKeywords, lock++, t.slug)
-    const blockFile = await fetchImage(t.imageKeywords, lock++, t.slug)
+    const heroFile = await fetchImage(t.images.hero, `${t.slug}-hero`)
+    const blockFile = await fetchImage(t.images.block, `${t.slug}-block`)
     const heroMedia = await payload.create({
       collection: 'media',
       context: ctx,
@@ -237,13 +234,20 @@ export async function seedTenants(payload: Payload): Promise<void> {
       data: aboutPage(t, tenantID, heroMedia.id as string, blockMedia.id as string) as never,
     })
 
-    // Posts (then cross-link them as related).
+    // Posts — each with its own cover image (then cross-link them as related).
     const created: string[] = []
     for (const post of t.posts) {
+      const postFile = await fetchImage(post.image, `${t.slug}-${post.slug}`)
+      const postMedia = await payload.create({
+        collection: 'media',
+        context: ctx,
+        data: { alt: post.title, tenant: tenantID } as never,
+        file: postFile,
+      })
       const doc = await payload.create({
         collection: 'posts',
         context: ctx,
-        data: postDoc(t, tenantID, admin.id as string, heroMedia.id as string, post) as never,
+        data: postDoc(t, tenantID, admin.id as string, postMedia.id as string, post) as never,
       })
       created.push(doc.id as string)
     }

@@ -9,6 +9,8 @@ export type SeedPost = {
   slug: string
   title: string
   description: string
+  /** Hero/cover image URL for this post. Falls back to a placeholder. */
+  image: string
   sections: SeedSection[]
 }
 
@@ -20,8 +22,13 @@ export type SeedTenant = {
   /** hero headline + intro paragraph on the front page */
   tagline: string
   intro: string
-  /** loremflickr keywords used to fetch imagery */
-  imageKeywords: string
+  /**
+   * Image URLs for this site — THE place to control seed imagery. `hero` is the
+   * front-page / om-os / post hero; `block` is the in-page media block. Replace
+   * with your own URLs (any reachable image). If a URL fails, the seed falls
+   * back to a bundled placeholder.
+   */
+  images: { hero: string; block: string }
   /** three "highlight" columns on the front page */
   highlights: { heading: string; body: string }[]
   /** the /om-os page */
@@ -39,7 +46,11 @@ export const TENANTS: SeedTenant[] = [
     tagline: 'Frokost, der samler os',
     intro:
       'Frokost Konsortiet er fællesskabet bag dine bedste frokostpauser. Vi forener nogle af landets dygtigste køkkener under ét tag, så din arbejdsplads får variation, kvalitet og bæredygtighed – hver eneste dag.',
-    imageKeywords: 'lunch,buffet,food',
+    images: {
+      hero: 'https://plus.unsplash.com/premium_photo-1663852297267-827c73e7529e?q=80&w=2340&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+      block:
+        'https://plus.unsplash.com/premium_photo-1663852297267-827c73e7529e?q=80&w=2340&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+    },
     highlights: [
       {
         heading: 'Mange køkkener, ét fællesskab',
@@ -80,6 +91,8 @@ export const TENANTS: SeedTenant[] = [
       {
         slug: 'variation-i-frokostordningen',
         title: 'Sådan skaber vi variation i frokostordningen',
+        image:
+          'https://plus.unsplash.com/premium_photo-1663852297267-827c73e7529e?q=80&w=2340&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
         description:
           'Hemmeligheden bag en frokostordning, kollegerne ikke bliver trætte af, er flere køkkener med hver deres signatur.',
         sections: [
@@ -100,6 +113,8 @@ export const TENANTS: SeedTenant[] = [
       {
         slug: 'baeredygtighed-fra-jord-til-bord',
         title: 'Bæredygtighed fra jord til bord',
+        image:
+          'https://plus.unsplash.com/premium_photo-1663852297267-827c73e7529e?q=80&w=2340&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
         description:
           'Bæredygtig frokost handler om hele kæden – fra hvordan råvarerne dyrkes, til hvad der sker med resterne.',
         sections: [
@@ -126,7 +141,11 @@ export const TENANTS: SeedTenant[] = [
     tagline: 'Frokost for alle sanser',
     intro:
       'Hos Smagssans er frokost mere end mad. Vi komponerer retter, hvor duft, tekstur og smag spiller sammen, så pausen midt på dagen bliver et lille øjeblik værd at huske.',
-    imageKeywords: 'gourmet,plating',
+    images: {
+      hero: 'https://images.unsplash.com/photo-1498837167922-ddd27525d352?q=80&w=2340&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+      block:
+        'https://images.unsplash.com/photo-1498837167922-ddd27525d352?q=80&w=2340&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+    },
     highlights: [
       {
         heading: 'Sæsonens råvarer',
@@ -167,6 +186,8 @@ export const TENANTS: SeedTenant[] = [
       {
         slug: 'efteraarets-smage',
         title: 'Efterårets smage',
+        image:
+          'https://images.unsplash.com/photo-1498837167922-ddd27525d352?q=80&w=2340&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
         description:
           'Når dagene bliver kortere, bliver smagene dybere. Sådan fanger vi efteråret på tallerkenen.',
         sections: [
@@ -186,7 +207,10 @@ export const TENANTS: SeedTenant[] = [
       {
         slug: 'kunsten-at-krydre',
         title: 'Kunsten at krydre',
-        description: 'Krydderier kan løfte en ret – eller drukne den. Her er vores tilgang til balancen.',
+        image:
+          'https://images.unsplash.com/photo-1498837167922-ddd27525d352?q=80&w=2340&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+        description:
+          'Krydderier kan løfte en ret – eller drukne den. Her er vores tilgang til balancen.',
         sections: [
           {
             paragraphs: [
@@ -211,7 +235,11 @@ export const TENANTS: SeedTenant[] = [
     tagline: 'Fra jorden til jeres frokostbord',
     intro:
       'Fra Jorden dyrker frokost med respekt for naturen. Økologiske grøntsager, korte forsyningskæder og grøn gastronomi gør hver ret både god for jer og for kloden.',
-    imageKeywords: 'vegetables,farm',
+    images: {
+      hero: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?q=80&w=2340&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+      block:
+        'https://images.unsplash.com/photo-1504674900247-0877df9cc836?q=80&w=2340&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+    },
     highlights: [
       {
         heading: '100% økologisk',
@@ -252,6 +280,8 @@ export const TENANTS: SeedTenant[] = [
       {
         slug: 'rodfrugternes-aarstid',
         title: 'Derfor er rodfrugter efterårets helte',
+        image:
+          'https://images.unsplash.com/photo-1504674900247-0877df9cc836?q=80&w=2340&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
         description:
           'Rodfrugter er billige, holdbare og fulde af smag. Her er, hvorfor de fylder så meget i vores efterårsmenu.',
         sections: [
@@ -271,6 +301,8 @@ export const TENANTS: SeedTenant[] = [
       {
         slug: 'moed-vores-avlere',
         title: 'Mød vores avlere',
+        image:
+          'https://images.unsplash.com/photo-1504674900247-0877df9cc836?q=80&w=2340&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
         description:
           'Bag hver ret står en avler. Vi tog på besøg hos dem, der dyrker grøntsagerne til jeres frokost.',
         sections: [
