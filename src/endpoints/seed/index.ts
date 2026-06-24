@@ -183,6 +183,7 @@ export const seed = async ({
   await payload.update({
     id: post1Doc.id,
     collection: 'posts',
+    context: { disableRevalidate: true },
     data: {
       relatedPosts: [post2Doc.id, post3Doc.id],
     },
@@ -190,6 +191,7 @@ export const seed = async ({
   await payload.update({
     id: post2Doc.id,
     collection: 'posts',
+    context: { disableRevalidate: true },
     data: {
       relatedPosts: [post1Doc.id, post3Doc.id],
     },
@@ -197,6 +199,7 @@ export const seed = async ({
   await payload.update({
     id: post3Doc.id,
     collection: 'posts',
+    context: { disableRevalidate: true },
     data: {
       relatedPosts: [post1Doc.id, post2Doc.id],
     },
@@ -216,11 +219,13 @@ export const seed = async ({
     payload.create({
       collection: 'pages',
       depth: 0,
+      context: { disableRevalidate: true },
       data: { ...home({ heroImage: imageHomeDoc, metaImage: image2Doc }), tenant: tenantID },
     }),
     payload.create({
       collection: 'pages',
       depth: 0,
+      context: { disableRevalidate: true },
       data: { ...contactPageData({ contactForm: contactForm }), tenant: tenantID },
     }),
   ])
@@ -230,6 +235,7 @@ export const seed = async ({
   await Promise.all([
     payload.create({
       collection: 'header',
+      context: { disableRevalidate: true },
       data: {
         tenant: tenantID,
         navItems: [
@@ -255,6 +261,7 @@ export const seed = async ({
     }),
     payload.create({
       collection: 'footer',
+      context: { disableRevalidate: true },
       data: {
         tenant: tenantID,
         navItems: [

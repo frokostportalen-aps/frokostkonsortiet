@@ -34,8 +34,20 @@ inside the image (`Dockerfile.dev`), and only `./src` is bind-mounted for live
 reload, so nothing is written back into your working tree.
 
 ```bash
-docker compose up --build                   # first run (build), then just `up`
-docker compose exec app pnpm seed:tenants   # seed tenants + admin (idempotent)
+docker compose up --build                    # first run (build), then just `up`
+docker compose exec app pnpm seed:tenants    # rich Danish content for every site
+```
+
+`seed:tenants` creates the tenants, a cross-site menu, a front page and an
+`/om-os` page per site, news posts, per-tenant imagery, and a super-admin
+(`admin@example.com` / `password`). Run it **inside the container** (as above)
+so the fetched media lands in the app's `media` volume.
+
+After seeding, recreate the app once so the proxy/header caches pick up the new
+data (the seed runs with revalidation disabled, so it can't bust Next's cache):
+
+```bash
+docker compose up -d --force-recreate app
 ```
 
 Then open these — browsers and OrbStack resolve `*.localhost` to `127.0.0.1`

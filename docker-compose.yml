@@ -20,6 +20,7 @@ services:
       - '3000:3000'
     volumes:
       - ./src:/app/src
+      - ./scripts:/app/scripts
       - media:/app/public/media
     depends_on:
       - mongo
