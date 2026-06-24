@@ -119,7 +119,15 @@ export const Pages: CollectionConfig<'pages'> = {
         position: 'sidebar',
       },
     },
-    slugField(),
+    // Slug is unique per tenant (see compound index below), not globally, so
+    // each site can have its own `home`, `about`, etc.
+    slugField({ disableUnique: true }),
+  ],
+  indexes: [
+    {
+      fields: ['tenant', 'slug'],
+      unique: true,
+    },
   ],
   hooks: {
     afterChange: [revalidatePage],

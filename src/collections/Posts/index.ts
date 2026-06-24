@@ -216,7 +216,14 @@ export const Posts: CollectionConfig<'posts'> = {
         },
       ],
     },
-    slugField(),
+    // Slug is unique per tenant (see compound index below), not globally.
+    slugField({ disableUnique: true }),
+  ],
+  indexes: [
+    {
+      fields: ['tenant', 'slug'],
+      unique: true,
+    },
   ],
   hooks: {
     afterChange: [revalidatePost],

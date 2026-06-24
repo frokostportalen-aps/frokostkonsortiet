@@ -21,8 +21,16 @@ export const Categories: CollectionConfig = {
       type: 'text',
       required: true,
     },
+    // Slug is unique per tenant (see compound index below), not globally.
     slugField({
       position: undefined,
+      disableUnique: true,
     }),
+  ],
+  indexes: [
+    {
+      fields: ['tenant', 'slug'],
+      unique: true,
+    },
   ],
 }
