@@ -4,9 +4,12 @@ import React from 'react'
 
 import { Footer } from '@/Footer/Component'
 import { Header } from '@/Header/Component'
+import { TenantTheme } from '@/components/TenantTheme'
 import { mergeOpenGraph } from '@/utilities/mergeOpenGraph'
 import { getTenantBySlug } from '@/utilities/getTenant'
 import { getServerSideURL, getTenantServerURL } from '@/utilities/getURL'
+import { getTenantTheme } from '@/themes/tenantThemes'
+import { getTenantFont } from '@/themes/fonts'
 
 type Args = {
   children: React.ReactNode
@@ -15,13 +18,23 @@ type Args = {
 
 export default async function TenantLayout({ children, params }: Args) {
   const { tenant } = await params
+  const font = getTenantFont(tenant)
+
+  // `display: contents` so this wrapper carries the font (className defines the
+  // var; --font-sans + font-family cascade to children) without adding a box
+  // that would break the footer's `mt-auto` against the body flex column.
+  const fontStyle = {
+    display: 'contents',
+    ...(font ? { '--font-sans': font.sansVar, fontFamily: 'var(--font-sans)' } : {}),
+  } as React.CSSProperties
 
   return (
-    <>
+    <div className={font?.className} style={fontStyle}>
+      <TenantTheme theme={getTenantTheme(tenant)} />
       <Header tenantSlug={tenant} />
       {children}
       <Footer tenantSlug={tenant} />
-    </>
+    </div>
   )
 }
 
