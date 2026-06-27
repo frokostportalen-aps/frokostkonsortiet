@@ -10,6 +10,20 @@ const PORT = 3000
 const urlForDomain = (domain: string) =>
   domain.includes('localhost') ? `http://${domain}:${PORT}/` : `https://${domain}/`
 
+/**
+ * Which of a tenant's domains the cross-site menu should link to. A local seed
+ * links to the `*.localhost` dev domains; a production seed sets
+ * `SEED_LINK_DOMAIN=public` to link to the public `new.*` domains instead
+ * (falling back to the first non-localhost domain, then the first domain).
+ */
+const preferPublicLinks = process.env.SEED_LINK_DOMAIN === 'public'
+const linkDomain = (domains: string[]): string =>
+  preferPublicLinks
+    ? (domains.find((d) => d.startsWith('new.')) ??
+      domains.find((d) => !d.includes('localhost')) ??
+      domains[0])
+    : (domains.find((d) => d.includes('localhost')) ?? domains[0])
+
 const mainTenant = TENANTS.find((t) => t.isMain)!
 
 // Used when a configured image URL can't be fetched.
@@ -263,7 +277,7 @@ export async function seedTenants(payload: Payload): Promise<void> {
     // Header menu: the main site links out to every kitchen; each kitchen links
     // back to the main site. All sites get Om os + Nyheder.
     const kitchenNavItems = TENANTS.filter((k) => !k.isMain).map((k) => ({
-      link: { type: 'custom', label: k.name, url: urlForDomain(k.domains[0]), newTab: false },
+      link: { type: 'custom', label: k.name, url: urlForDomain(linkDomain(k.domains)), newTab: false },
     }))
     const headerNavItems = t.isMain
       ? [
@@ -274,7 +288,7 @@ export async function seedTenants(payload: Payload): Promise<void> {
         ]
       : [
           {
-            link: { type: 'custom', label: mainTenant.name, url: urlForDomain(mainTenant.domains[0]) },
+            link: { type: 'custom', label: mainTenant.name, url: urlForDomain(linkDomain(mainTenant.domains)) },
           },
           { link: { type: 'custom', label: 'Om os', url: '/om-os' } },
           { link: { type: 'custom', label: 'Nyheder', url: '/posts' } },
