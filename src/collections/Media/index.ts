@@ -8,22 +8,34 @@ import {
 import path from 'path'
 import { fileURLToPath } from 'url'
 
-import { anyone } from '../access/anyone'
-import { createByTenant, mutateByTenant } from '../access/byTenant'
+import { anyone } from '../../access/anyone'
+import { createByTenant, mutateByTenant } from '../../access/byTenant'
+import { setTenantPrefix } from './hooks/setTenantPrefix'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
 export const Media: CollectionConfig = {
   slug: 'media',
-  folders: true,
+  folders: false,
   access: {
     create: createByTenant,
     delete: mutateByTenant,
     read: anyone,
     update: mutateByTenant,
   },
+  hooks: {
+    beforeChange: [setTenantPrefix],
+  },
   fields: [
+    {
+      // Folder prefix in the storage bucket, set from the tenant slug by the
+      // beforeChange hook above. The S3 storage plugin detects this existing
+      // field and uses it as the per-document object-key prefix.
+      name: 'prefix',
+      type: 'text',
+      admin: { hidden: true, readOnly: true },
+    },
     {
       name: 'alt',
       type: 'text',
@@ -41,7 +53,7 @@ export const Media: CollectionConfig = {
   ],
   upload: {
     // Upload to the public/media directory in Next.js making them publicly accessible even outside of Payload
-    staticDir: path.resolve(dirname, '../../public/media'),
+    staticDir: path.resolve(dirname, '../../../public/media'),
     adminThumbnail: 'thumbnail',
     focalPoint: true,
     imageSizes: [
