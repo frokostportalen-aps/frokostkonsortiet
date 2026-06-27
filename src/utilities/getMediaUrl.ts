@@ -15,5 +15,12 @@ export const getMediaUrl = (url: string | null | undefined, cacheTag?: string | 
     cacheTag = encodeURIComponent(cacheTag)
   }
 
-  return cacheTag ? `${url}?${cacheTag}` : url
+  if (!cacheTag) return url
+
+  // The URL may already carry a query string (e.g. `?prefix=…` from the R2
+  // storage adapter), so join the cache tag with the right separator instead of
+  // always using `?` — a second `?` would corrupt the existing params and break
+  // the media route's prefix lookup.
+  const separator = url.includes('?') ? '&' : '?'
+  return `${url}${separator}${cacheTag}`
 }
