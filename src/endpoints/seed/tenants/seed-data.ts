@@ -42,7 +42,12 @@ export const TENANTS: SeedTenant[] = [
     name: 'Frokost Konsortiet',
     slug: 'frokost-konsortiet',
     isMain: true,
-    domains: ['frokostkonsortiet.localhost', 'localhost'],
+    domains: [
+      'frokostkonsortiet.localhost',
+      'localhost',
+      'frokostkonsortiet.dk',
+      'new.frokostkonsortiet.dk',
+    ],
     tagline: 'Frokost, der samler os',
     intro:
       'Frokost Konsortiet er fællesskabet bag dine bedste frokostpauser. Vi forener nogle af landets dygtigste køkkener under ét tag, så din arbejdsplads får variation, kvalitet og bæredygtighed – hver eneste dag.',
@@ -137,7 +142,7 @@ export const TENANTS: SeedTenant[] = [
     name: 'Smagssans',
     slug: 'smagssans',
     isMain: false,
-    domains: ['smagssans.localhost'],
+    domains: ['smagssans.localhost', 'smagssans.dk', 'new.smagssans.dk'],
     tagline: 'Frokost for alle sanser',
     intro:
       'Hos Smagssans er frokost mere end mad. Vi komponerer retter, hvor duft, tekstur og smag spiller sammen, så pausen midt på dagen bliver et lille øjeblik værd at huske.',
@@ -231,7 +236,7 @@ export const TENANTS: SeedTenant[] = [
     name: 'Fra Jorden',
     slug: 'frajorden',
     isMain: false,
-    domains: ['frajorden.localhost'],
+    domains: ['frajorden.localhost', 'frajorden.dk', 'new.frajorden.dk'],
     tagline: 'Fra jorden til jeres frokostbord',
     intro:
       'Fra Jorden dyrker frokost med respekt for naturen. Økologiske grøntsager, korte forsyningskæder og grøn gastronomi gør hver ret både god for jer og for kloden.',

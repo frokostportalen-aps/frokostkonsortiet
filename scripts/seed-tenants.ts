@@ -2,7 +2,7 @@ import 'dotenv/config'
 import { getPayload } from 'payload'
 import config from '../src/payload.config'
 
-import { seedTenants } from './lib/seed-tenants'
+import { seedTenants } from '../src/endpoints/seed/tenants/seed-tenants'
 
 /**
  * Seeds every site with realistic Danish content: tenants + `.localhost`
