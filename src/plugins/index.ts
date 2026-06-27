@@ -4,6 +4,7 @@ import { nestedDocsPlugin } from '@payloadcms/plugin-nested-docs'
 import { redirectsPlugin } from '@payloadcms/plugin-redirects'
 import { seoPlugin } from '@payloadcms/plugin-seo'
 import { searchPlugin } from '@payloadcms/plugin-search'
+import { s3Storage } from '@payloadcms/storage-s3'
 import { Plugin } from 'payload'
 import { revalidateRedirects } from '@/hooks/revalidateRedirects'
 import { isSuperAdmin } from '@/access/isSuperAdmin'
@@ -114,4 +115,25 @@ export const plugins: Plugin[] = [
     tenantsSlug: 'tenants',
     userHasAccessToAllTenants: (user) => isSuperAdmin(user),
   }),
+  // Store media in Cloudflare R2 (S3-compatible) when credentials are present.
+  // Without them — e.g. local dev — uploads fall back to the on-disk staticDir,
+  // so the app keeps working with no R2 setup.
+  ...(process.env.R2_BUCKET
+    ? [
+        s3Storage({
+          collections: { media: true },
+          bucket: process.env.R2_BUCKET,
+          config: {
+            endpoint: process.env.R2_ENDPOINT,
+            region: 'auto',
+            // R2 ignores regions but expects path-style addressing.
+            forcePathStyle: true,
+            credentials: {
+              accessKeyId: process.env.R2_ACCESS_KEY_ID || '',
+              secretAccessKey: process.env.R2_SECRET_ACCESS_KEY || '',
+            },
+          },
+        }),
+      ]
+    : []),
 ]
