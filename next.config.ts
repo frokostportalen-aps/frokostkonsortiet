@@ -23,7 +23,10 @@ const nextConfig: NextConfig = {
         pathname: '/api/media/file/**',
       },
     ],
-    qualities: [100],
+    // Allowlist of <Image> quality values. 75 is Next's default (used by every
+    // Image without an explicit quality prop); 100 is used by ImageMedia. A
+    // requested quality outside this list returns HTTP 400 and the image fails.
+    qualities: [75, 100],
     remotePatterns: [
       // Allow the shared server URL plus every tenant origin so media optimizes
       // on each site's own domain.
