@@ -50,7 +50,7 @@ export const TENANTS: SeedTenant[] = [
     ],
     tagline: 'Frokost, der samler os',
     intro:
-      'Frokost Konsortiet er fællesskabet bag dine bedste frokostpauser. Vi forener nogle af landets dygtigste køkkener under ét tag, så din arbejdsplads får variation, kvalitet og bæredygtighed – hver eneste dag.',
+      'Frokost Konsortiet er fællesskabet bag dine bedste frokostpauser. Vi laver frokost med variation, kvalitet og bæredygtighed i centrum, så din arbejdsplads får noget godt at glæde sig til – hver eneste dag.',
     images: {
       hero: 'https://plus.unsplash.com/premium_photo-1663852297267-827c73e7529e?q=80&w=2340&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
       block:
@@ -58,12 +58,12 @@ export const TENANTS: SeedTenant[] = [
     },
     highlights: [
       {
-        heading: 'Mange køkkener, ét fællesskab',
-        body: 'Smagssans, Fra Jorden og flere specialkøkkener leverer under samme aftale. I skifter nemt mellem koncepter, uden at skifte leverandør.',
+        heading: 'Variation hver uge',
+        body: 'Vores frokost veksler, så der altid er noget nyt at glæde sig til på tallerkenen.',
       },
       {
         heading: 'Sæson og bæredygtighed',
-        body: 'Menuerne følger årstiderne, og vi prioriterer økologi, lokale råvarer og minimalt madspild i alle vores køkkener.',
+        body: 'Menuerne følger årstiderne, og vi prioriterer økologi, lokale råvarer og minimalt madspild i alt, hvad vi laver.',
       },
       {
         heading: 'Nem administration',
@@ -76,21 +76,21 @@ export const TENANTS: SeedTenant[] = [
         {
           heading: 'Vores historie',
           paragraphs: [
-            'Vi samlede en håndfuld selvstændige køkkener, der hver især var bedst til noget forskelligt – og gav dem en fælles platform. I dag betyder det, at en enkelt arbejdsplads kan få sæsonens grøntsager fra Fra Jorden den ene uge og sanselige smagskompositioner fra Smagssans den næste.',
-            'Konsortiet vokser løbende med nye køkkener, der deler vores værdier om kvalitet, åbenhed og respekt for råvarerne.',
+            'Frokost Konsortiet startede med en ambition om at gøre frokostpausen til dagens højdepunkt. I dag betyder det, at en arbejdsplads kan få sæsonens grøntsager den ene uge og sanselige smagskompositioner den næste.',
+            'Vi udvikler os løbende og holder fast i vores værdier om kvalitet, åbenhed og respekt for råvarerne.',
           ],
         },
         {
           heading: 'Sådan arbejder vi',
           paragraphs: [
-            'Hvert køkken bevarer sin egen identitet og sit eget håndværk, mens vi står for koordinering, levering og den daglige kontakt. Det giver jer det bedste fra begge verdener: små køkkeners passion og et stort fællesskabs driftssikkerhed.',
+            'Vi står for menuplanlægning, levering og den daglige kontakt, så I altid har ét sted at henvende jer. Det giver jer det bedste fra begge verdener: passion for håndværket og driftssikkerhed i hverdagen.',
           ],
         },
       ],
     },
     cta: {
       heading: 'Klar til en bedre frokost?',
-      body: 'Tag fat i os, så finder vi det køkken – eller den kombination af køkkener – der passer til jeres arbejdsplads.',
+      body: 'Tag fat i os, så finder vi den frokostløsning, der passer til jeres arbejdsplads.',
     },
     posts: [
       {
@@ -99,7 +99,7 @@ export const TENANTS: SeedTenant[] = [
         image:
           'https://plus.unsplash.com/premium_photo-1663852297267-827c73e7529e?q=80&w=2340&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
         description:
-          'Hemmeligheden bag en frokostordning, kollegerne ikke bliver trætte af, er flere køkkener med hver deres signatur.',
+          'Hemmeligheden bag en frokostordning, kollegerne ikke bliver trætte af, er menuer med variation og hver deres signatur.',
         sections: [
           {
             paragraphs: [
@@ -107,10 +107,10 @@ export const TENANTS: SeedTenant[] = [
             ],
           },
           {
-            heading: 'Flere køkkener, mindre rutine',
+            heading: 'Variation, mindre rutine',
             paragraphs: [
-              'I Frokost Konsortiet roterer vi mellem køkkener med vidt forskellige udtryk. Den ene uge er der rodfrugter og grøn gastronomi fra Fra Jorden, den næste sanselige kompositioner fra Smagssans.',
-              'Resultatet er en frokost, der føles ny – uden at I skal jonglere med flere leverandører og aftaler.',
+              'I Frokost Konsortiet veksler vi mellem menuer med vidt forskellige udtryk. Den ene uge er der rodfrugter og grøn gastronomi, den næste sanselige kompositioner.',
+              'Resultatet er en frokost, der føles ny – uden at I skal jonglere med flere aftaler.',
             ],
           },
         ],
@@ -131,7 +131,7 @@ export const TENANTS: SeedTenant[] = [
           {
             heading: 'Mindre madspild, mere smag',
             paragraphs: [
-              'Vores køkkener planlægger menuerne efter sæsonen og bruger hele råvaren. Det, der ikke bliver til dagens ret, bliver til fond, syltning eller morgendagens frokost.',
+              'Vi planlægger menuerne efter sæsonen og bruger hele råvaren. Det, der ikke bliver til dagens ret, bliver til fond, syltning eller morgendagens frokost.',
             ],
           },
         ],
