@@ -214,6 +214,23 @@
   }
 }
 
+/* Consecutive Media + Content bands merge into one element: drop the gap... */
+[data-block-type='mediaContent']:has(+ [data-block-type='mediaContent']) {
+  margin-bottom: 0;
+}
+[data-block-type='mediaContent'] + [data-block-type='mediaContent'] {
+  margin-top: 0;
+}
+/* ...and square the internal corners, so only the group's top and bottom round. */
+[data-block-type='mediaContent']:has(+ [data-block-type='mediaContent']) .media-content-band {
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+}
+[data-block-type='mediaContent'] + [data-block-type='mediaContent'] .media-content-band {
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+}
+
 html {
   opacity: 0;
 }
