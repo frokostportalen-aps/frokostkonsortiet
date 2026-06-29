@@ -90,7 +90,16 @@ const homePage = (t: SeedTenant, tenantID: string, heroMedia: string, blockMedia
         })),
       ],
     },
-    { blockType: 'mediaBlock', blockName: 'Billede', media: blockMedia },
+    // One media+text split per feature, alternating the image side (and image)
+    // down the page.
+    ...t.features.map((f, i) => ({
+      blockType: 'mediaContent',
+      blockName: `Billede + tekst ${i + 1}`,
+      media: i % 2 === 0 ? blockMedia : heroMedia,
+      imagePosition: i % 2 === 0 ? 'left' : 'right',
+      richText: richText(heading('h2', f.heading), p(f.body)),
+      links: [customLink('Om os', '/om-os')],
+    })),
     {
       blockType: 'archive',
       blockName: 'Nyheder',
@@ -101,6 +110,16 @@ const homePage = (t: SeedTenant, tenantID: string, heroMedia: string, blockMedia
       ),
       populateBy: 'collection',
       relationTo: 'posts',
+    },
+    // A standalone split (separated by the archive above and CTA below, so it
+    // keeps all four rounded corners rather than merging).
+    {
+      blockType: 'mediaContent',
+      blockName: 'Billede + tekst (spotlight)',
+      media: blockMedia,
+      imagePosition: 'right',
+      richText: richText(heading('h2', t.spotlight.heading), p(t.spotlight.body)),
+      links: [customLink('Om os', '/om-os')],
     },
     {
       blockType: 'cta',

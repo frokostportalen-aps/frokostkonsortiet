@@ -31,6 +31,13 @@ export type SeedTenant = {
   images: { hero: string; block: string }
   /** three "highlight" columns on the front page */
   highlights: { heading: string; body: string }[]
+  /**
+   * Front-page media + text splits (image beside a short value proposition).
+   * At least two — the builder alternates the image left/right down the page.
+   */
+  features: { heading: string; body: string }[]
+  /** A standalone media + text split lower on the front page (not merged). */
+  spotlight: { heading: string; body: string }
   /** the /om-os page */
   about: { lead: string; sections: SeedSection[] }
   cta: { heading: string; body: string }
@@ -754,6 +761,20 @@ export const TENANTS: SeedTenant[] = [
         body: 'Én aftale, én faktura og ét kontaktpunkt. Vi gør det enkelt at give kollegerne en frokost, de glæder sig til.',
       },
     ],
+    features: [
+      {
+        heading: 'Mere end bare frokost',
+        body: 'Bag hver levering står et fællesskab af køkkener, der brænder for håndværket. Vi samler dem under én aftale, så I får variation, kvalitet og bæredygtighed – uden besværet.',
+      },
+      {
+        heading: 'Nem administration, ét kontaktpunkt',
+        body: 'Én aftale, én faktura og én leverandør at ringe til. Vi står for planlægning, levering og den daglige kontakt, så I kan bruge tiden på alt det andet.',
+      },
+    ],
+    spotlight: {
+      heading: 'Sæson, smag og bæredygtighed',
+      body: 'Menuerne følger årstiderne, vi prioriterer økologi og lokale råvarer, og vi holder madspildet nede – hele vejen fra jord til frokostbord.',
+    },
     about: {
       lead: 'Frokost Konsortiet startede som en idé om, at god frokost ikke skal være et kompromis mellem smag, sundhed og bæredygtighed.',
       sections: [
@@ -849,6 +870,20 @@ export const TENANTS: SeedTenant[] = [
         body: 'Velkendte retter får et uventet twist, så der altid er noget nyt at glæde sig til på tallerkenen.',
       },
     ],
+    features: [
+      {
+        heading: 'Smag, der bliver lagt mærke til',
+        body: 'Vi laver alt fra bunden samme morgen, det skal serveres – med kontraster, dufte og krydring, der gør frokostpausen til et øjeblik værd at huske.',
+      },
+      {
+        heading: 'Sæsonen sætter menuen',
+        body: 'Vi handler efter årstiden og lader de bedste råvarer bestemme retterne. Det giver en menu i konstant bevægelse – og en frokost, der smager af året, lige nu.',
+      },
+    ],
+    spotlight: {
+      heading: 'Håndværk i hver ret',
+      body: 'Vores kokke arbejder som komponister – kontraster, dufte og en krydring, der er smagt til, før retten forlader køkkenet.',
+    },
     about: {
       lead: 'Smagssans blev født ud af en simpel overbevisning: at en frokost kan vække alle sanser, hvis man tør give den opmærksomhed.',
       sections: [
@@ -943,6 +978,20 @@ export const TENANTS: SeedTenant[] = [
         body: 'Vi køber tæt på og i sæson, så råvarerne er friske, sporbare og rejser så kort som muligt.',
       },
     ],
+    features: [
+      {
+        heading: 'Grøntsagen i hovedrollen',
+        body: 'Økologiske råvarer fra danske avlere, korte forsyningskæder og minimalt madspild. Grøn gastronomi, der er god for både jer og planeten.',
+      },
+      {
+        heading: 'Tæt på avlerne',
+        body: 'Vi kender markerne og menneskene bag vores råvarer. Hele høsten kommer i brug – ikke kun de pæneste eksemplarer – så der er mindre spild på marken og mere smag i køkkenet.',
+      },
+    ],
+    spotlight: {
+      heading: 'Fra mark til frokostbord',
+      body: 'Vi planlægger sæsonen sammen med vores avlere og bruger hele råvaren, så der er mindre spild på marken og mere smag i køkkenet.',
+    },
     about: {
       lead: 'Fra Jorden begyndte på markerne, ikke i køkkenet. Vi tror på, at den bedste frokost starter med den bedste jord.',
       sections: [
