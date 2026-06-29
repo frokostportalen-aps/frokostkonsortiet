@@ -28,3 +28,6 @@ tsconfig.tsbuildinfo
 
 # pnpm project-local store (created if pnpm runs inside a bind mount)
 .pnpm-store/
+
+# Local content drafts / source material (e.g. mockup decks)
+Indhold/
