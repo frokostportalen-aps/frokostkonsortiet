@@ -1,7 +1,14 @@
 import type { File, Payload } from 'payload'
 
-import { heading, p, richText } from './lexical'
-import { TENANTS, type SeedTenant } from './seed-data'
+import { heading, list, p, richText } from './lexical'
+import {
+  CONSORTIUM_PAGES,
+  kitchenPages,
+  TENANTS,
+  type PageSection,
+  type SeedPage,
+  type SeedTenant,
+} from './seed-data'
 
 const ctx = { disableRevalidate: true }
 const PORT = 3000
@@ -136,6 +143,125 @@ const aboutPage = (t: SeedTenant, tenantID: string, heroMedia: string, blockMedi
   meta: { title: `Om ${t.name}`, description: t.about.lead, image: heroMedia },
 })
 
+// A column inside a Content block.
+const column = (size: string, ...nodes: Parameters<typeof richText>) => ({
+  size,
+  enableLink: false,
+  richText: richText(...nodes),
+})
+
+/** Optional full-width heading + intro column shared by several section kinds. */
+const headerColumns = (heading_?: string, intro?: string) =>
+  heading_ || intro
+    ? [column('full', ...(heading_ ? [heading('h2', heading_)] : []), ...(intro ? [p(intro)] : []))]
+    : []
+
+/** Turn a single page section into one Content block. */
+const sectionToBlock = (s: PageSection) => {
+  switch (s.kind) {
+    case 'text':
+      return {
+        blockType: 'content',
+        blockName: s.heading ?? 'Tekst',
+        columns: [
+          column(
+            'full',
+            ...(s.heading ? [heading('h2', s.heading)] : []),
+            ...(s.paragraphs ?? []).map(p),
+            ...(s.bullets ? [list(s.bullets)] : []),
+          ),
+        ],
+      }
+    case 'columns':
+      return {
+        blockType: 'content',
+        blockName: s.heading ?? 'Kolonner',
+        columns: [
+          ...headerColumns(s.heading, s.intro),
+          ...s.columns.map((c) => column('oneThird', heading('h3', c.heading), p(c.body))),
+        ],
+      }
+    case 'pricing':
+      return {
+        blockType: 'content',
+        blockName: s.heading ?? 'Priser',
+        columns: [
+          ...headerColumns(s.heading, s.intro),
+          ...s.items.map((it) =>
+            column(
+              'oneThird',
+              heading('h3', it.name),
+              ...(it.price ? [heading('h4', it.price)] : []),
+              list(it.lines),
+            ),
+          ),
+          ...(s.note ? [column('full', p(s.note))] : []),
+        ],
+      }
+    case 'faq':
+      return {
+        blockType: 'faq',
+        blockName: s.heading ?? 'FAQ',
+        ...(s.heading ? { heading: s.heading } : {}),
+        items: s.items.map((qa) => ({ question: qa.q, answer: richText(p(qa.a)) })),
+      }
+    case 'partners':
+      return {
+        blockType: 'content',
+        blockName: s.heading ?? 'Partnere',
+        columns: [
+          ...headerColumns(s.heading, s.intro),
+          ...TENANTS.filter((k) => !k.isMain).map((k) => ({
+            size: 'oneThird',
+            enableLink: true,
+            link: {
+              type: 'custom',
+              appearance: 'default',
+              label: `Besøg ${k.name}`,
+              url: urlForDomain(linkDomain(k.domains)),
+              newTab: false,
+            },
+            richText: richText(heading('h3', k.name), p(k.tagline)),
+          })),
+        ],
+      }
+  }
+}
+
+/** Build a standalone content page (Services, FAQ, Catering, …). */
+const contentPage = (page: SeedPage, tenantID: string, heroMedia: string) => ({
+  title: page.title,
+  slug: page.slug,
+  _status: 'published',
+  tenant: tenantID,
+  hero: {
+    type: 'mediumImpact',
+    media: heroMedia,
+    richText: richText(
+      heading('h1', page.hero.heading),
+      ...(page.hero.intro ? [p(page.hero.intro)] : []),
+    ),
+  },
+  layout: [
+    ...page.sections.map(sectionToBlock),
+    ...(page.cta
+      ? [
+          {
+            blockType: 'cta',
+            blockName: 'CTA',
+            links: [customLink(page.cta.linkLabel ?? 'Kontakt os', page.cta.linkUrl ?? '/om-os')],
+            richText: richText(heading('h3', page.cta.heading), p(page.cta.body)),
+          },
+        ]
+      : []),
+  ],
+  meta: {
+    title: page.title,
+    description: page.metaDescription ?? page.hero.intro ?? page.hero.heading,
+    image: heroMedia,
+  },
+})
+
 const postDoc = (
   t: SeedTenant,
   tenantID: string,
@@ -248,6 +374,17 @@ export async function seedTenants(payload: Payload): Promise<void> {
       data: aboutPage(t, tenantID, heroMedia.id as string, blockMedia.id as string) as never,
     })
 
+    // The mockup pages: consortium nav for the main site, the kitchen page set
+    // (in the tenant's own voice) for every kitchen.
+    const extraPages = t.isMain ? CONSORTIUM_PAGES : kitchenPages(t.name)
+    for (const page of extraPages) {
+      await payload.create({
+        collection: 'pages',
+        context: ctx,
+        data: contentPage(page, tenantID, heroMedia.id as string) as never,
+      })
+    }
+
     // Posts — each with its own cover image (then cross-link them as related).
     const created: string[] = []
     for (const post of t.posts) {
@@ -274,34 +411,73 @@ export async function seedTenants(payload: Payload): Promise<void> {
       })
     }
 
-    // Header menu: the main site links out to every kitchen; each kitchen links
-    // back to the main site. All sites get Om os + Nyheder.
-    const kitchenNavItems = TENANTS.filter((k) => !k.isMain).map((k) => ({
-      link: { type: 'custom', label: k.name, url: urlForDomain(linkDomain(k.domains)), newTab: false },
-    }))
+    // Header menu mirrors the mockup. The main site shows the consortium nav;
+    // each kitchen shows its service nav plus a link back to the consortium and
+    // the customer login. (Cross-site links between kitchens live on the main
+    // site's Partnere page.)
     const headerNavItems = t.isMain
       ? [
-          { link: { type: 'custom', label: 'Forsiden', url: '/' } },
+          { type: 'link', link: { type: 'custom', label: 'Services', url: '/services' } },
+          { type: 'link', link: { type: 'custom', label: 'FrokostPortalen', url: '/frokostportalen' } },
+          {
+            // Partnere is a dropdown: the overview page plus a cross-site link to
+            // each kitchen (env-aware via urlForDomain/linkDomain).
+            type: 'dropdown',
+            label: 'Partnere',
+            subItems: [
+              { link: { type: 'custom', label: 'Overblik', url: '/partnere' } },
+              ...TENANTS.filter((k) => !k.isMain).map((k) => ({
+                link: { type: 'custom', label: k.name, url: urlForDomain(linkDomain(k.domains)) },
+              })),
+            ],
+          },
+          { type: 'link', link: { type: 'custom', label: 'Netværk', url: '/netvaerk' } },
+          { type: 'link', link: { type: 'custom', label: 'Om os', url: '/om-os' } },
+          { type: 'link', link: { type: 'custom', label: 'Kontakt', url: '/kontakt' } },
+        ]
+      : [
+          { type: 'link', link: { type: 'custom', label: 'Frokost ud af huset', url: '/frokost-ud-af-huset' } },
+          { type: 'link', link: { type: 'custom', label: 'Kantine', url: '/kantine' } },
+          {
+            // A dropdown: just a label + sub items, no unused URL. The Catering
+            // overview is the first choice so the page stays reachable.
+            type: 'dropdown',
+            label: 'Catering',
+            subItems: [
+              { link: { type: 'custom', label: 'Overblik', url: '/catering' } },
+              { link: { type: 'custom', label: 'Mødeforplejning', url: '/moedeforplejning' } },
+              { link: { type: 'custom', label: 'Frugtordning', url: '/frugtordning' } },
+              { link: { type: 'custom', label: 'Drikkevarer', url: '/drikkevarer' } },
+            ],
+          },
+          { type: 'link', link: { type: 'custom', label: 'Bæredygtighed', url: '/baeredygtighed' } },
+          { type: 'link', link: { type: 'custom', label: 'Nem bestilling & tilretning', url: '/kundeportal' } },
+          { type: 'link', link: { type: 'custom', label: 'FAQ', url: '/faq' } },
+        ]
+    const footerNavItems = t.isMain
+      ? [
           { link: { type: 'custom', label: 'Om os', url: '/om-os' } },
+          { link: { type: 'custom', label: 'Partnere', url: '/partnere' } },
+          { link: { type: 'custom', label: 'Netværk', url: '/netvaerk' } },
+          { link: { type: 'custom', label: 'Kontakt', url: '/kontakt' } },
           { link: { type: 'custom', label: 'Nyheder', url: '/posts' } },
-          ...kitchenNavItems,
         ]
       : [
           {
             link: { type: 'custom', label: mainTenant.name, url: urlForDomain(linkDomain(mainTenant.domains)) },
           },
           { link: { type: 'custom', label: 'Om os', url: '/om-os' } },
+          { link: { type: 'custom', label: 'FAQ', url: '/faq' } },
+          { link: { type: 'custom', label: 'Kundelogin', url: 'https://min.frokostportal.dk', newTab: true } },
           { link: { type: 'custom', label: 'Nyheder', url: '/posts' } },
         ]
-    const footerNavItems = [
-      { link: { type: 'custom', label: 'Om os', url: '/om-os' } },
-      { link: { type: 'custom', label: 'Nyheder', url: '/posts' } },
-    ]
 
     await upsertNav(payload, 'header', t.slug, tenantID, headerNavItems)
     await upsertNav(payload, 'footer', t.slug, tenantID, footerNavItems)
 
-    payload.logger.info(`✓ ${t.slug}: ${t.posts.length} indlæg, 2 sider → ${t.domains.join(', ')}`)
+    payload.logger.info(
+      `✓ ${t.slug}: ${t.posts.length} indlæg, ${2 + extraPages.length} sider → ${t.domains.join(', ')}`,
+    )
   }
 }
 

@@ -37,6 +37,690 @@ export type SeedTenant = {
   posts: SeedPost[]
 }
 
+/**
+ * A standalone content page (beyond the home/om-os pair). Sections are rendered
+ * into the existing Content/CTA blocks by `seed-tenants.ts`, so no new block
+ * types are needed — prices and FAQs just become rich text.
+ */
+export type PageSection =
+  | { kind: 'text'; heading?: string; paragraphs?: string[]; bullets?: string[] }
+  | {
+      kind: 'columns'
+      heading?: string
+      intro?: string
+      columns: { heading: string; body: string }[]
+    }
+  | {
+      kind: 'pricing'
+      heading?: string
+      intro?: string
+      note?: string
+      items: { name: string; price?: string; lines: string[] }[]
+    }
+  | { kind: 'faq'; heading?: string; items: { q: string; a: string }[] }
+  // Renders one linked column per kitchen tenant (resolved from TENANTS at seed
+  // time, so the links are env-aware like the cross-site nav).
+  | { kind: 'partners'; heading?: string; intro?: string }
+
+export type SeedPage = {
+  slug: string
+  title: string
+  hero: { heading: string; intro?: string }
+  sections: PageSection[]
+  cta?: { heading: string; body: string; linkLabel?: string; linkUrl?: string }
+  metaDescription?: string
+}
+
+/**
+ * Pages for the main consortium site (Frokost Konsortiet). Mirrors the mockup's
+ * navigation: Services · FrokostPortalen · Partnere · Netværk · Om os · Kontakt.
+ */
+export const CONSORTIUM_PAGES: SeedPage[] = [
+  {
+    slug: 'services',
+    title: 'Services',
+    hero: {
+      heading: 'Det vi står for',
+      intro:
+        'Frokost Konsortiet samler en række selvstændige køkkener under ét fællesskab. Sammen dækker vi hele paletten – fra den daglige frokost til store selskaber.',
+    },
+    sections: [
+      {
+        kind: 'columns',
+        heading: 'Vores services',
+        intro: 'Uanset behov finder vi den løsning, der passer til jeres arbejdsplads.',
+        columns: [
+          {
+            heading: 'Frokost ud af huset',
+            body: 'Daglig frokostordning leveret til jeres adresse – med variation, sæson og bæredygtighed i centrum.',
+          },
+          {
+            heading: 'Kantinedrift',
+            body: 'Vi driver jeres kantine med friske buffeter og faste menuer, tilpasset jeres rammer og budget.',
+          },
+          {
+            heading: 'Catering & selskaber',
+            body: 'Selskabsmenuer, receptioner og events – store som små – med mad, der gør dagen til noget særligt.',
+          },
+          {
+            heading: 'Mødeforplejning',
+            body: 'Tapas, platter og smørrebrød til møder, samt inhouse mødeservice med opdækning og afrydning.',
+          },
+          {
+            heading: 'FrokostPortalen',
+            body: 'Ét digitalt sted til bestilling, tilretning og overblik over den daglige økonomi.',
+          },
+          {
+            heading: 'Bæredygtig drift',
+            body: 'Lavt CO₂-aftryk, reduceret madspild og friske råvarer fra danske producenter i sæson.',
+          },
+        ],
+      },
+    ],
+    cta: {
+      heading: 'Skal vi forplejne jer?',
+      body: 'Tag fat i os, så finder vi det køkken og den løsning, der passer til jeres arbejdsplads.',
+      linkLabel: 'Kontakt os',
+      linkUrl: '/kontakt',
+    },
+    metaDescription:
+      'Frokost ud af huset, kantinedrift, catering, mødeforplejning og bæredygtig drift – samlet i Frokost Konsortiet.',
+  },
+  {
+    slug: 'frokostportalen',
+    title: 'FrokostPortalen',
+    hero: {
+      heading: 'FrokostPortalen',
+      intro:
+        'Hold styr på den daglige økonomi. FrokostPortalen samler bestilling, tilretning og overblik ét sted – for både køkken og kunde.',
+    },
+    sections: [
+      {
+        kind: 'columns',
+        heading: 'Et samlet overblik',
+        columns: [
+          {
+            heading: 'Daglig økonomi',
+            body: 'Følg forbrug og fakturering løbende, så der aldrig er overraskelser ved månedens udgang.',
+          },
+          {
+            heading: 'Nem bestilling',
+            body: 'Tilret antal og behov med få klik – ændringer slår igennem med det samme.',
+          },
+          {
+            heading: 'Mindre madspild',
+            body: 'Hold øje med forbruget og undgå at smide penge i skraldespanden.',
+          },
+        ],
+      },
+      {
+        kind: 'text',
+        heading: 'Login',
+        paragraphs: [
+          'Er I allerede kunde? Log ind på portalen og administrer jeres ordning på min.frokostportal.dk.',
+        ],
+      },
+    ],
+    cta: {
+      heading: 'Log ind på FrokostPortalen',
+      body: 'Administrer jeres ordning, se forbruget og tilret behov – når det passer jer.',
+      linkLabel: 'Gå til login',
+      linkUrl: 'https://min.frokostportal.dk',
+    },
+    metaDescription:
+      'FrokostPortalen samler bestilling, tilretning og overblik over den daglige økonomi ét sted.',
+  },
+  {
+    slug: 'partnere',
+    title: 'Partnere',
+    hero: {
+      heading: 'Bliv partner i Frokost Konsortiet',
+      intro:
+        'Vi tror på, at dygtige køkkenfolk skal kunne stå på egne ben uden at stå alene. Som partner får du fællesskab, administration og et stærkt netværk i ryggen.',
+    },
+    sections: [
+      {
+        kind: 'faq',
+        heading: 'Ofte stillede spørgsmål fra kommende partnere',
+        items: [
+          {
+            q: 'Jeg har ingen opstartskapital – kan jeg stadig blive partner?',
+            a: 'Ja. Vi har bygget konsortiet, så du kan komme i gang uden en stor opsparing. Vi hjælper med rammerne, så du kan fokusere på maden.',
+          },
+          {
+            q: 'Jeg har lige købt hus og stiftet familie – kan jeg opretholde min løn fra første dag som selvstændig?',
+            a: 'Det er netop pointen med fællesskabet. Vi sikrer en stabil drift og økonomi, så du kan have en tryg indkomst fra dag ét.',
+          },
+          {
+            q: 'Jeg har mit eget team – kan jeg tage dem med?',
+            a: 'Ja. Et godt køkken er et godt hold. Du kan tage dine folk med ind i konsortiet.',
+          },
+          {
+            q: 'Jeg er allerede selvstændig – kan jeg blive partner?',
+            a: 'Absolut. Mange af vores partnere kom med en eksisterende forretning og fik adgang til netværk, indkøb og administration.',
+          },
+        ],
+      },
+      {
+        kind: 'partners',
+        heading: 'Mød vores founding partnere',
+        intro: 'Køkkenerne, der grundlagde Frokost Konsortiet – besøg deres sider.',
+      },
+    ],
+    cta: {
+      heading: 'Kunne du tænke dig at høre mere?',
+      body: 'Vi tager gerne en uforpligtende snak om, hvad et partnerskab kan betyde for dig og dit køkken.',
+      linkLabel: 'Kontakt os',
+      linkUrl: '/kontakt',
+    },
+    metaDescription:
+      'Bliv partner i Frokost Konsortiet – fællesskab, administration og netværk for selvstændige køkkener.',
+  },
+  {
+    slug: 'netvaerk',
+    title: 'Netværk',
+    hero: {
+      heading: 'Netværk',
+      intro:
+        'I Frokost Konsortiet afholder vi møder og arrangementer for alle vores partnere. Vi faciliterer personalefester på tværs af hele konsortiet, så alle kan mødes og få et bredere kendskab til organisationen.',
+    },
+    sections: [
+      {
+        kind: 'columns',
+        heading: 'Kommende møder og arrangementer',
+        columns: [
+          {
+            heading: '14. august 2026',
+            body: 'Sommerfest for ansatte på tværs af konsortiet (lukket arrangement).',
+          },
+          {
+            heading: '29. september 2026',
+            body: 'Fredagsbar for kollegaer i branchen – åbent arrangement.',
+          },
+          {
+            heading: '1. oktober 2026',
+            body: 'Kvartalsmøde for køkkenchefer på tværs af konsortiet (lukket møde).',
+          },
+        ],
+      },
+    ],
+    cta: {
+      heading: 'Vil du med til fredagsbar?',
+      body: 'Hold dig opdateret på vores arrangementer, eller skriv til os, hvis du vil høre mere om netværket.',
+      linkLabel: 'Kontakt os',
+      linkUrl: '/kontakt',
+    },
+    metaDescription:
+      'Møder, arrangementer og personalefester på tværs af Frokost Konsortiet.',
+  },
+  {
+    slug: 'kontakt',
+    title: 'Kontakt',
+    hero: {
+      heading: 'Kontakt os',
+      intro:
+        'Frokost Konsortiets administration sidder klar til at hjælpe – uanset om du er kunde, kommende partner eller bare nysgerrig.',
+    },
+    sections: [
+      {
+        kind: 'text',
+        heading: 'Hvem er vi',
+        paragraphs: [
+          'Frokost Konsortiets administration binder køkkenerne sammen og sikrer, at både kunder og partnere har ét sted at henvende sig. Vi står for den daglige drift, så køkkenerne kan koncentrere sig om maden.',
+        ],
+      },
+      {
+        kind: 'text',
+        heading: 'Find os',
+        bullets: [
+          'Hørkær 12, 2720 Herlev',
+          'Telefon: +45 72 10 88 10',
+          'E-mail: kontakt@frokostkonsortiet.dk',
+          'CVR-nr.: 46413148',
+        ],
+      },
+    ],
+    metaDescription:
+      'Kontakt Frokost Konsortiets administration – Hørkær 12, 2720 Herlev, +45 72 10 88 10.',
+  },
+]
+
+/**
+ * Pages for a kitchen site (Smagssans, Fra Jorden). The kitchen name is woven
+ * in so each site reads in its own voice. Mirrors the mockup's navigation:
+ * Frokost ud af huset · Kantine · Catering · Bæredygtighed · Nem bestilling &
+ * tilretning · FAQ (plus frugt/drikkevarer sub-pages).
+ */
+export const kitchenPages = (name: string): SeedPage[] => [
+  {
+    slug: 'frokost-ud-af-huset',
+    title: 'Frokost ud af huset',
+    hero: {
+      heading: 'Frokost ud af huset',
+      intro: `${name} leverer daglig frokost til jeres arbejdsplads – med variation, sæson og bæredygtighed i centrum.`,
+    },
+    sections: [
+      {
+        kind: 'pricing',
+        heading: 'Priseksempler',
+        intro: 'Vælg portionsstørrelsen, der passer til jeres arbejdsplads.',
+        items: [
+          {
+            name: 'Large portion',
+            price: '69 kr.',
+            lines: [
+              'Varm ret + tilbehør (350 g)',
+              '2 salater',
+              '2 slags pålæg',
+              'Ost hver mandag',
+              'Kage om torsdagen',
+            ],
+          },
+          {
+            name: 'Medium portion',
+            price: '65 kr.',
+            lines: [
+              'Varm ret + tilbehør (250 g)',
+              '2 salater',
+              '3 slags pålæg',
+              'Ost hver mandag',
+              'Kage om torsdagen',
+            ],
+          },
+        ],
+        note: 'Log ind for at se hele menuen. Alle priser er eksklusiv moms.',
+      },
+      {
+        kind: 'text',
+        heading: 'Buffist-service',
+        paragraphs: [
+          `Som en del af Frokost Konsortiet tilbyder ${name}, at I kan prøve vores kollegaers køkken, når I har brug for forandring. Nem håndtering via KundePortal & App.`,
+        ],
+      },
+      {
+        kind: 'faq',
+        heading: 'Ofte stillede spørgsmål',
+        items: [
+          {
+            q: 'Hvornår er jeres tilmeldingsfrist?',
+            a: 'I tilmelder og tilretter antal i KundePortalen frem til dagen før levering, så I altid betaler for det, I faktisk får.',
+          },
+          {
+            q: 'Hvornår leverer I frokosten?',
+            a: 'Vi leverer hver morgen inden frokost, så maden står klar, når sulten melder sig.',
+          },
+        ],
+      },
+    ],
+    cta: {
+      heading: 'Få et tilbud',
+      body: 'Fortæl os om jeres arbejdsplads, så sammensætter vi en frokostordning, der passer.',
+      linkLabel: 'Få et tilbud',
+      linkUrl: '/om-os',
+    },
+    metaDescription: `Daglig frokostordning fra ${name} – leveret til jeres arbejdsplads.`,
+  },
+  {
+    slug: 'kantine',
+    title: 'Kantine',
+    hero: {
+      heading: 'Kantinedrift',
+      intro: `Lad ${name} drive jeres kantine – med friske buffeter og faste menuer, tilpasset jeres rammer.`,
+    },
+    sections: [
+      {
+        kind: 'text',
+        heading: 'Eksempel på buffetudvalg',
+        paragraphs: [
+          'Vores buffeter veksler dagligt med varme retter, salater, pålæg og friske grøntsager – altid med noget for enhver smag.',
+        ],
+      },
+      {
+        kind: 'pricing',
+        heading: 'Priseksempler',
+        items: [
+          {
+            name: 'Management-aftale',
+            lines: [
+              'Vi driver kantinen for jer',
+              'Fast månedligt honorar',
+              'Fuldt overblik via FrokostPortalen',
+            ],
+          },
+          {
+            name: 'Kuvertpris-aftale',
+            lines: [
+              'I betaler pr. kuvert',
+              'Skalerer med antal spisende',
+              'Ingen faste omkostninger',
+            ],
+          },
+        ],
+        note: 'Alle priser er eksklusiv moms.',
+      },
+      {
+        kind: 'faq',
+        heading: 'Ofte stillede spørgsmål',
+        items: [
+          {
+            q: 'Kan vi selv være med til at sammensætte menuen?',
+            a: 'Ja. Vi planlægger menuen i tæt dialog med jer, så den passer til jeres medarbejdere og ønsker.',
+          },
+          {
+            q: 'Hvor mange skal vi være for at få egen kantine?',
+            a: 'Vi finder en model, der passer til jeres størrelse – fra mindre arbejdspladser til store kantiner.',
+          },
+        ],
+      },
+    ],
+    cta: {
+      heading: 'Vil du have et tilbud?',
+      body: 'Vi kigger gerne forbi og giver et bud på, hvordan jeres kantine kan drives.',
+      linkLabel: 'Få et tilbud',
+      linkUrl: '/om-os',
+    },
+    metaDescription: `Kantinedrift fra ${name} – friske buffeter og faste menuer tilpasset jeres rammer.`,
+  },
+  {
+    slug: 'catering',
+    title: 'Catering',
+    hero: {
+      heading: 'Catering',
+      intro: `${name} leverer catering til selskaber, receptioner og mærkedage – mad, der gør dagen til noget særligt.`,
+    },
+    sections: [
+      {
+        kind: 'columns',
+        heading: 'Selskabsmenuer',
+        columns: [
+          {
+            heading: 'Konfirmation',
+            body: 'Festmenuer til den store dag, tilpasset både børn og voksne.',
+          },
+          {
+            heading: 'Reception',
+            body: 'Lækre anretninger og snacks til stående arrangementer.',
+          },
+          {
+            heading: 'Selskaber',
+            body: 'Flerretters menuer til fødselsdage, jubilæer og firmafester.',
+          },
+        ],
+      },
+      {
+        kind: 'pricing',
+        heading: 'Priseksempler',
+        items: [
+          {
+            name: '3-retters menu',
+            lines: [
+              'Forret, hovedret og dessert',
+              'Sæsonens råvarer',
+              'Leveret eller serveret',
+            ],
+          },
+          {
+            name: 'Reception',
+            lines: [
+              'Udvalg af anretninger',
+              'Snacks og finger food',
+              'Tilpasset antal gæster',
+            ],
+          },
+        ],
+        note: 'Alle priser er eksklusiv moms.',
+      },
+      {
+        kind: 'faq',
+        heading: 'Ofte stillede spørgsmål',
+        items: [
+          {
+            q: 'Hvor lang tid i forvejen skal vi bestille?',
+            a: 'Til større selskaber anbefaler vi at bestille i god tid, men vi løser også gerne opgaver med kort varsel.',
+          },
+          {
+            q: 'Tager I højde for allergier?',
+            a: 'Ja. Fortæl os om allergier og særlige hensyn, så tilpasser vi menuen.',
+          },
+        ],
+      },
+    ],
+    cta: {
+      heading: 'Vil du have et tilbud?',
+      body: 'Fortæl os om jeres arrangement, så sammensætter vi en menu, der passer til anledningen.',
+      linkLabel: 'Få et tilbud',
+      linkUrl: '/om-os',
+    },
+    metaDescription: `Catering fra ${name} – selskabsmenuer, receptioner og mærkedage.`,
+  },
+  {
+    slug: 'moedeforplejning',
+    title: 'Mødeforplejning',
+    hero: {
+      heading: 'Mødeforplejning',
+      intro: `${name} sørger for forplejningen til jeres møder – fra kaffemøde til større arrangementer.`,
+    },
+    sections: [
+      {
+        kind: 'columns',
+        heading: 'Udvalg',
+        columns: [
+          {
+            heading: 'Tapas-anretning',
+            body: 'Et varieret udvalg af små lækkerier til det gode møde.',
+          },
+          {
+            heading: 'Gourmet-platte',
+            body: 'Forkæl deltagerne med en flot sammensat platte.',
+          },
+          {
+            heading: 'Smørrebrød',
+            body: 'Klassisk dansk smørrebrød, friskt og håndlavet.',
+          },
+        ],
+      },
+      {
+        kind: 'pricing',
+        heading: 'Inhouse mødeservice',
+        intro: 'Opdækning og afrydning til møder.',
+        items: [
+          {
+            name: 'Kaffemøder',
+            price: '10 kr. pr. person',
+            lines: ['Kaffe, te og vand', 'Opdækning og afrydning'],
+          },
+          {
+            name: 'Middag',
+            price: '20 kr. pr. person',
+            lines: ['Varm forplejning', 'Opdækning og afrydning'],
+          },
+        ],
+        note: 'Alle priser er eksklusiv moms.',
+      },
+    ],
+    cta: {
+      heading: 'Vil du have et tilbud på et større arrangement?',
+      body: 'Bestil online via KundePortalen, eller skriv til os for et tilbud.',
+      linkLabel: 'Få et tilbud',
+      linkUrl: '/om-os',
+    },
+    metaDescription: `Mødeforplejning fra ${name} – tapas, platter, smørrebrød og inhouse mødeservice.`,
+  },
+  {
+    slug: 'frugtordning',
+    title: 'Frugtordning',
+    hero: {
+      heading: 'Frugtordning',
+      intro: `Frisk frugt på arbejdspladsen hver uge – leveret af ${name}.`,
+    },
+    sections: [
+      {
+        kind: 'pricing',
+        heading: 'Frugtkurve',
+        intro: 'Vælg den kurv, der passer til jeres antal.',
+        items: [
+          { name: 'Frugtkurv – 20 stk.', price: '80 kr.', lines: ['Frisk sæsonfrugt', 'Ugentlig levering'] },
+          { name: 'Frugtkurv – 30 stk.', price: '80 kr.', lines: ['Frisk sæsonfrugt', 'Ugentlig levering'] },
+          { name: 'Frugtkurv – 50 stk.', price: '80 kr.', lines: ['Frisk sæsonfrugt', 'Ugentlig levering'] },
+        ],
+        note: 'Alle priser er eksklusiv moms.',
+      },
+    ],
+    cta: {
+      heading: 'Vil du have et tilbud på et større arrangement?',
+      body: 'Bestil online via KundePortalen, eller skriv til os for et tilbud.',
+      linkLabel: 'Bestil online',
+      linkUrl: '/om-os',
+    },
+    metaDescription: `Frugtordning fra ${name} – friske frugtkurve leveret hver uge.`,
+  },
+  {
+    slug: 'drikkevarer',
+    title: 'Drikkevarer',
+    hero: {
+      heading: 'Drikkevarer',
+      intro: `Et udvalg af friske drikkevarer til arbejdspladsen fra ${name}.`,
+    },
+    sections: [
+      {
+        kind: 'pricing',
+        heading: 'Udvalg',
+        items: [
+          { name: 'Letmælk', price: '15 kr.', lines: ['Frisk dansk mælk'] },
+          { name: 'Ingefærshot – 12 stk.', price: '80 kr.', lines: ['Friskpresset ingefær'] },
+          { name: 'Hyldesaft', price: '30 kr.', lines: ['Hjemmelavet sæsonsaft'] },
+        ],
+        note: 'Div. drikkevarer kan tilkøbes. Alle priser er eksklusiv moms.',
+      },
+    ],
+    cta: {
+      heading: 'Vil du have et tilbud på et større arrangement?',
+      body: 'Bestil online via KundePortalen, eller skriv til os for et tilbud.',
+      linkLabel: 'Bestil online',
+      linkUrl: '/om-os',
+    },
+    metaDescription: `Drikkevarer fra ${name} – mælk, ingefærshots, hyldesaft og mere.`,
+  },
+  {
+    slug: 'baeredygtighed',
+    title: 'Bæredygtighed',
+    hero: {
+      heading: 'Bæredygtighed',
+      intro: `Hos ${name} er bæredygtighed ikke en tilføjelse, men fundamentet under hele driften.`,
+    },
+    sections: [
+      {
+        kind: 'text',
+        heading: 'Vores produktion',
+        paragraphs: [
+          'Vores produktion er baseret på bæredygtighed, med fokus på en menu-sammensætning med lavt CO₂-aftryk, reduceret madspild og prioritering af sæsonens friske råvarer fra danske producenter.',
+        ],
+      },
+      {
+        kind: 'text',
+        heading: 'Vores medarbejdere',
+        paragraphs: [
+          'Det betyder meget at arbejde med noget, der giver mening og en god fornemmelse i maven – det gør vores hverdag bedre og bidrager til øget motivation hos os alle, hvilket driver os til at gøre os umage, så vi får glade kunder og dermed kan hjælpe endnu flere.',
+        ],
+      },
+      {
+        kind: 'text',
+        heading: 'Vores drift',
+        paragraphs: [
+          'For at sikre økonomisk bæredygtighed driver vi køkkenet ansvarligt – så vi kan blive ved med at lave god mad i mange år frem.',
+        ],
+      },
+      {
+        kind: 'text',
+        heading: 'Social kapital',
+        paragraphs: [
+          'Ved at styrke samarbejde, tillid og kommunikation øger vi kvaliteten på arbejdspladsen – både personligt og professionelt.',
+        ],
+      },
+    ],
+    metaDescription: `Bæredygtighed hos ${name} – lavt CO₂-aftryk, mindre madspild og social kapital.`,
+  },
+  {
+    slug: 'kundeportal',
+    title: 'Nem bestilling & tilretning',
+    hero: {
+      heading: 'Introduktion til vores KundePortal',
+      intro:
+        'Se hvordan I selv nemt kan justere jeres behov og sikre, at der altid er nok af favoritterne.',
+    },
+    sections: [
+      {
+        kind: 'columns',
+        heading: 'Med KundePortalen kan I',
+        columns: [
+          {
+            heading: 'Tilret behov',
+            body: 'Juster antal og menu med få klik, så I altid har nok af favoritterne.',
+          },
+          {
+            heading: 'Hold øje med madspild',
+            body: 'Undgå at smide penge i skraldespanden ved at følge jeres forbrug.',
+          },
+          {
+            heading: 'Fuldt overblik',
+            body: 'Se forbrug og fakturering samlet ét sted – også fra app.',
+          },
+        ],
+      },
+    ],
+    cta: {
+      heading: 'Kom nemt i gang',
+      body: 'Som kunde får I adgang til KundePortalen, hvor I selv styrer bestilling og tilretning.',
+      linkLabel: 'Få et tilbud',
+      linkUrl: '/om-os',
+    },
+    metaDescription:
+      'KundePortalen gør det nemt selv at justere behov, holde øje med madspild og bevare overblikket.',
+  },
+  {
+    slug: 'faq',
+    title: 'FAQ',
+    hero: {
+      heading: 'Ofte stillede spørgsmål',
+      intro: 'Her har vi samlet de generelle, ofte stillede spørgsmål.',
+    },
+    sections: [
+      {
+        kind: 'faq',
+        items: [
+          {
+            q: 'Hvornår er tilmeldingsfristen?',
+            a: 'I tilretter antal i KundePortalen frem til dagen før levering, så I kun betaler for det, I får.',
+          },
+          {
+            q: 'Hvornår leverer I?',
+            a: 'Vi leverer hver morgen inden frokost, så maden står klar til pausen.',
+          },
+          {
+            q: 'Kan I tage højde for allergier og kostønsker?',
+            a: 'Ja. Fortæl os om allergier og særlige hensyn, så tilpasser vi menuen.',
+          },
+          {
+            q: 'Hvordan håndterer I madspild?',
+            a: 'Vi planlægger efter sæsonen, bruger hele råvaren og hjælper jer med at tilrette antal, så spildet minimeres.',
+          },
+          {
+            q: 'Hvordan bestiller vi?',
+            a: 'Alt foregår nemt via KundePortalen og app – bestilling, tilretning og overblik samlet ét sted.',
+          },
+        ],
+      },
+    ],
+    cta: {
+      heading: 'Fandt du ikke svar?',
+      body: 'Skriv til os, så vender vi tilbage hurtigst muligt.',
+      linkLabel: 'Få et tilbud',
+      linkUrl: '/om-os',
+    },
+    metaDescription: 'Svar på de generelle, ofte stillede spørgsmål.',
+  },
+]
+
 export const TENANTS: SeedTenant[] = [
   {
     name: 'Frokost Konsortiet',
