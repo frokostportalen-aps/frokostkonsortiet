@@ -12,7 +12,9 @@ const heroes = {
   mediumImpact: MediumImpactHero,
 }
 
-export const RenderHero: React.FC<Page['hero']> = (props) => {
+type RenderHeroProps = Page['hero'] & { heroTheme?: 'light' | 'dark' }
+
+export const RenderHero: React.FC<RenderHeroProps> = (props) => {
   const { type } = props || {}
 
   if (!type || type === 'none') return null

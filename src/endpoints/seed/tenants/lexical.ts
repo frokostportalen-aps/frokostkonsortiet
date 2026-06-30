@@ -48,6 +48,27 @@ export const heading = (tag: 'h1' | 'h2' | 'h3' | 'h4', value: string): Node => 
   version: 1,
 })
 
+/** Bullet list from plain strings. */
+export const list = (items: string[]): Node => ({
+  type: 'list',
+  listType: 'bullet',
+  start: 1,
+  tag: 'ul',
+  children: items.map((item, i) => ({
+    type: 'listitem',
+    value: i + 1,
+    children: [text(item)],
+    direction: 'ltr',
+    format: '',
+    indent: 0,
+    version: 1,
+  })),
+  direction: 'ltr',
+  format: '',
+  indent: 0,
+  version: 1,
+})
+
 /** Wrap children in a Lexical root (the value stored on a richText field). */
 export const richText = (...children: Node[]) => ({
   root: {

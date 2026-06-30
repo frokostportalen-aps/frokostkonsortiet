@@ -22,9 +22,53 @@ export const Header: CollectionConfig = {
       name: 'navItems',
       type: 'array',
       fields: [
+        {
+          name: 'type',
+          type: 'radio',
+          defaultValue: 'link',
+          options: [
+            { label: 'Link', value: 'link' },
+            { label: 'Dropdown', value: 'dropdown' },
+          ],
+          admin: { layout: 'horizontal' },
+        },
+        // A plain link. Hidden (and not validated) for dropdown items.
         link({
           appearances: false,
+          overrides: {
+            admin: {
+              condition: (_, siblingData) => siblingData?.type !== 'dropdown',
+            },
+          },
         }),
+        // A dropdown only needs a label — the destinations live in its sub items.
+        {
+          name: 'label',
+          type: 'text',
+          label: 'Label',
+          required: true,
+          admin: {
+            condition: (_, siblingData) => siblingData?.type === 'dropdown',
+          },
+        },
+        {
+          name: 'subItems',
+          type: 'array',
+          label: 'Sub items',
+          minRows: 1,
+          fields: [
+            link({
+              appearances: false,
+            }),
+          ],
+          admin: {
+            condition: (_, siblingData) => siblingData?.type === 'dropdown',
+            initCollapsed: true,
+            components: {
+              RowLabel: '@/Header/RowLabel#RowLabel',
+            },
+          },
+        },
       ],
       maxRows: 6,
       admin: {

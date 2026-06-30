@@ -1,7 +1,10 @@
-import type { File, Payload } from 'payload'
+import type { Payload } from 'payload'
 
-import { heading, p, richText } from './lexical'
-import { TENANTS, type SeedTenant } from './seed-data'
+import { readdir, readFile } from 'fs/promises'
+import path from 'path'
+
+import { TENANTS } from './data'
+import type { PageContext, SeedDoc, TenantMeta } from './data/types'
 
 const ctx = { disableRevalidate: true }
 const PORT = 3000
@@ -24,144 +27,165 @@ const linkDomain = (domains: string[]): string =>
       domains[0])
     : (domains.find((d) => d.includes('localhost')) ?? domains[0])
 
-const mainTenant = TENANTS.find((t) => t.isMain)!
+// ── idempotent upsert helpers ──────────────────────────────────────────────
+//
+// Every helper is keyed so re-running is safe:
+//   - pages/posts on (tenant, slug) — backed by the unique [tenant, slug] index
+//   - media on (tenant, filename-prefix)
+// Default (force: false) is additive: existing docs are left untouched, so
+// editor-written content survives a re-seed. With force: true the doc is
+// overwritten (pages/posts updated in place; media replaced), which is how the
+// `--force` CLI reset rebuilds a site from the seed data.
 
-// Used when a configured image URL can't be fetched.
-const FALLBACK_IMAGE =
-  'https://raw.githubusercontent.com/payloadcms/payload/refs/heads/3.x/templates/website/src/endpoints/seed/image-hero1.webp'
+type UpsertOpts = { force: boolean }
 
-/** Fetch a configured image URL, falling back to a bundled placeholder. */
-async function fetchImage(url: string, baseName: string): Promise<File> {
-  for (const candidate of [url, FALLBACK_IMAGE]) {
-    try {
-      const res = await fetch(candidate, { method: 'GET' })
-      if (!res.ok) continue
-      const data = await res.arrayBuffer()
-      if (!data.byteLength) continue
-      const mimetype = res.headers.get('content-type')?.split(';')[0] || 'image/jpeg'
-      const ext = mimetype.split('/')[1] || 'jpg'
-      return {
-        name: `${baseName}.${ext}`,
-        data: Buffer.from(data),
-        mimetype,
-        size: data.byteLength,
-      }
-    } catch {
-      // try the fallback
-    }
-  }
-  throw new Error(`Could not fetch image: ${url}`)
+/** A page/post result: its id plus whether this run created it. */
+type UpsertResult = { id: string; created: boolean }
+
+async function findBySlug(
+  payload: Payload,
+  collection: 'pages' | 'posts',
+  tenantID: string,
+  slug: string,
+) {
+  return (
+    await payload.find({
+      collection,
+      where: { and: [{ tenant: { equals: tenantID } }, { slug: { equals: slug } }] },
+      limit: 1,
+      pagination: false,
+    })
+  ).docs[0]
 }
 
-const customLink = (label: string, url: string, appearance: 'default' | 'outline' = 'default') => ({
-  link: { type: 'custom', appearance, label, url },
-})
-
-// ── page builders ──────────────────────────────────────────────────────────
-
-const homePage = (t: SeedTenant, tenantID: string, heroMedia: string, blockMedia: string) => ({
-  title: `${t.name} – frokost`,
-  slug: 'home',
-  _status: 'published',
-  tenant: tenantID,
-  hero: {
-    type: 'highImpact',
-    media: heroMedia,
-    richText: richText(heading('h1', t.tagline), p(t.intro)),
-    links: [customLink('Om os', '/om-os'), customLink('Nyheder', '/posts', 'outline')],
-  },
-  layout: [
-    {
-      blockType: 'content',
-      blockName: 'Intro',
-      columns: [
-        { size: 'full', richText: richText(heading('h2', `Velkommen hos ${t.name}`)) },
-        ...t.highlights.map((h) => ({
-          size: 'oneThird',
-          enableLink: false,
-          richText: richText(heading('h3', h.heading), p(h.body)),
-        })),
-      ],
-    },
-    { blockType: 'mediaBlock', blockName: 'Billede', media: blockMedia },
-    {
-      blockType: 'archive',
-      blockName: 'Nyheder',
-      categories: [],
-      introContent: richText(
-        heading('h3', 'Seneste nyt'),
-        p('Læs med, når vi deler historier, sæsoner og smage fra køkkenet.'),
-      ),
-      populateBy: 'collection',
-      relationTo: 'posts',
-    },
-    {
-      blockType: 'cta',
-      blockName: 'CTA',
-      links: [customLink('Kontakt os', '/om-os')],
-      richText: richText(heading('h3', t.cta.heading), p(t.cta.body)),
-    },
-  ],
-  meta: { title: t.name, description: t.intro, image: heroMedia },
-})
-
-const aboutPage = (t: SeedTenant, tenantID: string, heroMedia: string, blockMedia: string) => ({
-  title: `Om ${t.name}`,
-  slug: 'om-os',
-  _status: 'published',
-  tenant: tenantID,
-  hero: {
-    type: 'mediumImpact',
-    media: heroMedia,
-    richText: richText(heading('h1', `Om ${t.name}`), p(t.about.lead)),
-  },
-  layout: [
-    {
-      blockType: 'content',
-      blockName: 'Om os',
-      columns: [
-        {
-          size: 'full',
-          richText: richText(
-            ...t.about.sections.flatMap((s) => [
-              ...(s.heading ? [heading('h2', s.heading)] : []),
-              ...s.paragraphs.map(p),
-            ]),
-          ),
-        },
-      ],
-    },
-    { blockType: 'mediaBlock', blockName: 'Billede', media: blockMedia },
-  ],
-  meta: { title: `Om ${t.name}`, description: t.about.lead, image: heroMedia },
-})
-
-const postDoc = (
-  t: SeedTenant,
+/**
+ * Create a doc if (tenant, slug) is free; with force, overwrite an existing one.
+ * `upsertPage`/`upsertPost` are thin wrappers so callers don't pass the slug.
+ */
+async function upsertDoc(
+  payload: Payload,
+  collection: 'pages' | 'posts',
   tenantID: string,
-  authorID: string,
-  heroMedia: string,
-  post: SeedTenant['posts'][number],
-) => ({
-  title: post.title,
-  slug: post.slug,
-  _status: 'published',
-  tenant: tenantID,
-  authors: [authorID],
-  heroImage: heroMedia,
-  content: richText(
-    heading('h2', post.description),
-    ...post.sections.flatMap((s) => [
-      ...(s.heading ? [heading('h2', s.heading)] : []),
-      ...s.paragraphs.map(p),
-    ]),
-  ),
-  meta: { title: post.title, description: post.description, image: heroMedia },
-})
+  data: SeedDoc,
+  { force }: UpsertOpts,
+): Promise<UpsertResult> {
+  const existing = await findBySlug(payload, collection, tenantID, data.slug)
+  if (existing) {
+    if (force) {
+      await payload.update({ collection, id: existing.id, context: ctx, data: data as never })
+    }
+    return { id: existing.id as string, created: false }
+  }
+  const doc = await payload.create({ collection, context: ctx, data: data as never })
+  return { id: doc.id as string, created: true }
+}
+
+export const upsertPage = (payload: Payload, tenantID: string, data: SeedDoc, opts: UpsertOpts) =>
+  upsertDoc(payload, 'pages', tenantID, data, opts)
+
+export const upsertPost = (payload: Payload, tenantID: string, data: SeedDoc, opts: UpsertOpts) =>
+  upsertDoc(payload, 'posts', tenantID, data, opts)
+
+// ── images (loaded from each tenant's images/ folder) ──────────────────────—
+
+const MIME: Record<string, string> = {
+  '.jpg': 'image/jpeg',
+  '.jpeg': 'image/jpeg',
+  '.png': 'image/png',
+  '.webp': 'image/webp',
+  '.gif': 'image/gif',
+  '.avif': 'image/avif',
+}
+
+/** Reuse an existing image (matched on its filename prefix) or upload it fresh. */
+async function upsertMediaFile(
+  payload: Payload,
+  tenantID: string,
+  baseName: string,
+  filePath: string,
+  ext: string,
+  alt: string,
+  { force }: UpsertOpts,
+): Promise<string> {
+  const existing = (
+    await payload.find({
+      collection: 'media',
+      where: { and: [{ tenant: { equals: tenantID } }, { filename: { like: baseName } }] },
+      limit: 1,
+      pagination: false,
+    })
+  ).docs[0]
+  if (existing && !force) return existing.id as string
+  if (existing && force) {
+    await payload.delete({ collection: 'media', id: existing.id, context: ctx })
+  }
+  const data = await readFile(filePath)
+  const doc = await payload.create({
+    collection: 'media',
+    context: ctx,
+    data: { alt, tenant: tenantID } as never,
+    file: {
+      name: `${baseName}${ext}`,
+      data,
+      mimetype: MIME[ext] ?? 'image/jpeg',
+      size: data.byteLength,
+    },
+  })
+  return doc.id as string
+}
+
+/**
+ * Upload every image in a tenant's `images/` folder and return a `name → media
+ * id` map. The name is the filename without extension, so `images/hero.jpg`
+ * becomes `img('hero')`. Uploads are keyed `${slug}-${name}` so additive runs
+ * reuse them instead of re-uploading.
+ */
+async function loadImages(
+  payload: Payload,
+  slug: string,
+  tenantID: string,
+  imagesDir: string,
+  opts: UpsertOpts,
+): Promise<Record<string, string>> {
+  let files: string[] = []
+  try {
+    files = await readdir(imagesDir)
+  } catch {
+    return {}
+  }
+  const map: Record<string, string> = {}
+  for (const filename of files) {
+    const ext = path.extname(filename).toLowerCase()
+    if (!MIME[ext]) continue
+    const key = path.basename(filename, path.extname(filename))
+    map[key] = await upsertMediaFile(
+      payload,
+      tenantID,
+      `${slug}-${key}`,
+      path.join(imagesDir, filename),
+      ext,
+      `${slug} – ${key}`,
+      opts,
+    )
+  }
+  return map
+}
 
 // ── engine ───────────────────────────────────────────────────────────────────
 
-export async function seedTenants(payload: Payload): Promise<void> {
+export type SeedOptions = {
+  /**
+   * `false` (default): additive — only create what's missing, never touch
+   * existing docs. Safe to run after editors have written real content.
+   * `true`: destructive reset — wipe each tenant's posts/pages/media and rebuild
+   * from the seed data.
+   */
+  force?: boolean
+}
+
+export async function seedTenants(payload: Payload, opts: SeedOptions = {}): Promise<void> {
+  const force = opts.force ?? false
+
   // A super-admin to log in with and to author the posts.
   let admin = (
     await payload.find({
@@ -182,6 +206,21 @@ export async function seedTenants(payload: Payload): Promise<void> {
       } as never,
     })
     payload.logger.info('✓ super-admin: admin@example.com / password')
+  }
+
+  const tenantMetas: TenantMeta[] = TENANTS.map((t) => ({
+    name: t.name,
+    slug: t.slug,
+    isMain: t.isMain,
+    domains: t.domains,
+    tagline: t.tagline,
+  }))
+  // Absolute URL to another tenant's site (env-aware), for cross-site links.
+  const tenantBySlug = new Map(TENANTS.map((t) => [t.slug, t]))
+  const siteUrl = (slug: string): string => {
+    const t = tenantBySlug.get(slug)
+    if (!t) throw new Error(`siteUrl: unknown tenant '${slug}'`)
+    return urlForDomain(linkDomain(t.domains))
   }
 
   for (const t of TENANTS) {
@@ -211,106 +250,86 @@ export async function seedTenants(payload: Payload): Promise<void> {
     }
     const tenantID = tenant.id as string
 
-    // Clear this tenant's content so re-running yields fresh pages.
-    for (const collection of ['posts', 'pages', 'media'] as const) {
-      await payload.delete({
-        collection,
-        where: { tenant: { equals: tenantID } },
-        context: ctx,
-      })
+    // Force = full reset: wipe this tenant's content, then recreate it below
+    // (the upsert helpers find nothing and create fresh). Additive runs skip this
+    // and leave existing pages/posts/media — including editor edits — untouched.
+    if (force) {
+      for (const collection of ['posts', 'pages', 'media'] as const) {
+        await payload.delete({
+          collection,
+          where: { tenant: { equals: tenantID } },
+          context: ctx,
+        })
+      }
     }
 
-    // Media (hero + a second image for the media blocks).
-    const heroFile = await fetchImage(t.images.hero, `${t.slug}-hero`)
-    const blockFile = await fetchImage(t.images.block, `${t.slug}-block`)
-    const heroMedia = await payload.create({
-      collection: 'media',
-      context: ctx,
-      data: { alt: `${t.name} – stemningsbillede`, tenant: tenantID } as never,
-      file: heroFile,
-    })
-    const blockMedia = await payload.create({
-      collection: 'media',
-      context: ctx,
-      data: { alt: `${t.name} – fra køkkenet`, tenant: tenantID } as never,
-      file: blockFile,
-    })
+    // Upload this tenant's images and build the `img('name')` resolver.
+    const images = await loadImages(payload, t.slug, tenantID, path.join(t.dir, 'images'), { force })
+    const img = (key: string): string => {
+      const id = images[key]
+      if (!id) {
+        throw new Error(`Tenant '${t.slug}' has no image '${key}' (looked in ${t.dir}/images)`)
+      }
+      return id
+    }
 
-    // Pages.
-    await payload.create({
-      collection: 'pages',
-      context: ctx,
-      data: homePage(t, tenantID, heroMedia.id as string, blockMedia.id as string) as never,
-    })
-    await payload.create({
-      collection: 'pages',
-      context: ctx,
-      data: aboutPage(t, tenantID, heroMedia.id as string, blockMedia.id as string) as never,
-    })
+    const pageCtx: PageContext = {
+      tenantID,
+      authorID: admin.id as string,
+      img,
+      tenants: tenantMetas,
+      siteUrl,
+    }
 
-    // Posts — each with its own cover image (then cross-link them as related).
-    const created: string[] = []
+    // Pages — one factory per file in the tenant's pages/ folder.
+    const pageResults: UpsertResult[] = []
+    for (const page of t.pages) {
+      pageResults.push(await upsertPage(payload, tenantID, page(pageCtx), { force }))
+    }
+
+    // Posts. Cross-link only the posts this run created, so editor-curated
+    // `relatedPosts` on existing posts is preserved.
+    const postIDs: string[] = []
+    const postCreated: boolean[] = []
     for (const post of t.posts) {
-      const postFile = await fetchImage(post.image, `${t.slug}-${post.slug}`)
-      const postMedia = await payload.create({
-        collection: 'media',
-        context: ctx,
-        data: { alt: post.title, tenant: tenantID } as never,
-        file: postFile,
-      })
-      const doc = await payload.create({
-        collection: 'posts',
-        context: ctx,
-        data: postDoc(t, tenantID, admin.id as string, postMedia.id as string, post) as never,
-      })
-      created.push(doc.id as string)
+      const result = await upsertPost(payload, tenantID, post(pageCtx), { force })
+      postIDs.push(result.id)
+      postCreated.push(result.created)
     }
-    for (let i = 0; i < created.length; i++) {
+    for (let i = 0; i < postIDs.length; i++) {
+      if (!postCreated[i]) continue
       await payload.update({
         collection: 'posts',
-        id: created[i],
+        id: postIDs[i],
         context: ctx,
-        data: { relatedPosts: created.filter((_, j) => j !== i) } as never,
+        data: { relatedPosts: postIDs.filter((_, j) => j !== i) } as never,
       })
     }
 
-    // Header menu: the main site links out to every kitchen; each kitchen links
-    // back to the main site. All sites get Om os + Nyheder.
-    const kitchenNavItems = TENANTS.filter((k) => !k.isMain).map((k) => ({
-      link: { type: 'custom', label: k.name, url: urlForDomain(linkDomain(k.domains)), newTab: false },
-    }))
-    const headerNavItems = t.isMain
-      ? [
-          { link: { type: 'custom', label: 'Forsiden', url: '/' } },
-          { link: { type: 'custom', label: 'Om os', url: '/om-os' } },
-          { link: { type: 'custom', label: 'Nyheder', url: '/posts' } },
-          ...kitchenNavItems,
-        ]
-      : [
-          {
-            link: { type: 'custom', label: mainTenant.name, url: urlForDomain(linkDomain(mainTenant.domains)) },
-          },
-          { link: { type: 'custom', label: 'Om os', url: '/om-os' } },
-          { link: { type: 'custom', label: 'Nyheder', url: '/posts' } },
-        ]
-    const footerNavItems = [
-      { link: { type: 'custom', label: 'Om os', url: '/om-os' } },
-      { link: { type: 'custom', label: 'Nyheder', url: '/posts' } },
-    ]
+    // Header + footer navigation come from the tenant's menu.ts.
+    const { header, footer } = t.menu(pageCtx)
+    await upsertNav(payload, 'header', t.slug, tenantID, header, { force })
+    await upsertNav(payload, 'footer', t.slug, tenantID, footer, { force })
 
-    await upsertNav(payload, 'header', t.slug, tenantID, headerNavItems)
-    await upsertNav(payload, 'footer', t.slug, tenantID, footerNavItems)
-
-    payload.logger.info(`✓ ${t.slug}: ${t.posts.length} indlæg, 2 sider → ${t.domains.join(', ')}`)
+    const newPages = pageResults.filter((r) => r.created).length
+    const newPosts = postCreated.filter(Boolean).length
+    payload.logger.info(
+      `✓ ${t.slug}: +${newPosts}/${t.posts.length} indlæg, +${newPages}/${t.pages.length} sider → ${t.domains.join(', ')}`,
+    )
   }
 }
 
+/**
+ * Create the nav if the tenant has none; with force, refresh an existing one.
+ * Additive runs leave an existing nav untouched (it may have been edited).
+ */
 async function upsertNav(
   payload: Payload,
   collection: 'header' | 'footer',
   tenantSlug: string,
   tenantID: string,
   navItems: unknown[],
+  { force }: UpsertOpts,
 ) {
   const existing = await payload.find({
     collection,
@@ -319,12 +338,14 @@ async function upsertNav(
     pagination: false,
   })
   if (existing.docs[0]) {
-    await payload.update({
-      collection,
-      id: existing.docs[0].id,
-      context: ctx,
-      data: { navItems } as never,
-    })
+    if (force) {
+      await payload.update({
+        collection,
+        id: existing.docs[0].id,
+        context: ctx,
+        data: { navItems } as never,
+      })
+    }
   } else {
     await payload.create({
       collection,

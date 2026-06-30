@@ -4,8 +4,11 @@ import { createByTenant, mutateByTenant, readByTenantOrPublished } from '../../a
 import { Archive } from '../../blocks/ArchiveBlock/config'
 import { CallToAction } from '../../blocks/CallToAction/config'
 import { Content } from '../../blocks/Content/config'
+import { FAQ } from '../../blocks/FAQ/config'
 import { FormBlock } from '../../blocks/Form/config'
 import { MediaBlock } from '../../blocks/MediaBlock/config'
+import { MediaContent } from '../../blocks/MediaContent/config'
+import { Testimonials } from '../../blocks/Testimonials/config'
 import { hero } from '@/heros/config'
 import { slugField } from 'payload'
 import { populatePublishedAt } from '../../hooks/populatePublishedAt'
@@ -74,7 +77,16 @@ export const Pages: CollectionConfig<'pages'> = {
             {
               name: 'layout',
               type: 'blocks',
-              blocks: [CallToAction, Content, MediaBlock, Archive, FormBlock],
+              blocks: [
+                CallToAction,
+                Content,
+                MediaBlock,
+                MediaContent,
+                Archive,
+                FormBlock,
+                FAQ,
+                Testimonials,
+              ],
               required: true,
               admin: {
                 initCollapsed: true,
