@@ -11,3 +11,4 @@ record in place — supersede it with a new ADR and update its status.
 | ADR | Title | Status |
 | --- | --- | --- |
 | [0001](0001-multi-tenant-from-single-payload.md) | Multi-tenant: many sites from one Payload instance | Accepted |
+| [0002](0002-additive-per-tenant-seed.md) | Additive, per-tenant seed with composable content | Accepted |
