@@ -45,6 +45,31 @@
   --breakpoint-2xl: 86rem;
   --font-mono: var(--font-geist-mono);
   --font-sans: var(--font-geist-sans);
+
+  /* Testimonial marquee: registering the animation here makes it available as
+     the `animate-testimonial-ltr` / `animate-testimonial-rtl` utilities. The
+     per-row scroll speed is fed in via the `--testimonial-duration` custom
+     property set inline on each track. */
+  --animate-testimonial-ltr: testimonial-scroll-ltr var(--testimonial-duration, 100s) linear
+    infinite;
+  --animate-testimonial-rtl: testimonial-scroll-rtl var(--testimonial-duration, 100s) linear
+    infinite;
+  @keyframes testimonial-scroll-ltr {
+    from {
+      transform: translateX(0);
+    }
+    to {
+      transform: translateX(-50%);
+    }
+  }
+  @keyframes testimonial-scroll-rtl {
+    from {
+      transform: translateX(-50%);
+    }
+    to {
+      transform: translateX(0);
+    }
+  }
 }
 
 @layer utilities {
@@ -229,6 +254,15 @@
 [data-block-type='mediaContent'] + [data-block-type='mediaContent'] .media-content-band {
   border-top-left-radius: 0;
   border-top-right-radius: 0;
+}
+
+/* Testimonial marquee — edge fade only; the animation lives in the @theme
+   `--animate-testimonial-*` utilities and the hover/reduced-motion behaviour is
+   expressed with Tailwind variants in the block component. (A linear-gradient
+   mask reads cleaner here than as an arbitrary-value utility.) */
+.testimonial-marquee {
+  -webkit-mask-image: linear-gradient(to right, transparent, black 6%, black 94%, transparent);
+  mask-image: linear-gradient(to right, transparent, black 6%, black 94%, transparent);
 }
 
 html {
