@@ -29,5 +29,10 @@ tsconfig.tsbuildinfo
 # pnpm project-local store (created if pnpm runs inside a bind mount)
 .pnpm-store/
 
-# Local content drafts / source material (e.g. mockup decks)
+# Local content drafts / source material (e.g. mockup decks, raw photo/video
+# exports). The downscaled seed images under src/.../data/*/images/ ARE tracked
+# (the seed reads them); these raw originals are not.
 Indhold/
+Film og billeder/
+*.zip
+*.mov
