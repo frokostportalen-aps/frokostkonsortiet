@@ -14,6 +14,12 @@ import { generateMeta } from '@/utilities/generateMeta'
 import PageClient from './page.client'
 import { LivePreviewListener } from '@/components/LivePreviewListener'
 
+// Statically rendered with ISR: published pages refresh within this window, so
+// out-of-band content changes (e.g. a `pnpm seed:tenants:prod` run) appear
+// without a redeploy. Draft/live-preview requests bypass the cache and stay
+// dynamic.
+export const revalidate = 600
+
 export async function generateStaticParams() {
   const payload = await getPayload({ config: configPromise })
   const pages = await payload.find({
