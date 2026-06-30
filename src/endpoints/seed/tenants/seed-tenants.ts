@@ -122,6 +122,13 @@ const homePage = (t: SeedTenant, tenantID: string, heroMedia: string, blockMedia
       links: [customLink('Om os', '/om-os')],
     },
     {
+      blockType: 'testimonials',
+      blockName: 'Udtalelser',
+      heading: 'Det siger vores kunder',
+      intro: `Arbejdspladser i hele landet har ${t.name} på menuen. Her er nogle af dem.`,
+      items: t.testimonials,
+    },
+    {
       blockType: 'cta',
       blockName: 'CTA',
       links: [customLink('Kontakt os', '/om-os')],

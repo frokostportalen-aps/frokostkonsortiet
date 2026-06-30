@@ -41,6 +41,8 @@ export type SeedTenant = {
   /** the /om-os page */
   about: { lead: string; sections: SeedSection[] }
   cta: { heading: string; body: string }
+  /** Scrolling testimonial cards on the front page (the marquee block). */
+  testimonials: { quote: string; author: string; role: string }[]
   posts: SeedPost[]
 }
 
@@ -797,6 +799,44 @@ export const TENANTS: SeedTenant[] = [
       heading: 'Klar til en bedre frokost?',
       body: 'Tag fat i os, så finder vi den frokostløsning, der passer til jeres arbejdsplads.',
     },
+    testimonials: [
+      {
+        quote:
+          'Vi gik fra tre forskellige leverandører til én aftale med Frokost Konsortiet. Én faktura, ét kontaktpunkt – og kollegerne er gladere end nogensinde.',
+        author: 'Mette Sørensen',
+        role: 'Facility Manager, Nordhavn Tech',
+      },
+      {
+        quote:
+          'Variationen er det, der gør forskellen. Der er altid noget nyt på menuen, og det mærker man på stemningen i frokostpausen.',
+        author: 'Jonas Brandt',
+        role: 'Kontorchef, Aarhus Advokaterne',
+      },
+      {
+        quote:
+          'Endelig en frokostordning, hvor administrationen passer sig selv. Vi bruger nul tid på det og får kvalitet hver eneste dag.',
+        author: 'Camilla Holm',
+        role: 'HR-ansvarlig, Vestas Partners',
+      },
+      {
+        quote:
+          'Det betyder noget, at maden er bæredygtig og i sæson. Vores medarbejdere spørger ind til, hvor råvarerne kommer fra – og der er altid et godt svar.',
+        author: 'Rasmus Dahl',
+        role: 'Bæredygtighedschef, GreenField',
+      },
+      {
+        quote:
+          'Skiftet var helt smertefrit. Konsortiet stod for det hele, og vi mærkede ikke en eneste dag uden frokost undervejs.',
+        author: 'Line Pedersen',
+        role: 'Office Manager, Kbh. Mediehus',
+      },
+      {
+        quote:
+          'Vores kantine kører nu som et urværk. Friske buffeter, glade gæster og et budget, der holder. Hvad mere kan man bede om?',
+        author: 'Thomas Krogh',
+        role: 'Adm. direktør, Krogh & Co.',
+      },
+    ],
     posts: [
       {
         slug: 'variation-i-frokostordningen',
@@ -906,6 +946,44 @@ export const TENANTS: SeedTenant[] = [
       heading: 'Få Smagssans på menuen',
       body: 'Vil I forkæle kollegerne med en frokost, der bliver lagt mærke til? Lad os fortælle, hvordan en uge med Smagssans smager.',
     },
+    testimonials: [
+      {
+        quote:
+          'Første dag stod hele kontoret og snusede til luften. Smagssans har gjort frokostpausen til noget, vi taler om resten af dagen.',
+        author: 'Sofie Lind',
+        role: 'Kreativ direktør, Studio Nord',
+      },
+      {
+        quote:
+          'Det er tydeligt, at hver ret er smagt til. Kontraster, duft, tekstur – det er frokost, der er tænkt igennem, ikke bare lavet.',
+        author: 'Henrik Vad',
+        role: 'Partner, Vad & Lange Arkitekter',
+      },
+      {
+        quote:
+          'Menuen står aldrig stille. Den følger sæsonen, så der er altid en ny smag at blive overrasket af. Vores team elsker det.',
+        author: 'Amalie Bjerg',
+        role: 'Teamlead, Designbureauet Form',
+      },
+      {
+        quote:
+          'Alt laves fra bunden samme morgen – det kan man smage. Det er den slags kvalitet, vi ellers kun får på en god restaurant.',
+        author: 'Peter Munk',
+        role: 'CFO, Munk Consulting',
+      },
+      {
+        quote:
+          'Velkendte retter med et uventet twist. Mine kolleger glæder sig faktisk til frokost nu – det havde jeg aldrig troet, jeg skulle sige.',
+        author: 'Nadia El-Amin',
+        role: 'Kommunikationschef, Puls Media',
+      },
+      {
+        quote:
+          'Smagssans rammer den fine balance mellem det forfinede og det mættende. Man bliver mæt, men det føles aldrig kedeligt.',
+        author: 'Frederik Storm',
+        role: 'Lab-leder, BioNordic',
+      },
+    ],
     posts: [
       {
         slug: 'efteraarets-smage',
@@ -1014,6 +1092,44 @@ export const TENANTS: SeedTenant[] = [
       heading: 'Smag det grønne køkken',
       body: 'Nysgerrig på en frokost, der er god for både jer og planeten? Lad os vise jer, hvad sæsonen byder på.',
     },
+    testimonials: [
+      {
+        quote:
+          'Vores CO₂-regnskab på frokosten er faldet markant, og maden er blevet bedre. Fra Jorden beviser, at det grønne valg også er det lækre valg.',
+        author: 'Anders Vinge',
+        role: 'Bæredygtighedschef, Klimafonden',
+      },
+      {
+        quote:
+          'Grøntsagen i hovedrollen lød kedeligt, til vi smagte det. Nu efterspørger selv de mest kødglade kolleger en ekstra portion.',
+        author: 'Maja Toft',
+        role: 'Driftsleder, Coworking Syd',
+      },
+      {
+        quote:
+          'Det er 100% økologisk uden at gå på kompromis med smagen. Vi kan stå inde for hver eneste ret, vi serverer for vores gæster.',
+        author: 'Søren Bach',
+        role: 'Kantineansvarlig, Novo Campus',
+      },
+      {
+        quote:
+          'At de kender avlerne bag råvarerne betyder alt for os. Det er sporbarhed, vi kan fortælle vores kunder om med stolthed.',
+        author: 'Ida Kjær',
+        role: 'Indkøbschef, Ren Energi A/S',
+      },
+      {
+        quote:
+          'Sæsonens råvarer gør, at menuen hele tiden skifter. Det holder frokosten spændende og minder os om, hvad der gror lige nu.',
+        author: 'Mikkel Roed',
+        role: 'Projektleder, Urban Farming Lab',
+      },
+      {
+        quote:
+          'Mindre madspild og mere smag – de to ting plejer at trække i hver sin retning. Fra Jorden får dem til at gå hånd i hånd.',
+        author: 'Trine Holst',
+        role: 'ESG-rådgiver, Grøn Omstilling',
+      },
+    ],
     posts: [
       {
         slug: 'rodfrugternes-aarstid',
