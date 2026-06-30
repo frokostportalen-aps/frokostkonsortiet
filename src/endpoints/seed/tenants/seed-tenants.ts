@@ -186,15 +186,27 @@ export type SeedOptions = {
 export async function seedTenants(payload: Payload, opts: SeedOptions = {}): Promise<void> {
   const force = opts.force ?? false
 
-  // A super-admin to log in with and to author the posts.
-  let admin = (
-    await payload.find({
-      collection: 'users',
-      where: { email: { equals: 'admin@example.com' } },
-      limit: 1,
-      pagination: false,
-    })
-  ).docs[0]
+  // Author for the seeded posts. Prefer an existing super-admin, then any
+  // existing user; only create the dev admin when the database has NO users at
+  // all (a fresh local DB). This means seeding a populated database — i.e.
+  // production — reuses your real super-admin and never adds the
+  // admin@example.com / password test user.
+  let admin =
+    (
+      await payload.find({
+        collection: 'users',
+        where: { roles: { in: ['super-admin'] } },
+        limit: 1,
+        pagination: false,
+      })
+    ).docs[0] ??
+    (
+      await payload.find({
+        collection: 'users',
+        limit: 1,
+        pagination: false,
+      })
+    ).docs[0]
   if (!admin) {
     admin = await payload.create({
       collection: 'users',
@@ -205,7 +217,7 @@ export async function seedTenants(payload: Payload, opts: SeedOptions = {}): Pro
         roles: ['super-admin'],
       } as never,
     })
-    payload.logger.info('✓ super-admin: admin@example.com / password')
+    payload.logger.info('✓ dev super-admin oprettet (tom DB): admin@example.com / password')
   }
 
   const tenantMetas: TenantMeta[] = TENANTS.map((t) => ({
