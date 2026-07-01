@@ -10,6 +10,7 @@ import {
   mediaContent,
   p,
   richText,
+  stats,
   testimonials,
 } from '../../builders'
 
@@ -19,62 +20,71 @@ export const home: PageFactory = ({ tenantID, img }) => ({
   _status: 'published',
   tenant: tenantID,
   hero: hero.high(
-    img('hero'),
+    img('hero-transparent'),
     richText(
-      heading('h1', 'Frokost for alle sanser'),
+      heading('h1', 'Det handler om at være glad for mad'),
       p(
-        'Hos Smagssans er frokost mere end mad. Vi komponerer retter, hvor duft, tekstur og smag spiller sammen, så pausen midt på dagen bliver et lille øjeblik værd at huske.',
+        'Vi leverer brændstoffet til jeres medarbejdere – velsmagende, sund mad, der holder humøret oppe og hovedet skarpt. Lækker frokost til fair priser, leveret til arbejdspladser i hele Storkøbenhavn.',
       ),
     ),
-    [customLink('Om os', '/om-os'), customLink('Nyheder', '/posts', 'outline')],
+    [customLink('Frokostordning', '/frokost-ud-af-huset'), customLink('Om os', '/om-os', 'outline')],
+    { fit: 'contain' },
   ),
   layout: [
     content(
       [
-        column('full', heading('h2', 'Velkommen hos Smagssans')),
+        column('full', heading('h2', 'Vælg den ordning, der passer til jer')),
         column(
           'oneThird',
-          heading('h3', 'Sæsonens råvarer'),
-          p('Vi handler efter årstiden og lader de bedste råvarer bestemme menuen – aldrig omvendt.'),
-        ),
-        column(
-          'oneThird',
-          heading('h3', 'Håndlavet hver dag'),
+          heading('h3', 'Frokostordning'),
           p(
-            'Alt laves fra bunden i vores køkken samme morgen, det skal serveres. Ingen genveje, ingen halvfabrikata.',
+            'Maden laver vi helt færdig og sender den med chauffør i termo- og transportkasser til jer. Klar til at stille frem, når sulten melder sig.',
           ),
         ),
         column(
           'oneThird',
-          heading('h3', 'Smag, der overrasker'),
+          heading('h3', 'Kantineordning'),
           p(
-            'Velkendte retter får et uventet twist, så der altid er noget nyt at glæde sig til på tallerkenen.',
+            'Vi klarer produktionen, og en kok hos jer anretter på porcelæn, lægger sidste hånd på maden, tager opvasken og holder kantinen ren.',
+          ),
+        ),
+        column(
+          'oneThird',
+          heading('h3', 'Kontorfællesskab'),
+          p(
+            'Deler I adresse med andre virksomheder? Hver virksomhed bestiller, tilretter og får sin egen faktura – uden ekstra administration.',
           ),
         ),
       ],
-      'Intro',
+      'Vores ordninger',
     ),
+    stats([
+      { value: '1980', label: 'Måske Danmarks ældste catering' },
+      { value: '100%', label: 'grøn strøm i produktionen' },
+      { value: 'Fra 58 kr.', label: 'pr. kuvert' },
+      { value: '07–16', label: 'åbent alle hverdage' },
+    ]),
     mediaContent(
       img('forside-1'),
       'left',
       richText(
-        heading('h2', 'Smag, der bliver lagt mærke til'),
+        heading('h2', 'Træt af at løbe tør for favoritterne?'),
         p(
-          'Vi laver alt fra bunden samme morgen, det skal serveres – med kontraster, dufte og krydring, der gør frokostpausen til et øjeblik værd at huske.',
+          'Med vores medarbejderapp vælger hver medarbejder selv kostønsker, tilføjer gæster og melder ferie. Det giver mindre madspild, færre fejl og en menu, der altid rammer plet.',
         ),
       ),
-      [customLink('Om os', '/om-os')],
+      [customLink('Nem bestilling & tilretning', '/kundeportal')],
     ),
     mediaContent(
       img('forside-2'),
       'right',
       richText(
-        heading('h2', 'Sæsonen sætter menuen'),
+        heading('h2', 'Mad er omsorg'),
         p(
-          'Vi handler efter årstiden og lader de bedste råvarer bestemme retterne. Det giver en menu i konstant bevægelse – og en frokost, der smager af året, lige nu.',
+          'Mad skal være varieret og spændende, og vi skal passe på den verden, vi lever i. Derfor laver vi maden med omtanke – for smagen, for sundheden og for klimaet.',
         ),
       ),
-      [customLink('Om os', '/om-os')],
+      [customLink('Bæredygtighed', '/baeredygtighed')],
     ),
     archive(
       richText(
@@ -86,12 +96,12 @@ export const home: PageFactory = ({ tenantID, img }) => ({
       img('forside-spotlight'),
       'right',
       richText(
-        heading('h2', 'Håndværk i hver ret'),
+        heading('h2', 'Mad, alle kan være med til'),
         p(
-          'Vores kokke arbejder som komponister – kontraster, dufte og en krydring, der er smagt til, før retten forlader køkkenet.',
+          'Vegetar, vegansk, pescetar, glutenfri, laktosefri, halal, uden gris eller multiallergi – vi har en menuvariation til alle, så ingen på arbejdspladsen bliver glemt.',
         ),
       ),
-      [customLink('Om os', '/om-os')],
+      [customLink('Se menuvariationer', '/menuvariationer')],
     ),
     testimonials(
       'Det siger vores kunder',
@@ -139,16 +149,16 @@ export const home: PageFactory = ({ tenantID, img }) => ({
       richText(
         heading('h3', 'Få Smagssans på menuen'),
         p(
-          'Vil I forkæle kollegerne med en frokost, der bliver lagt mærke til? Lad os fortælle, hvordan en uge med Smagssans smager.',
+          'Vil I forkæle kollegerne med en frokost til fair priser? Ring til os på 72 10 88 10, eller lad os fortælle, hvordan en uge med Smagssans smager.',
         ),
       ),
       [customLink('Kontakt os', '/om-os')],
     ),
   ],
   meta: {
-    title: 'Smagssans',
+    title: 'Smagssans – frokostordning til arbejdspladser',
     description:
-      'Hos Smagssans er frokost mere end mad. Vi komponerer retter, hvor duft, tekstur og smag spiller sammen, så pausen midt på dagen bliver et lille øjeblik værd at huske.',
+      'Det handler om at være glad for mad. Smagssans leverer velsmagende, sund frokost til fair priser – frokostordning, kantineordning og catering i hele Storkøbenhavn.',
     image: img('hero'),
   },
 })

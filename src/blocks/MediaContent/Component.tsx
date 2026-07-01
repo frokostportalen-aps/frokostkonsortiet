@@ -1,14 +1,30 @@
 import React from 'react'
 
-import type { MediaContentBlock as Props } from '@/payload-types'
+import type { MediaContentBlock as MediaContentBlockProps } from '@/payload-types'
+import type { Signature, TenantDesign } from '@/themes/tenantThemes'
 
 import { CMSLink } from '@/components/Link'
 import { Media } from '@/components/Media'
 import RichText from '@/components/RichText'
 import { cn } from '@/utilities/ui'
 
-export const MediaContentBlock: React.FC<Props> = ({ media, richText, links, imagePosition }) => {
+type Props = MediaContentBlockProps & { design?: TenantDesign }
+
+const mark: Record<Signature, string> = {
+  rule: 'h-px w-12 bg-primary',
+  block: 'h-1 w-12 rounded-full bg-primary',
+  sketch: 'h-[3px] w-10 rounded-full bg-primary/80',
+}
+
+export const MediaContentBlock: React.FC<Props> = ({
+  media,
+  richText,
+  links,
+  imagePosition,
+  design,
+}) => {
   const imageRight = imagePosition === 'right'
+  const signature = design?.signature ?? 'rule'
 
   return (
     // Outer wrapper owns max-width + side padding; the inner band owns the
@@ -33,11 +49,12 @@ export const MediaContentBlock: React.FC<Props> = ({ media, richText, links, ima
         {/* Text half — tinted panel, vertically centred. */}
         <div
           className={cn(
-            'flex flex-col justify-center gap-4 bg-accent px-6 py-10 text-accent-foreground md:px-12 md:py-16',
+            'flex flex-col justify-center gap-5 bg-accent px-6 py-10 text-accent-foreground md:px-12 md:py-16',
             imageRight && 'md:order-1',
           )}
         >
-          {richText && <RichText data={richText} enableGutter={false} />}
+          <span aria-hidden className={cn('block', mark[signature])} />
+          {richText && <RichText className="[&_p]:opacity-80" data={richText} enableGutter={false} />}
           {Array.isArray(links) && links.length > 0 && (
             <ul className="flex flex-wrap gap-4">
               {links.map(({ link }, i) => (

@@ -9,7 +9,7 @@ import { homeStatic } from '@/endpoints/seed/home-static'
 
 import { RenderBlocks } from '@/blocks/RenderBlocks'
 import { RenderHero } from '@/heros/RenderHero'
-import { getTenantTheme } from '@/themes/tenantThemes'
+import { getTenantDesign, getTenantTheme } from '@/themes/tenantThemes'
 import { generateMeta } from '@/utilities/generateMeta'
 import PageClient from './page.client'
 import { LivePreviewListener } from '@/components/LivePreviewListener'
@@ -78,7 +78,11 @@ export default async function Page({ params: paramsPromise }: Args) {
 
       {draft && <LivePreviewListener />}
 
-      <RenderHero {...hero} heroTheme={getTenantTheme(tenant)?.heroTheme} />
+      <RenderHero
+        {...hero}
+        heroTheme={getTenantTheme(tenant)?.heroTheme}
+        design={getTenantDesign(tenant)}
+      />
       <RenderBlocks blocks={layout} tenantSlug={tenant} />
     </article>
   )

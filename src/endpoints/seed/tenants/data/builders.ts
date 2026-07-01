@@ -111,6 +111,34 @@ export const testimonials = (
   items,
 })
 
+/** Big key-figures band (2–4 numbers). Theme-aware, reusable across tenants. */
+export const stats = (
+  items: { value: string; label: string }[],
+  heading_?: string,
+  intro?: string,
+  blockName = 'Nøgletal',
+) => ({
+  blockType: 'stats',
+  blockName,
+  ...(heading_ ? { heading: heading_ } : {}),
+  ...(intro ? { intro } : {}),
+  items,
+})
+
+/** Vertical timeline (company history etc.). Theme-aware, reusable across tenants. */
+export const timeline = (
+  items: { year: string; title: string; description?: string }[],
+  heading_?: string,
+  intro?: string,
+  blockName = 'Tidslinje',
+) => ({
+  blockType: 'timeline',
+  blockName,
+  ...(heading_ ? { heading: heading_ } : {}),
+  ...(intro ? { intro } : {}),
+  items,
+})
+
 /** FAQ block from plain question/answer strings. */
 export const faq = (
   items: { q: string; a: string }[],
@@ -125,20 +153,26 @@ export const faq = (
 
 // ── hero ──────────────────────────────────────────────────────────────────—
 
+/** How the hero image fills its frame. `contain` shows the whole image without
+ *  cropping — use it for subjects with breathing room, e.g. cut-out photos. */
+type HeroOpts = { fit?: 'cover' | 'contain' }
+
 export const hero = {
   /** Full-bleed hero with a background image (front pages). */
-  high: (media: string, rt: RichText, links: LinkWrap[] = []) => ({
+  high: (media: string, rt: RichText, links: LinkWrap[] = [], opts: HeroOpts = {}) => ({
     type: 'highImpact',
     media,
     richText: rt,
     links,
+    mediaFit: opts.fit ?? 'cover',
   }),
   /** Image + heading (om-os and content pages). */
-  medium: (media: string, rt: RichText, links: LinkWrap[] = []) => ({
+  medium: (media: string, rt: RichText, links: LinkWrap[] = [], opts: HeroOpts = {}) => ({
     type: 'mediumImpact',
     media,
     richText: rt,
     links,
+    mediaFit: opts.fit ?? 'cover',
   }),
   /** Text-only hero, no image. */
   low: (rt: RichText, links: LinkWrap[] = []) => ({

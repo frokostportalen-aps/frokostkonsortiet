@@ -1,5 +1,15 @@
 import type { PageFactory } from '../../types'
-import { column, content, cta, customLink, heading, hero, p, richText } from '../../builders'
+import {
+  column,
+  content,
+  cta,
+  customLink,
+  heading,
+  hero,
+  mediaContent,
+  p,
+  richText,
+} from '../../builders'
 
 export const kundeportal: PageFactory = ({ tenantID, img }) => ({
   title: 'Nem bestilling & tilretning',
@@ -34,6 +44,35 @@ export const kundeportal: PageFactory = ({ tenantID, img }) => ({
         ),
       ],
       'Med KundePortalen kan I',
+    ),
+    mediaContent(
+      img('frokost-ud-af-huset'),
+      'right',
+      richText(
+        heading('h2', 'Mindre administration, mindre madspild'),
+        p(
+          'I appen vælger den enkelte medarbejder selv kostønsker, tilføjer gæster og melder ferie. Det giver et præcist bestillingsgrundlag – så I betaler for det, I faktisk spiser, og slipper for den tunge administration.',
+        ),
+      ),
+    ),
+    content(
+      [
+        column(
+          'full',
+          heading('h2', 'Også til kontorfællesskaber'),
+          p(
+            'Deler I adresse med andre virksomheder? Vores software gør, at hver virksomhed selv bestiller, retter til, melder ferie og holder styr på økonomien – og hver virksomhed får sin egen faktura.',
+          ),
+        ),
+        column(
+          'full',
+          heading('h2', 'Medarbejderappen'),
+          p(
+            'I appen vælger den enkelte medarbejder selv kostønsker – vegetar, vegansk, pescetar, glutenfri, laktosefri eller uden gris – tilføjer gæster og melder ferie. Det giver mindre tung administration og mindre madspild.',
+          ),
+        ),
+      ],
+      'Kontorfællesskab og app',
     ),
     cta(
       richText(

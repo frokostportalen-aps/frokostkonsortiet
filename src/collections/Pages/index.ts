@@ -8,7 +8,9 @@ import { FAQ } from '../../blocks/FAQ/config'
 import { FormBlock } from '../../blocks/Form/config'
 import { MediaBlock } from '../../blocks/MediaBlock/config'
 import { MediaContent } from '../../blocks/MediaContent/config'
+import { Stats } from '../../blocks/Stats/config'
 import { Testimonials } from '../../blocks/Testimonials/config'
+import { Timeline } from '../../blocks/Timeline/config'
 import { hero } from '@/heros/config'
 import { slugField } from 'payload'
 import { populatePublishedAt } from '../../hooks/populatePublishedAt'
@@ -86,6 +88,8 @@ export const Pages: CollectionConfig<'pages'> = {
                 FormBlock,
                 FAQ,
                 Testimonials,
+                Stats,
+                Timeline,
               ],
               required: true,
               admin: {

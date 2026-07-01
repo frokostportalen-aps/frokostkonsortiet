@@ -9,7 +9,7 @@ import { kantine } from './pages/kantine'
 import { catering } from './pages/catering'
 import { moedeforplejning } from './pages/moedeforplejning'
 import { frugtordning } from './pages/frugtordning'
-import { drikkevarer } from './pages/drikkevarer'
+import { menuvariationer } from './pages/menuvariationer'
 import { baeredygtighed } from './pages/baeredygtighed'
 import { kundeportal } from './pages/kundeportal'
 import { faqPage } from './pages/faq'
@@ -19,9 +19,9 @@ export const smagssans: TenantDef = {
   slug: 'smagssans',
   isMain: false,
   domains: ['smagssans.localhost', 'smagssans.dk', 'new.smagssans.dk'],
-  tagline: 'Frokost for alle sanser',
+  tagline: 'Det handler om at være glad for mad',
   dir: folderOf(import.meta.url),
-  pages: [home, omOs, frokostUdAfHuset, kantine, catering, moedeforplejning, frugtordning, drikkevarer, baeredygtighed, kundeportal, faqPage],
+  pages: [home, omOs, frokostUdAfHuset, kantine, menuvariationer, catering, moedeforplejning, frugtordning, baeredygtighed, kundeportal, faqPage],
   posts,
   menu,
 }

@@ -107,10 +107,15 @@ async function upsertMediaFile(
   alt: string,
   { force }: UpsertOpts,
 ): Promise<string> {
+  // Match the exact stored filename, not a `like` substring: a substring match
+  // makes a shorter basename collide with a longer one (e.g. `smagssans-hero`
+  // matches `smagssans-hero-transparent.webp`), so seeding both would delete the
+  // freshly-created longer one under `--force` and leave a dangling reference.
+  const filename = `${baseName}${ext}`
   const existing = (
     await payload.find({
       collection: 'media',
-      where: { and: [{ tenant: { equals: tenantID } }, { filename: { like: baseName } }] },
+      where: { and: [{ tenant: { equals: tenantID } }, { filename: { equals: filename } }] },
       limit: 1,
       pagination: false,
     })
@@ -125,7 +130,7 @@ async function upsertMediaFile(
     context: ctx,
     data: { alt, tenant: tenantID } as never,
     file: {
-      name: `${baseName}${ext}`,
+      name: filename,
       data,
       mimetype: MIME[ext] ?? 'image/jpeg',
       size: data.byteLength,

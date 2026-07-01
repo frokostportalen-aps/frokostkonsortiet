@@ -19,6 +19,10 @@
   h6 {
     font-weight: unset;
     font-size: unset;
+    /* A tenant may set a separate heading font (--font-heading); otherwise
+       headings fall back to the body font, so tenants without a split are
+       unaffected. */
+    font-family: var(--font-heading, var(--font-sans));
   }
 }
 
@@ -123,7 +127,7 @@
   --secondary: oklch(97% 0 0deg);
   --secondary-foreground: oklch(20.5% 0 0deg);
   --muted: oklch(97% 0 0deg);
-  --muted-foreground: oklch(55.6% 0 0deg);
+  --muted-foreground: oklch(43% 0 0deg);
   --accent: oklch(97% 0 0deg);
   --accent-foreground: oklch(20.5% 0 0deg);
   --destructive: oklch(57.7% 0.245 27.325deg);
@@ -151,24 +155,28 @@
 }
 
 [data-theme='dark'] {
-  --background: oklch(14.5% 0 0deg);
-  --foreground: oklch(98.5% 0 0deg);
-  --card: oklch(17% 0 0deg);
-  --card-foreground: oklch(98.5% 0 0deg);
-  --popover: oklch(14.5% 0 0deg);
-  --popover-foreground: oklch(98.5% 0 0deg);
+  /* A shared warm charcoal, not flat neutral grey: a whisper of chroma at a
+     warm hue (65) reads as intentional and premium across the whole family
+     without committing to any one tenant's hue. Cards sit a touch higher than
+     the background so panels separate cleanly. */
+  --background: oklch(15.5% 0.006 65deg);
+  --foreground: oklch(98.5% 0.002 65deg);
+  --card: oklch(20% 0.008 65deg);
+  --card-foreground: oklch(98.5% 0.002 65deg);
+  --popover: oklch(18% 0.007 65deg);
+  --popover-foreground: oklch(98.5% 0.002 65deg);
   --primary: oklch(98.5% 0 0deg);
   --primary-foreground: oklch(20.5% 0 0deg);
-  --secondary: oklch(26.9% 0 0deg);
-  --secondary-foreground: oklch(98.5% 0 0deg);
-  --muted: oklch(26.9% 0 0deg);
-  --muted-foreground: oklch(70.8% 0 0deg);
-  --accent: oklch(26.9% 0 0deg);
-  --accent-foreground: oklch(98.5% 0 0deg);
+  --secondary: oklch(27% 0.007 65deg);
+  --secondary-foreground: oklch(98.5% 0.002 65deg);
+  --muted: oklch(27% 0.007 65deg);
+  --muted-foreground: oklch(72% 0.006 65deg);
+  --accent: oklch(27% 0.007 65deg);
+  --accent-foreground: oklch(98.5% 0.002 65deg);
   --destructive: oklch(39.6% 0.141 25.723deg);
   --destructive-foreground: oklch(63.7% 0.237 25.331deg);
-  --border: oklch(26.9% 0 0deg);
-  --input: oklch(26.9% 0 0deg);
+  --border: oklch(30% 0.008 65deg);
+  --input: oklch(27% 0.007 65deg);
   --ring: oklch(43.9% 0 0deg);
   --chart-1: oklch(48.8% 0.243 264.376deg);
   --chart-2: oklch(69.6% 0.17 162.48deg);

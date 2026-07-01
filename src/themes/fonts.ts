@@ -1,4 +1,4 @@
-import { Playfair_Display, Poppins, Source_Serif_4 } from 'next/font/google'
+import { Mulish, Playfair_Display, Poppins, Source_Serif_4 } from 'next/font/google'
 
 /**
  * Per-site fonts, keyed by tenant slug. Each font exposes a CSS variable; the
@@ -27,16 +27,35 @@ const sourceSerif = Source_Serif_4({
   display: 'swap',
 })
 
+// Clean humanist sans for body copy. Playfair stays for headings (see smagssans
+// below) — display serifs are elegant for titles but hard to read in running
+// text, so the body gets a proper sans.
+const mulish = Mulish({
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700'],
+  variable: '--font-mulish',
+  display: 'swap',
+})
+
 export type TenantFont = {
-  /** next/font className that defines the font's CSS variable */
+  /** next/font className that defines the body font's CSS variable */
   className: string
-  /** the value to assign to --font-sans, e.g. "var(--font-playfair)" */
+  /** the value to assign to --font-sans, e.g. "var(--font-mulish)" */
   sansVar: string
+  /** optional second next/font className for a separate heading font */
+  headingClassName?: string
+  /** optional value for --font-heading; when set, h1–h6 use it */
+  headingVar?: string
 }
 
 export const tenantFonts: Record<string, TenantFont> = {
   'frokost-konsortiet': { className: poppins.variable, sansVar: 'var(--font-poppins)' },
-  smagssans: { className: playfair.variable, sansVar: 'var(--font-playfair)' },
+  smagssans: {
+    className: mulish.variable,
+    sansVar: 'var(--font-mulish)',
+    headingClassName: playfair.variable,
+    headingVar: 'var(--font-playfair)',
+  },
   frajorden: { className: sourceSerif.variable, sansVar: 'var(--font-source-serif)' },
 }
 

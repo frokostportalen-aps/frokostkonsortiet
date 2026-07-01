@@ -1,6 +1,7 @@
 import React from 'react'
 
 import type { Page } from '@/payload-types'
+import type { TenantDesign } from '@/themes/tenantThemes'
 
 import { HighImpactHero } from '@/heros/HighImpact'
 import { LowImpactHero } from '@/heros/LowImpact'
@@ -12,7 +13,10 @@ const heroes = {
   mediumImpact: MediumImpactHero,
 }
 
-type RenderHeroProps = Page['hero'] & { heroTheme?: 'light' | 'dark' }
+type RenderHeroProps = Page['hero'] & {
+  heroTheme?: 'light' | 'dark'
+  design?: TenantDesign
+}
 
 export const RenderHero: React.FC<RenderHeroProps> = (props) => {
   const { type } = props || {}
