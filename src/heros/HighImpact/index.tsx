@@ -1,6 +1,6 @@
 'use client'
-import { useHeaderTheme } from '@/providers/HeaderTheme'
-import React, { useEffect } from 'react'
+import { useHeaderThemeSync } from '@/providers/HeaderTheme'
+import React from 'react'
 
 import type { Page } from '@/payload-types'
 import type { TenantDesign } from '@/themes/tenantThemes'
@@ -38,8 +38,8 @@ const HeroLinks: React.FC<{ links: Page['hero']['links']; center?: boolean }> = 
  * typographic rather than photographic.
  */
 const SplitHero: React.FC<HeroProps> = ({ links, media, mediaFit, richText, design }) => {
-  const { setHeaderTheme } = useHeaderTheme()
-  useEffect(() => setHeaderTheme(null), [setHeaderTheme])
+  // No scrim: the header keeps the ambient theme over an editorial split.
+  useHeaderThemeSync(null)
 
   // `contain` shows the whole image without cropping (e.g. cut-out photos); it
   // has no backdrop, so it floats on the site background instead of sitting in a
@@ -90,8 +90,8 @@ const SplitHero: React.FC<HeroProps> = ({ links, media, mediaFit, richText, desi
  * logo/menu stay legible against the image.
  */
 const OverlayHero: React.FC<HeroProps> = ({ links, media, richText, heroTheme = 'dark' }) => {
-  const { setHeaderTheme } = useHeaderTheme()
-  useEffect(() => setHeaderTheme(heroTheme), [heroTheme, setHeaderTheme])
+  // The header floats over the photo and adopts the hero's theme for contrast.
+  useHeaderThemeSync(heroTheme)
 
   return (
     <div
