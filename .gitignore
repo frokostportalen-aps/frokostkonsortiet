@@ -36,3 +36,7 @@ Indhold/
 Film og billeder/
 *.zip
 *.mov
+
+# Local scratch artifacts (playwright-cli screenshots, ad-hoc captures)
+.playwright-cli/
+scratch-*.png
