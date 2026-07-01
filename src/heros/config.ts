@@ -67,6 +67,21 @@ export const hero: Field = {
       relationTo: 'media',
       required: true,
     },
+    {
+      name: 'mediaFit',
+      type: 'select',
+      defaultValue: 'cover',
+      label: 'Billedtilpasning',
+      admin: {
+        description:
+          'Beskær: billedet fylder hele rammen (kan skære top/bund af). Vis helt: hele billedet vises uden beskæring — velegnet til motiver med luft omkring, fx fritlagte billeder.',
+        condition: (_, { type } = {}) => ['highImpact', 'mediumImpact'].includes(type),
+      },
+      options: [
+        { label: 'Beskær (cover)', value: 'cover' },
+        { label: 'Vis helt (contain)', value: 'contain' },
+      ],
+    },
   ],
   label: false,
 }
