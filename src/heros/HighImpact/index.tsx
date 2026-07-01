@@ -105,8 +105,8 @@ const OverlayHero: React.FC<HeroProps> = ({ links, media, richText, heroTheme = 
         aria-hidden="true"
         className={`pointer-events-none absolute inset-0 z-0 ${
           heroTheme === 'dark'
-            ? 'bg-black/55 bg-gradient-to-b from-black/75 via-black/60 to-black/55'
-            : 'bg-white/70 bg-gradient-to-b from-white/90 via-white/75 to-white/70'
+            ? 'bg-gradient-to-b from-black/45 via-black/30 to-black/20'
+            : 'bg-gradient-to-b from-white/75 via-white/55 to-white/40'
         }`}
       />
       <div className="container mb-8 z-10 relative flex items-center justify-center">
