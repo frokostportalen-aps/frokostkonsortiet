@@ -195,6 +195,10 @@ export interface Page {
         }[]
       | null;
     media?: (string | null) | Media;
+    /**
+     * Beskær: billedet fylder hele rammen (kan skære top/bund af). Vis helt: hele billedet vises uden beskæring — velegnet til motiver med luft omkring, fx fritlagte billeder.
+     */
+    mediaFit?: ('cover' | 'contain') | null;
   };
   layout: (
     | CallToActionBlock
@@ -205,6 +209,8 @@ export interface Page {
     | FormBlock
     | FAQBlock
     | TestimonialsBlock
+    | StatsBlock
+    | TimelineBlock
   )[];
   meta?: {
     title?: string | null;
@@ -906,6 +912,49 @@ export interface TestimonialsBlock {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "StatsBlock".
+ */
+export interface StatsBlock {
+  heading?: string | null;
+  intro?: string | null;
+  /**
+   * Vises som store nøgletal i et bånd – fx "1980", "5 køkkener", "100% grøn strøm".
+   */
+  items?:
+    | {
+        value: string;
+        label: string;
+        id?: string | null;
+      }[]
+    | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'stats';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TimelineBlock".
+ */
+export interface TimelineBlock {
+  heading?: string | null;
+  intro?: string | null;
+  /**
+   * Vises som en lodret tidslinje – fx virksomhedens historie år for år.
+   */
+  items?:
+    | {
+        year: string;
+        title: string;
+        description?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'timeline';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "header".
  */
 export interface Header {
@@ -1296,6 +1345,7 @@ export interface PagesSelect<T extends boolean = true> {
               id?: T;
             };
         media?: T;
+        mediaFit?: T;
       };
   layout?:
     | T
@@ -1308,6 +1358,8 @@ export interface PagesSelect<T extends boolean = true> {
         formBlock?: T | FormBlockSelect<T>;
         faq?: T | FAQBlockSelect<T>;
         testimonials?: T | TestimonialsBlockSelect<T>;
+        stats?: T | StatsBlockSelect<T>;
+        timeline?: T | TimelineBlockSelect<T>;
       };
   meta?:
     | T
@@ -1462,6 +1514,41 @@ export interface TestimonialsBlockSelect<T extends boolean = true> {
         quote?: T;
         author?: T;
         role?: T;
+        id?: T;
+      };
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "StatsBlock_select".
+ */
+export interface StatsBlockSelect<T extends boolean = true> {
+  heading?: T;
+  intro?: T;
+  items?:
+    | T
+    | {
+        value?: T;
+        label?: T;
+        id?: T;
+      };
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TimelineBlock_select".
+ */
+export interface TimelineBlockSelect<T extends boolean = true> {
+  heading?: T;
+  intro?: T;
+  items?:
+    | T
+    | {
+        year?: T;
+        title?: T;
+        description?: T;
         id?: T;
       };
   id?: T;
