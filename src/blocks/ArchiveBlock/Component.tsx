@@ -32,10 +32,9 @@ export const ArchiveBlock: React.FC<
   // Only fetch when scoped to a site — never fall back to an unscoped query,
   // which would aggregate every kitchen's posts (ADR-0001's leak risk).
   if (populateBy === 'collection' && tenantSlug) {
-    const flattenedCategories = categories?.map((category) => {
-      if (typeof category === 'object') return category.id
-      else return category
-    })
+    const flattenedCategories = categories?.map((category) =>
+      typeof category === 'object' ? category.id : category,
+    )
 
     posts = await listPostsByCategory({ tenantSlug, categoryIds: flattenedCategories, limit })
   } else {
