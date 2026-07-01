@@ -1,12 +1,10 @@
 import type { Post, ArchiveBlock as ArchiveBlockProps } from '@/payload-types'
 
-import configPromise from '@payload-config'
-import { getPayload } from 'payload'
 import React from 'react'
 import RichText from '@/components/RichText'
 
 import { CollectionArchive } from '@/components/CollectionArchive'
-import { getTenantPostsWhere } from '@/utilities/tenantPostsFilter'
+import { listPostsByCategory } from '@/data/tenantContent'
 
 export const ArchiveBlock: React.FC<
   ArchiveBlockProps & {
@@ -28,32 +26,15 @@ export const ArchiveBlock: React.FC<
 
   let posts: Post[] = []
 
-  if (populateBy === 'collection') {
-    const payload = await getPayload({ config: configPromise })
-
+  // Only fetch when scoped to a site — never fall back to an unscoped query,
+  // which would aggregate every kitchen's posts (ADR-0001's leak risk).
+  if (populateBy === 'collection' && tenantSlug) {
     const flattenedCategories = categories?.map((category) => {
       if (typeof category === 'object') return category.id
       else return category
     })
 
-    // Scope to the current site (the main tenant aggregates across kitchens).
-    const tenantWhere = tenantSlug ? await getTenantPostsWhere(tenantSlug) : {}
-
-    const fetchedPosts = await payload.find({
-      collection: 'posts',
-      depth: 1,
-      limit,
-      where: {
-        and: [
-          tenantWhere,
-          ...(flattenedCategories && flattenedCategories.length > 0
-            ? [{ categories: { in: flattenedCategories } }]
-            : []),
-        ],
-      },
-    })
-
-    posts = fetchedPosts.docs
+    posts = await listPostsByCategory({ tenantSlug, categoryIds: flattenedCategories, limit })
   } else {
     if (selectedDocs?.length) {
       const filteredSelectedPosts = selectedDocs.map((post) => {

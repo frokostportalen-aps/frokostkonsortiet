@@ -1,13 +1,11 @@
 import type { Metadata } from 'next/types'
 
 import { CollectionArchive } from '@/components/CollectionArchive'
-import configPromise from '@payload-config'
-import { getPayload } from 'payload'
 import React from 'react'
 import { Search } from '@/search/Component'
 import PageClient from './page.client'
 import { CardPostData } from '@/components/Card'
-import { getTenantPostsWhere } from '@/utilities/tenantPostsFilter'
+import { searchPosts } from '@/data/tenantContent'
 
 type Args = {
   params: Promise<{
@@ -20,41 +18,8 @@ type Args = {
 export default async function Page({ params: paramsPromise, searchParams: searchParamsPromise }: Args) {
   const { tenant } = await paramsPromise
   const { q: query } = await searchParamsPromise
-  const payload = await getPayload({ config: configPromise })
 
-  // Scope search results to the current site (main tenant aggregates).
-  const tenantWhere = await getTenantPostsWhere(tenant)
-
-  const posts = await payload.find({
-    collection: 'search',
-    depth: 1,
-    limit: 12,
-    select: {
-      title: true,
-      slug: true,
-      categories: true,
-      meta: true,
-    },
-    // pagination: false reduces overhead if you don't need totalDocs
-    pagination: false,
-    where: {
-      and: [
-        tenantWhere,
-        ...(query
-          ? [
-              {
-                or: [
-                  { title: { like: query } },
-                  { 'meta.description': { like: query } },
-                  { 'meta.title': { like: query } },
-                  { slug: { like: query } },
-                ],
-              },
-            ]
-          : []),
-      ],
-    },
-  })
+  const posts = await searchPosts({ tenantSlug: tenant, query })
 
   return (
     <div className="pt-24 pb-24">
