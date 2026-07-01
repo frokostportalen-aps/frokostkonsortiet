@@ -3,12 +3,10 @@ import type { Metadata } from 'next/types'
 import { CollectionArchive } from '@/components/CollectionArchive'
 import { PageRange } from '@/components/PageRange'
 import { Pagination } from '@/components/Pagination'
-import configPromise from '@payload-config'
-import { getPayload } from 'payload'
 import React from 'react'
 import PageClient from './page.client'
 import { getAllTenantSlugs, getTenantBySlug } from '@/utilities/getTenant'
-import { getTenantPostsWhere } from '@/utilities/tenantPostsFilter'
+import { listPosts } from '@/data/tenantContent'
 
 export const dynamic = 'force-static'
 export const revalidate = 600
@@ -26,21 +24,8 @@ export async function generateStaticParams() {
 
 export default async function Page({ params: paramsPromise }: Args) {
   const { tenant } = await paramsPromise
-  const payload = await getPayload({ config: configPromise })
 
-  const posts = await payload.find({
-    collection: 'posts',
-    depth: 1,
-    limit: 12,
-    overrideAccess: false,
-    where: await getTenantPostsWhere(tenant),
-    select: {
-      title: true,
-      slug: true,
-      categories: true,
-      meta: true,
-    },
-  })
+  const posts = await listPosts({ tenantSlug: tenant, limit: 12 })
 
   return (
     <div className="pt-24 pb-24">
