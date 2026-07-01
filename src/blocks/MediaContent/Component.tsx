@@ -1,14 +1,15 @@
 import React from 'react'
 
 import type { MediaContentBlock as MediaContentBlockProps } from '@/payload-types'
-import type { Signature, TenantDesign } from '@/themes/tenantThemes'
+import type { Signature } from '@/themes/dialect'
 
+import { getDialect } from '@/themes/dialect'
 import { CMSLink } from '@/components/Link'
 import { Media } from '@/components/Media'
 import RichText from '@/components/RichText'
 import { cn } from '@/utilities/ui'
 
-type Props = MediaContentBlockProps & { design?: TenantDesign }
+type Props = MediaContentBlockProps & { tenantSlug?: string }
 
 const mark: Record<Signature, string> = {
   rule: 'h-px w-12 bg-primary',
@@ -21,10 +22,10 @@ export const MediaContentBlock: React.FC<Props> = ({
   richText,
   links,
   imagePosition,
-  design,
+  tenantSlug,
 }) => {
   const imageRight = imagePosition === 'right'
-  const signature = design?.signature ?? 'rule'
+  const { signature } = getDialect(tenantSlug)
 
   return (
     // Outer wrapper owns max-width + side padding; the inner band owns the
