@@ -1,5 +1,17 @@
 import type { PageFactory } from '../../types'
-import { column, content, cta, customLink, faq, heading, hero, list, p, richText } from '../../builders'
+import {
+  column,
+  content,
+  cta,
+  customLink,
+  faq,
+  heading,
+  hero,
+  list,
+  mediaContent,
+  p,
+  richText,
+} from '../../builders'
 
 export const frokostUdAfHuset: PageFactory = ({ tenantID, img }) => ({
   title: 'Frokost ud af huset',
@@ -9,9 +21,9 @@ export const frokostUdAfHuset: PageFactory = ({ tenantID, img }) => ({
   hero: hero.medium(
     img('frokost-ud-af-huset'),
     richText(
-      heading('h1', 'Frokost ud af huset'),
+      heading('h1', 'Frokostordning'),
       p(
-        'Smagssans leverer daglig frokost til jeres arbejdsplads – med variation, sæson og bæredygtighed i centrum.',
+        'Maden laver vi helt færdig og sender den med chauffør i termo- og transportkasser til jer. I stiller bare frem – så er frokosten klar, når sulten melder sig.',
       ),
     ),
   ),
@@ -21,57 +33,80 @@ export const frokostUdAfHuset: PageFactory = ({ tenantID, img }) => ({
         column(
           'full',
           heading('h2', 'Priseksempler'),
-          p('Vælg portionsstørrelsen, der passer til jeres arbejdsplads.'),
+          p('Vi tilpasser frokostordningen efter jeres behov og budget. Her er tre populære menuer.'),
         ),
         column(
           'oneThird',
-          heading('h3', 'Large portion'),
-          heading('h4', '69 kr.'),
+          heading('h3', 'Den mest populære'),
+          heading('h4', 'Fra 63 kr.'),
           list([
-            'Varm ret + tilbehør (350 g)',
-            '2 salater',
-            '2 slags pålæg',
-            'Ost hver mandag',
-            'Kage om torsdagen',
+            'Varm ret med tilbehør',
+            'Friske salater',
+            'Pålæg og brød',
+            'Frugt eller sødt',
           ]),
         ),
         column(
           'oneThird',
-          heading('h3', 'Medium portion'),
-          heading('h4', '65 kr.'),
+          heading('h3', 'Den lette'),
+          heading('h4', 'Fra 58 kr.'),
           list([
-            'Varm ret + tilbehør (250 g)',
-            '2 salater',
-            '3 slags pålæg',
-            'Ost hver mandag',
-            'Kage om torsdagen',
+            'Lettere varm ret',
+            'Friske salater',
+            'Pålæg og brød',
+            'Færre kalorier, fuld smag',
+          ]),
+        ),
+        column(
+          'oneThird',
+          heading('h3', 'Vegetar'),
+          heading('h4', 'Fra 63 kr.'),
+          list([
+            'Grøn varm ret',
+            'Friske salater',
+            'Grønt pålæg og brød',
+            'Frugt eller sødt',
           ]),
         ),
         column('full', p('Log ind for at se hele menuen. Alle priser er eksklusiv moms.')),
       ],
       'Priseksempler',
     ),
+    mediaContent(
+      img('forside-2'),
+      'right',
+      richText(
+        heading('h2', 'Sådan kommer maden ud til jer'),
+        p(
+          'Vi henter maden i vores køkken kl. 10.00 og sender den med chauffør i termo- og transportkasser, så den typisk er hos jer tidligst kl. 10.30. Deadline for bestilling er 2 hverdage før inden kl. 10.00 – det holder madspildet nede.',
+        ),
+      ),
+    ),
     content(
       [
         column(
           'full',
-          heading('h2', 'Buffist-service'),
+          heading('h2', 'Mad til alle på arbejdspladsen'),
           p(
-            'Som en del af Frokost Konsortiet tilbyder Smagssans, at I kan prøve vores kollegaers køkken, når I har brug for forandring. Nem håndtering via KundePortal & App.',
+            'Via medarbejderappen vælger hver enkelt selv kostønsker – fisk, vegetar, vegansk, pescetar, glutenfri, laktosefri eller uden gris. Medarbejderne kan tilføje gæster og melde ferie, så I undgår tung administration og madspild.',
           ),
         ),
       ],
-      'Buffist-service',
+      'Mad til alle',
     ),
     faq(
       [
         {
-          q: 'Hvornår er jeres tilmeldingsfrist?',
-          a: 'I tilmelder og tilretter antal i KundePortalen frem til dagen før levering, så I altid betaler for det, I faktisk får.',
+          q: 'Har I et minimum bestillingsantal?',
+          a: 'Ja, som udgangspunkt 15 personer. Men giv os et kald, så ser vi, om vi ikke kan løse det alligevel.',
         },
         {
-          q: 'Hvornår leverer I frokosten?',
-          a: 'Vi leverer hver morgen inden frokost, så maden står klar, når sulten melder sig.',
+          q: 'Hvad tid leverer I frokosten?',
+          a: 'Frokosten hentes i vores køkken kl. 10.00, så typisk er den hos jer tidligst kl. 10.30.',
+        },
+        {
+          q: 'Kan vi nøjes med frokost 3-4 dage om ugen?',
+          a: 'Det er muligt, men priserne stiger, da de er baseret på 5-dages levering.',
         },
       ],
       'Ofte stillede spørgsmål',
@@ -79,14 +114,15 @@ export const frokostUdAfHuset: PageFactory = ({ tenantID, img }) => ({
     cta(
       richText(
         heading('h3', 'Få et tilbud'),
-        p('Fortæl os om jeres arbejdsplads, så sammensætter vi en frokostordning, der passer.'),
+        p('Fortæl os om jeres arbejdsplads, så sammensætter vi en frokostordning, der passer til jeres behov og budget.'),
       ),
       [customLink('Få et tilbud', '/om-os')],
     ),
   ],
   meta: {
-    title: 'Frokost ud af huset',
-    description: 'Daglig frokostordning fra Smagssans – leveret til jeres arbejdsplads.',
+    title: 'Frokostordning – Smagssans',
+    description:
+      'Daglig frokostordning fra Smagssans – maden laver vi helt færdig og sender den med chauffør i termo- og transportkasser til jer. Fra 58 kr. pr. kuvert.',
     image: img('frokost-ud-af-huset'),
   },
 })
