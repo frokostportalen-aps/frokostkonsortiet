@@ -1,4 +1,4 @@
-import type { Signature } from '@/themes/tenantThemes'
+import type { Signature } from '@/themes/dialect'
 
 /**
  * Every rendering of the tenant's signature motif ("ét sprog, tre dialekter"),

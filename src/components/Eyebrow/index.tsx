@@ -1,6 +1,6 @@
 import React from 'react'
 
-import type { EyebrowStyle } from '@/themes/tenantThemes'
+import type { EyebrowStyle } from '@/themes/dialect'
 import { cn } from '@/utilities/ui'
 
 /**
