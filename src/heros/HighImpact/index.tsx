@@ -3,7 +3,7 @@ import { useHeaderTheme } from '@/providers/HeaderTheme'
 import React, { useEffect } from 'react'
 
 import type { Page } from '@/payload-types'
-import type { TenantDesign } from '@/themes/tenantThemes'
+import type { Dialect } from '@/themes/dialect'
 
 import { CMSLink } from '@/components/Link'
 import { Eyebrow } from '@/components/Eyebrow'
@@ -12,7 +12,7 @@ import RichText from '@/components/RichText'
 
 type HeroProps = Page['hero'] & {
   heroTheme?: 'light' | 'dark'
-  design?: TenantDesign
+  dialect?: Dialect
 }
 
 const HeroLinks: React.FC<{ links: Page['hero']['links']; center?: boolean }> = ({
@@ -37,7 +37,7 @@ const HeroLinks: React.FC<{ links: Page['hero']['links']; center?: boolean }> = 
  * scrim, so the header keeps the ambient theme — used by sites whose voice is
  * typographic rather than photographic.
  */
-const SplitHero: React.FC<HeroProps> = ({ links, media, mediaFit, richText, design }) => {
+const SplitHero: React.FC<HeroProps> = ({ links, media, mediaFit, richText, dialect }) => {
   const { setHeaderTheme } = useHeaderTheme()
   useEffect(() => setHeaderTheme(null), [setHeaderTheme])
 
@@ -50,9 +50,9 @@ const SplitHero: React.FC<HeroProps> = ({ links, media, mediaFit, richText, desi
     <div className="container pb-8 md:pb-16">
       <div className="grid items-center gap-10 md:grid-cols-2 md:gap-12 lg:gap-16">
         <div className="max-w-xl">
-          {design?.tagline && (
-            <Eyebrow style={design.eyebrow} withRule className="mb-6">
-              {design.tagline}
+          {dialect?.tagline && (
+            <Eyebrow style={dialect.eyebrow} withRule className="mb-6">
+              {dialect.tagline}
             </Eyebrow>
           )}
           {richText && (
@@ -125,7 +125,7 @@ const OverlayHero: React.FC<HeroProps> = ({ links, media, richText, heroTheme = 
 }
 
 export const HighImpactHero: React.FC<HeroProps> = (props) => {
-  return props.design?.heroVariant === 'split' ? (
+  return props.dialect?.heroVariant === 'split' ? (
     <SplitHero {...props} />
   ) : (
     <OverlayHero {...props} />

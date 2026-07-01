@@ -4,12 +4,13 @@ import React from 'react'
 import RichText from '@/components/RichText'
 
 import type { ContentBlock as ContentBlockProps } from '@/payload-types'
-import type { Signature, TenantDesign } from '@/themes/tenantThemes'
+import type { Signature } from '@/themes/dialect'
 
+import { getDialect } from '@/themes/dialect'
 import { CMSLink } from '../../components/Link'
 import { SignatureCard } from '@/components/SignatureCard'
 
-type Props = ContentBlockProps & { design?: TenantDesign }
+type Props = ContentBlockProps & { tenantSlug?: string }
 
 const colsSpanClasses = {
   full: '12',
@@ -33,8 +34,8 @@ const sectionMark: Record<Signature, string> = {
  *   - half/third/...  -> a card in a responsive grid (the signature shell)
  * A leading full-width heading that introduces cards gets the signature rule.
  */
-export const ContentBlock: React.FC<Props> = ({ columns, design }) => {
-  const signature = design?.signature ?? 'rule'
+export const ContentBlock: React.FC<Props> = ({ columns, tenantSlug }) => {
+  const { signature } = getDialect(tenantSlug)
   const cols = columns ?? []
   const hasCards = cols.some((c) => c.size && c.size !== 'full')
 
