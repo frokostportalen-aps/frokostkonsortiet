@@ -110,7 +110,7 @@ export async function listPostsByCategory({
     where: {
       and: [
         await visibleToTenant(tenantSlug),
-        ...(categoryIds && categoryIds.length > 0 ? [{ categories: { in: categoryIds } }] : []),
+        ...(categoryIds?.length ? [{ categories: { in: categoryIds } }] : []),
       ],
     },
   })
