@@ -38,8 +38,10 @@ export const HeaderNav: React.FC<{ data: HeaderType | null }> = ({ data }) => {
 
   return (
     <>
-      {/* Desktop */}
-      <nav className="hidden items-center gap-6 md:flex">
+      {/* Desktop — only once the viewport is wide enough for the full set of
+          (long, Danish) labels; below `lg` the cramped row collides with the
+          logo, so we show the drawer instead. */}
+      <nav aria-label="Hovedmenu" className="hidden items-center gap-6 lg:flex">
         {navItems.map((item, i) => (
           <DesktopItem key={i} item={item} active={itemActive(item)} isActive={isActive} />
         ))}
@@ -56,7 +58,7 @@ export const HeaderNav: React.FC<{ data: HeaderType | null }> = ({ data }) => {
       <Sheet open={open} onOpenChange={setOpen}>
         <SheetTrigger
           aria-label="Åbn menu"
-          className="-mr-2 inline-flex cursor-pointer items-center justify-center p-2 text-foreground md:hidden"
+          className="-mr-2 inline-flex cursor-pointer items-center justify-center p-2 text-foreground lg:hidden"
         >
           <MenuIcon className="w-6" />
         </SheetTrigger>
@@ -65,7 +67,7 @@ export const HeaderNav: React.FC<{ data: HeaderType | null }> = ({ data }) => {
           <SheetHeader>
             <SheetTitle>Menu</SheetTitle>
           </SheetHeader>
-          <nav className="flex flex-col gap-1 px-3 pb-4">
+          <nav aria-label="Mobilmenu" className="flex flex-col gap-1 px-3 pb-4">
             {navItems.map((item, i) => (
               <MobileItem key={i} item={item} active={itemActive(item)} isActive={isActive} />
             ))}
@@ -94,7 +96,7 @@ const DesktopItem: React.FC<{
 }> = ({ item, active, isActive }) => {
   const subItems = item.subItems ?? []
   const linkClass = cn(
-    'text-sm font-medium transition-colors hover:text-primary',
+    'whitespace-nowrap text-sm font-medium transition-colors hover:text-primary',
     active ? 'text-primary' : 'text-foreground/80',
   )
 

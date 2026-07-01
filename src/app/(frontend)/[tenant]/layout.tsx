@@ -26,13 +26,17 @@ export default async function TenantLayout({ children, params }: Args) {
   const fontStyle = {
     display: 'contents',
     ...(font ? { '--font-sans': font.sansVar, fontFamily: 'var(--font-sans)' } : {}),
+    ...(font?.headingVar ? { '--font-heading': font.headingVar } : {}),
   } as React.CSSProperties
 
+  // Both font classNames so the body var AND the heading var are defined.
+  const fontClassName = [font?.className, font?.headingClassName].filter(Boolean).join(' ')
+
   return (
-    <div className={font?.className} style={fontStyle}>
+    <div className={fontClassName} style={fontStyle}>
       <TenantTheme theme={getTenantTheme(tenant)} />
       <Header tenantSlug={tenant} />
-      {children}
+      <main id="main-content">{children}</main>
       <Footer tenantSlug={tenant} />
     </div>
   )
