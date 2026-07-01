@@ -1,0 +1,58 @@
+import { revalidatePath, revalidateTag } from 'next/cache'
+import { NextResponse, type NextRequest } from 'next/server'
+
+import { pagePath } from '@/collections/Pages/hooks/revalidatePage'
+import { postPath } from '@/collections/Posts/hooks/revalidatePost'
+import type { RevalidateRef } from '@/endpoints/seed/tenants/seed-tenants'
+
+/**
+ * On-demand revalidation for out-of-band content writes — chiefly
+ * `pnpm seed:tenants[:prod]`, which runs outside the Next.js runtime and so
+ * seeds with `context.disableRevalidate` (the afterChange hooks that normally
+ * revalidate can't run there). After seeding, the CLI script POSTs the docs it
+ * touched here so the static/ISR cache is purged immediately instead of waiting
+ * out the `revalidate = 600` window.
+ *
+ * Guarded by REVALIDATE_SECRET (same style as the preview route's secret).
+ * Excluded from the tenant proxy via the `next/` matcher exclusion in proxy.ts.
+ *
+ *   POST /next/revalidate
+ *   x-revalidate-secret: <REVALIDATE_SECRET>
+ *   { "items": [{ "tenant": "smagssans", "slug": "home", "collection": "pages" }] }
+ */
+const pathFor = ({ tenant, slug, collection }: RevalidateRef): string =>
+  collection === 'posts' ? postPath(tenant, slug) : pagePath(tenant, slug)
+
+export async function POST(req: NextRequest): Promise<Response> {
+  const secret = process.env.REVALIDATE_SECRET
+  if (!secret || req.headers.get('x-revalidate-secret') !== secret) {
+    return NextResponse.json({ error: 'Not authorized' }, { status: 401 })
+  }
+
+  let items: RevalidateRef[]
+  try {
+    const body = (await req.json()) as { items?: RevalidateRef[] }
+    items = Array.isArray(body.items) ? body.items : []
+  } catch {
+    return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 })
+  }
+
+  const paths: string[] = []
+  const sitemapTenants = { pages: new Set<string>(), posts: new Set<string>() }
+
+  for (const item of items) {
+    if (!item?.tenant || !item?.slug) continue
+    const collection = item.collection === 'posts' ? 'posts' : 'pages'
+    const path = pathFor({ ...item, collection })
+    revalidatePath(path)
+    paths.push(path)
+    sitemapTenants[collection].add(item.tenant)
+  }
+
+  // Refresh the sitemap caches once per (collection, tenant), mirroring the
+  // tags the afterChange hooks set.
+  for (const tenant of sitemapTenants.pages) revalidateTag(`pages-sitemap-${tenant}`, 'max')
+  for (const tenant of sitemapTenants.posts) revalidateTag(`posts-sitemap-${tenant}`, 'max')
+
+  return NextResponse.json({ revalidated: paths.length, paths })
+}

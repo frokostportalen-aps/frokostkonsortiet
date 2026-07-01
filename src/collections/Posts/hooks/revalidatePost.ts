@@ -5,7 +5,7 @@ import { revalidatePath, revalidateTag } from 'next/cache'
 import type { Post } from '../../../payload-types'
 import { tenantSlugFromDoc } from '../../../utilities/tenantSlugFromDoc'
 
-const postPath = (tenantSlug: string, slug?: string | null) => `/${tenantSlug}/posts/${slug}`
+export const postPath = (tenantSlug: string, slug?: string | null) => `/${tenantSlug}/posts/${slug}`
 
 export const revalidatePost: CollectionAfterChangeHook<Post> = async ({
   doc,

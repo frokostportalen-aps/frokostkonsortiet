@@ -2,9 +2,51 @@ import 'dotenv/config'
 import { getPayload } from 'payload'
 import config from '../src/payload.config'
 
-import { seedTenants } from '../src/endpoints/seed/tenants/seed-tenants'
+import { seedTenants, type RevalidateRef } from '../src/endpoints/seed/tenants/seed-tenants'
 import { TENANTS } from '../src/endpoints/seed/tenants/data'
+import { getServerSideURL } from '../src/utilities/getURL'
 import { isProduction, targetLabel } from './seedTarget'
+
+/**
+ * Seeding runs outside Next.js, so the afterChange hooks that normally purge the
+ * ISR cache can't fire (we seed with `context.disableRevalidate`). Instead we
+ * POST the touched docs to the running app's `/next/revalidate` endpoint so the
+ * new content shows immediately rather than after the `revalidate = 600` window.
+ *
+ * No-op (with a hint) when REVALIDATE_SECRET is unset — the seed still succeeds;
+ * pages just refresh on the next ISR cycle. The target URL comes from
+ * getServerSideURL(): a local run reaches the app inside the container at :3000,
+ * prod hits NEXT_PUBLIC_SERVER_URL from .env.production.
+ */
+const revalidateSeeded = async (
+  items: RevalidateRef[],
+  log: (msg: string) => void,
+): Promise<void> => {
+  if (items.length === 0) return
+  const secret = process.env.REVALIDATE_SECRET
+  if (!secret) {
+    log(
+      'Springer revalidering over (REVALIDATE_SECRET mangler) — sider opdateres inden for revalidate-vinduet.',
+    )
+    return
+  }
+  const base = getServerSideURL()
+  try {
+    const res = await fetch(new URL('/next/revalidate', base), {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', 'x-revalidate-secret': secret },
+      body: JSON.stringify({ items }),
+    })
+    if (!res.ok) {
+      log(`Revalidering fejlede (HTTP ${res.status}) — sider opdateres inden for revalidate-vinduet.`)
+      return
+    }
+    const { revalidated } = (await res.json()) as { revalidated: number }
+    log(`✓ Revaliderede ${revalidated} stier via ${base}`)
+  } catch (err) {
+    log(`Revalidering kunne ikke nå ${base} (${(err as Error).message}) — sider opdateres inden for revalidate-vinduet.`)
+  }
+}
 
 /**
  * Seeds every site with realistic Danish content: tenants + `.localhost`
@@ -56,8 +98,9 @@ const run = async () => {
 
   const payload = await getPayload({ config })
   payload.logger.info(`Seeding (${mode}${prod ? ', PRODUKTION' : ''}) → ${target}`)
-  await seedTenants(payload, { force })
+  const { revalidate } = await seedTenants(payload, { force })
   payload.logger.info('Done seeding tenants.')
+  await revalidateSeeded(revalidate, (msg) => payload.logger.info(msg))
   process.exit(0)
 }
 

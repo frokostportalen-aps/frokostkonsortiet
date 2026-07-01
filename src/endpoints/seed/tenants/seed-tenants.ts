@@ -188,8 +188,21 @@ export type SeedOptions = {
   force?: boolean
 }
 
-export async function seedTenants(payload: Payload, opts: SeedOptions = {}): Promise<void> {
+/** A page/post the run touched, for out-of-band cache revalidation. */
+export type RevalidateRef = { tenant: string; slug: string; collection: 'pages' | 'posts' }
+
+export type SeedResult = {
+  /**
+   * Every page/post the run actually wrote (empty for a no-op additive re-seed).
+   * Seeding runs outside Next.js (`context.disableRevalidate`), so the CLI posts
+   * these to `/next/revalidate` afterwards to purge the ISR cache immediately.
+   */
+  revalidate: RevalidateRef[]
+}
+
+export async function seedTenants(payload: Payload, opts: SeedOptions = {}): Promise<SeedResult> {
   const force = opts.force ?? false
+  const revalidate: RevalidateRef[] = []
 
   // Author for the seeded posts. Prefer an existing super-admin, then any
   // existing user; only create the dev admin when the database has NO users at
@@ -301,7 +314,15 @@ export async function seedTenants(payload: Payload, opts: SeedOptions = {}): Pro
     // Pages — one factory per file in the tenant's pages/ folder.
     const pageResults: UpsertResult[] = []
     for (const page of t.pages) {
-      pageResults.push(await upsertPage(payload, tenantID, page(pageCtx), { force }))
+      const doc = page(pageCtx)
+      const result = await upsertPage(payload, tenantID, doc, { force })
+      pageResults.push(result)
+      // Only newly-written docs need revalidation; additive runs leave existing
+      // pages untouched (under --force they're deleted first, so recreated =
+      // created), so this stays empty for a no-op additive re-seed.
+      if (result.created) {
+        revalidate.push({ tenant: t.slug, slug: doc.slug, collection: 'pages' })
+      }
     }
 
     // Posts. Cross-link only the posts this run created, so editor-curated
@@ -309,9 +330,13 @@ export async function seedTenants(payload: Payload, opts: SeedOptions = {}): Pro
     const postIDs: string[] = []
     const postCreated: boolean[] = []
     for (const post of t.posts) {
-      const result = await upsertPost(payload, tenantID, post(pageCtx), { force })
+      const doc = post(pageCtx)
+      const result = await upsertPost(payload, tenantID, doc, { force })
       postIDs.push(result.id)
       postCreated.push(result.created)
+      if (result.created) {
+        revalidate.push({ tenant: t.slug, slug: doc.slug, collection: 'posts' })
+      }
     }
     for (let i = 0; i < postIDs.length; i++) {
       if (!postCreated[i]) continue
@@ -334,6 +359,8 @@ export async function seedTenants(payload: Payload, opts: SeedOptions = {}): Pro
       `✓ ${t.slug}: +${newPosts}/${t.posts.length} indlæg, +${newPages}/${t.pages.length} sider → ${t.domains.join(', ')}`,
     )
   }
+
+  return { revalidate }
 }
 
 /**

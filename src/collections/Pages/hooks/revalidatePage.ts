@@ -5,7 +5,7 @@ import { revalidatePath, revalidateTag } from 'next/cache'
 import type { Page } from '../../../payload-types'
 import { tenantSlugFromDoc } from '../../../utilities/tenantSlugFromDoc'
 
-const pagePath = (tenantSlug: string, slug?: string | null) =>
+export const pagePath = (tenantSlug: string, slug?: string | null) =>
   slug === 'home' ? `/${tenantSlug}` : `/${tenantSlug}/${slug}`
 
 export const revalidatePage: CollectionAfterChangeHook<Page> = async ({
