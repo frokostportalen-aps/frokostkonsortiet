@@ -54,5 +54,13 @@ export async function POST(req: NextRequest): Promise<Response> {
   for (const tenant of sitemapTenants.pages) revalidateTag(`pages-sitemap-${tenant}`, 'max')
   for (const tenant of sitemapTenants.posts) revalidateTag(`posts-sitemap-${tenant}`, 'max')
 
+  // Seeding also creates/updates tenants, but it runs with
+  // `context.disableRevalidate`, so the Tenants afterChange hook that normally
+  // busts the `tenant-domains` tag never fires. Bust it here so the proxy's
+  // domain→tenant map repopulates immediately — otherwise a freshly seeded DB
+  // keeps serving the empty map cached before seeding, and the root `/` 404s
+  // because no host can be resolved to a tenant.
+  revalidateTag('tenant-domains', 'max')
+
   return NextResponse.json({ revalidated: paths.length, paths })
 }
