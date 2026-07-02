@@ -1,16 +1,7 @@
 import type { CollectionConfig } from 'payload'
 
 import { createByTenant, mutateByTenant, readByTenantOrPublished } from '../../access/byTenant'
-import { Archive } from '../../blocks/ArchiveBlock/config'
-import { CallToAction } from '../../blocks/CallToAction/config'
-import { Content } from '../../blocks/Content/config'
-import { FAQ } from '../../blocks/FAQ/config'
-import { FormBlock } from '../../blocks/Form/config'
-import { MediaBlock } from '../../blocks/MediaBlock/config'
-import { MediaContent } from '../../blocks/MediaContent/config'
-import { Stats } from '../../blocks/Stats/config'
-import { Testimonials } from '../../blocks/Testimonials/config'
-import { Timeline } from '../../blocks/Timeline/config'
+import { blockConfigs } from '../../blocks/blockConfigs'
 import { hero } from '@/heros/config'
 import { slugField } from 'payload'
 import { populatePublishedAt } from '../../hooks/populatePublishedAt'
@@ -79,18 +70,7 @@ export const Pages: CollectionConfig<'pages'> = {
             {
               name: 'layout',
               type: 'blocks',
-              blocks: [
-                CallToAction,
-                Content,
-                MediaBlock,
-                MediaContent,
-                Archive,
-                FormBlock,
-                FAQ,
-                Testimonials,
-                Stats,
-                Timeline,
-              ],
+              blocks: blockConfigs,
               required: true,
               admin: {
                 initCollapsed: true,
