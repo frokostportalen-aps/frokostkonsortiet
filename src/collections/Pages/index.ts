@@ -3,12 +3,17 @@ import type { CollectionConfig } from 'payload'
 import { createByTenant, mutateByTenant, readByTenantOrPublished } from '../../access/byTenant'
 import { Archive } from '../../blocks/ArchiveBlock/config'
 import { CallToAction } from '../../blocks/CallToAction/config'
+import { ClientList } from '../../blocks/ClientList/config'
 import { Content } from '../../blocks/Content/config'
 import { FAQ } from '../../blocks/FAQ/config'
 import { FormBlock } from '../../blocks/Form/config'
 import { MediaBlock } from '../../blocks/MediaBlock/config'
 import { MediaContent } from '../../blocks/MediaContent/config'
+import { PlanPicker } from '../../blocks/PlanPicker/config'
+import { PriceMenu } from '../../blocks/PriceMenu/config'
 import { Stats } from '../../blocks/Stats/config'
+import { Steps } from '../../blocks/Steps/config'
+import { Team } from '../../blocks/Team/config'
 import { Testimonials } from '../../blocks/Testimonials/config'
 import { Timeline } from '../../blocks/Timeline/config'
 import { hero } from '@/heros/config'
@@ -89,6 +94,11 @@ export const Pages: CollectionConfig<'pages'> = {
                 FAQ,
                 Testimonials,
                 Stats,
+                PriceMenu,
+                Steps,
+                Team,
+                PlanPicker,
+                ClientList,
                 Timeline,
               ],
               required: true,

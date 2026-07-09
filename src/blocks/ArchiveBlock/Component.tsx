@@ -4,6 +4,7 @@ import configPromise from '@payload-config'
 import { getPayload } from 'payload'
 import React from 'react'
 import RichText from '@/components/RichText'
+import { ArrowLink } from '@/components/ArrowLink'
 
 import { CollectionArchive } from '@/components/CollectionArchive'
 import { getTenantPostsWhere } from '@/utilities/tenantPostsFilter'
@@ -19,6 +20,8 @@ export const ArchiveBlock: React.FC<
     categories,
     introContent,
     limit: limitFromProps,
+    linkLabel,
+    linkUrl,
     populateBy,
     selectedDocs,
     tenantSlug,
@@ -65,10 +68,15 @@ export const ArchiveBlock: React.FC<
   }
 
   return (
-    <div className="my-16" id={`block-${id}`}>
+    <div id={`block-${id}`}>
       {introContent && (
-        <div className="container mb-16">
-          <RichText className="ms-0 max-w-[48rem]" data={introContent} enableGutter={false} />
+        <div className="container mb-10 flex flex-wrap items-end justify-between gap-4">
+          <RichText
+            className="ms-0 max-w-[48rem] [&_h3]:text-3xl [&_h3]:font-semibold [&_h3]:tracking-tight md:[&_h3]:text-4xl [&_p]:mt-2 [&_p]:text-muted-foreground"
+            data={introContent}
+            enableGutter={false}
+          />
+          <ArrowLink href={linkUrl || '/posts'}>{linkLabel || 'Alle nyheder'}</ArrowLink>
         </div>
       )}
       <CollectionArchive posts={posts} />
