@@ -10,7 +10,10 @@ import {
   mediaContent,
   p,
   richText,
+  stats,
   testimonials,
+  clientList,
+  planPicker,
 } from '../../builders'
 
 export const home: PageFactory = ({ tenantID, img }) => ({
@@ -26,12 +29,12 @@ export const home: PageFactory = ({ tenantID, img }) => ({
         'Frokost Konsortiet er fællesskabet bag dine bedste frokostpauser. Vi laver frokost med variation, kvalitet og bæredygtighed i centrum, så din arbejdsplads får noget godt at glæde sig til – hver eneste dag.',
       ),
     ),
-    [customLink('Om os', '/om-os'), customLink('Nyheder', '/posts', 'outline')],
+    [customLink('Kontakt os', '/kontakt'), customLink('Om os', '/om-os', 'outline')],
   ),
   layout: [
     content(
       [
-        column('full', heading('h2', 'Velkommen hos Frokost Konsortiet')),
+        column('full', heading('h2', 'Ét fællesskab – hele paletten')),
         column(
           'oneThird',
           heading('h3', 'Variation hver uge'),
@@ -53,6 +56,17 @@ export const home: PageFactory = ({ tenantID, img }) => ({
         ),
       ],
       'Intro',
+    ),
+    stats(
+      [
+        { value: '3', label: 'selvstændige køkkener under ét tag' },
+        { value: '1', label: 'aftale, én faktura, ét kontaktpunkt' },
+        { value: 'Fra 58 kr.', label: 'pr. kuvert på tværs af familien' },
+        { value: '45+', label: 'års samlet køkkenerfaring' },
+      ],
+      undefined,
+      undefined,
+      'Nøgletal',
     ),
     mediaContent(
       img('forside-1'),
@@ -93,6 +107,38 @@ export const home: PageFactory = ({ tenantID, img }) => ({
       ),
       [customLink('Om os', '/om-os')],
     ),
+    planPicker({
+      heading: 'Hvilken ordning passer jer?',
+      intro: 'To spørgsmål – så peger vi jer i den rigtige retning.',
+      plans: [
+        {
+          need: 'frokost',
+          minPeople: 1,
+          title: 'Frokostordning',
+          description: 'Vi matcher jer med familiens køkkener – klassisk eller 100% økologisk.',
+          priceLabel: 'fra 58 kr. pr. kuvert',
+          url: '/services',
+        },
+        {
+          need: 'kantine',
+          minPeople: 40,
+          title: 'Kantinedrift',
+          description: 'Fra ca. 40 personer driver vi kantinen hos jer – med fast team og faste rammer.',
+          priceLabel: 'Aftalepris',
+          url: '/services',
+        },
+        {
+          need: 'catering',
+          minPeople: 1,
+          title: 'Catering & selskaber',
+          description: 'Reception, mærkedag eller flerretters middag – vi finder køkkenet, der løfter det.',
+          priceLabel: 'fra 145 kr. pr. person',
+          url: '/services',
+        },
+      ],
+      ctaUrl: '/kontakt',
+    }),
+    clientList(['Aarhus Advokaterne', 'Vestas Partners', 'GreenField', 'Kbh. Mediehus', 'Krogh & Co.', 'Nordhavn Tech']),
     testimonials(
       'Det siger vores kunder',
       'Arbejdspladser i hele landet har Frokost Konsortiet på menuen. Her er nogle af dem.',

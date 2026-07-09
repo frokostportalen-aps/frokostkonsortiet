@@ -1,7 +1,18 @@
 import type { PageFactory } from '../../types'
-import { column, content, heading, hero, list, p, richText } from '../../builders'
+import {
+  column,
+  content,
+  formBlock,
+  heading,
+  hero,
+  link,
+  p,
+  paragraph,
+  richText,
+  text,
+} from '../../builders'
 
-export const kontakt: PageFactory = ({ tenantID, img }) => ({
+export const kontakt: PageFactory = ({ tenantID, img, tilbudsFormID }) => ({
   title: 'Kontakt',
   slug: 'kontakt',
   _status: 'published',
@@ -33,15 +44,23 @@ export const kontakt: PageFactory = ({ tenantID, img }) => ({
         column(
           'full',
           heading('h2', 'Find os'),
-          list([
-            'Hørkær 12, 2720 Herlev',
-            'Telefon: +45 72 10 88 10',
-            'E-mail: kontakt@frokostkonsortiet.dk',
-            'CVR-nr.: 46413148',
-          ]),
+          p('Hørkær 12, 2720 Herlev'),
+          paragraph(text('Telefon: '), link('+45 72 10 88 10', 'tel:+4572108810')),
+          paragraph(
+            text('E-mail: '),
+            link('kontakt@frokostkonsortiet.dk', 'mailto:kontakt@frokostkonsortiet.dk'),
+          ),
+          p('CVR-nr.: 46413148'),
         ),
       ],
       'Find os',
+    ),
+    formBlock(
+      tilbudsFormID,
+      richText(
+        heading('h2', 'Skriv til os'),
+        p('Fortæl os kort om jeres arbejdsplads, så vender vi tilbage inden for én hverdag.'),
+      ),
     ),
   ],
   meta: {

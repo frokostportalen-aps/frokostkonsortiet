@@ -6,9 +6,9 @@
  * The lexical helpers (`heading`, `p`, `list`, `richText`, `link`) are
  * re-exported here so a page file only needs one import.
  */
-import { heading, list, p, richText } from '../lexical'
+import { heading, link, list, p, paragraph, richText, text } from '../lexical'
 
-export { heading, list, p, richText }
+export { heading, link, list, p, paragraph, richText, text }
 
 type Node = Record<string, unknown>
 type RichText = ReturnType<typeof richText>
@@ -123,6 +123,105 @@ export const stats = (
   ...(heading_ ? { heading: heading_ } : {}),
   ...(intro ? { intro } : {}),
   items,
+})
+
+/** A restaurant-style menu with prices (sections of lines with dotted leaders). */
+export type PriceMenuItem = {
+  name: string
+  description?: string
+  price: string
+  unit?: string
+  featured?: boolean
+}
+export type PriceMenuSection = {
+  title: string
+  description?: string
+  items: PriceMenuItem[]
+}
+export const priceMenu = (
+  opts: {
+    heading?: string
+    intro?: string
+    sections: PriceMenuSection[]
+    note?: string
+  },
+  blockName = 'Menukort',
+) => ({
+  blockType: 'priceMenu',
+  blockName,
+  ...opts,
+})
+
+/** Embedded form (plugin-form-builder) with an optional intro heading. */
+export const formBlock = (formID: string, intro?: RichText, blockName = 'Formular') => ({
+  blockType: 'formBlock',
+  blockName,
+  form: formID,
+  enableIntro: !!intro,
+  ...(intro ? { introContent: intro } : {}),
+})
+
+/** Numbered process steps ("I ringer -> vi smager til -> frokosten lander"). */
+export const steps = (
+  items: { title: string; description?: string }[],
+  heading_?: string,
+  intro?: string,
+  blockName = 'Sådan foregår det',
+) => ({
+  blockType: 'steps',
+  blockName,
+  ...(heading_ ? { heading: heading_ } : {}),
+  ...(intro ? { intro } : {}),
+  items,
+})
+
+/** The people behind the food — portraits with a personal one-liner. */
+export const team = (
+  members: { image: string; name: string; role?: string; quote?: string }[],
+  heading_?: string,
+  intro?: string,
+  blockName = 'Mød køkkenet',
+) => ({
+  blockType: 'team',
+  blockName,
+  ...(heading_ ? { heading: heading_ } : {}),
+  ...(intro ? { intro } : {}),
+  members,
+})
+
+/** Interactive plan finder (need + headcount -> recommendation). */
+export const planPicker = (
+  opts: {
+    heading?: string
+    intro?: string
+    plans: {
+      need: 'frokost' | 'kantine' | 'catering'
+      minPeople: number
+      title: string
+      description?: string
+      priceLabel?: string
+      url: string
+    }[]
+    ctaLabel?: string
+    ctaUrl?: string
+  },
+  blockName = 'Ordningsvælger',
+) => ({
+  blockType: 'planPicker',
+  blockName,
+  ...opts,
+})
+
+/** Typographic client wall ("Arbejdspladser der spiser med"). */
+export const clientList = (
+  names: string[],
+  heading_ = 'Arbejdspladser der spiser med',
+  blockName = 'Kundeliste',
+) => ({
+  blockType: 'clientList',
+  blockName,
+  heading: heading_,
+  clients: names.map((name) => ({ name })),
 })
 
 /** Vertical timeline (company history etc.). Theme-aware, reusable across tenants. */

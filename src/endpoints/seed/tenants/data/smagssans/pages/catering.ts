@@ -9,6 +9,7 @@ import {
   hero,
   mediaContent,
   p,
+  priceMenu,
   richText,
 } from '../../builders'
 
@@ -63,6 +64,49 @@ export const catering: PageFactory = ({ tenantID, img }) => ({
       ],
       'Cateringudvalg',
     ),
+    priceMenu({
+      heading: 'Priser',
+      intro: 'Vejledende priser pr. person – vi sammensætter altid efter anledning og antal gæster.',
+      sections: [
+        {
+          title: 'Catering & selskaber',
+          items: [
+            {
+              name: 'Morgenmad & brunch',
+              description: 'Friske morgenborde og mættende brunch.',
+              price: 'fra 85 kr.',
+              unit: 'pr. person',
+            },
+            {
+              name: 'Frokostbuffet',
+              description: 'Varme og kolde retter til den store forsamling.',
+              price: 'fra 145 kr.',
+              unit: 'pr. person',
+              featured: true,
+            },
+            {
+              name: 'Flerretters middag',
+              description: 'Til selskaber, receptioner og mærkedage.',
+              price: 'fra 295 kr.',
+              unit: 'pr. person',
+            },
+            {
+              name: 'Snack, sundt & kage',
+              description: 'Små lækkerier og hjemmebag til mødet eller pausen.',
+              price: 'fra 45 kr.',
+              unit: 'pr. person',
+            },
+            {
+              name: 'Julehygge',
+              description: 'Julens klassikere og hyggelige anretninger.',
+              price: 'fra 225 kr.',
+              unit: 'pr. person',
+            },
+          ],
+        },
+      ],
+      note: 'Alle priser er ekskl. moms og levering. Ring på 72 10 88 10, så regner vi på jeres arrangement.',
+    }),
     mediaContent(
       img('efteraarets-smage'),
       'right',

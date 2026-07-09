@@ -1,5 +1,17 @@
 import type { PageFactory } from '../../types'
-import { column, content, cta, customLink, faq, heading, hero, list, p, richText } from '../../builders'
+import {
+  column,
+  content,
+  cta,
+  customLink,
+  faq,
+  heading,
+  hero,
+  list,
+  mediaBlock,
+  p,
+  richText,
+} from '../../builders'
 
 export const kantine: PageFactory = ({ tenantID, img }) => ({
   title: 'Kantine',
@@ -50,6 +62,7 @@ export const kantine: PageFactory = ({ tenantID, img }) => ({
       ],
       'Priseksempler',
     ),
+    mediaBlock(img('partner')),
     faq(
       [
         {

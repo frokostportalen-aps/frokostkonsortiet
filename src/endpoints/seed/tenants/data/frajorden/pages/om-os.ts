@@ -1,7 +1,18 @@
 import type { PageFactory } from '../../types'
-import { content, column, heading, hero, mediaBlock, p, richText } from '../../builders'
+import {
+  content,
+  column,
+  formBlock,
+  heading,
+  hero,
+  mediaBlock,
+  p,
+  richText,
+  timeline,
+  team,
+} from '../../builders'
 
-export const omOs: PageFactory = ({ tenantID, img }) => ({
+export const omOs: PageFactory = ({ tenantID, img, tilbudsFormID }) => ({
   title: 'Om Fra Jorden',
   slug: 'om-os',
   _status: 'published',
@@ -35,7 +46,55 @@ export const omOs: PageFactory = ({ tenantID, img }) => ({
       ],
       'Om os',
     ),
-    mediaBlock(img('om-os')),
+    timeline(
+      [
+        {
+          year: '2016',
+          title: 'Begyndte på marken',
+          description:
+            'Fra Jorden starter som et samarbejde med to økologiske avlere på Sjælland – og fire kunder.',
+        },
+        {
+          year: '2018',
+          title: 'Spisemærke i guld',
+          description:
+            'Det Økologiske Spisemærke i guld: 90–100% økologi i alt, hvad vi laver – og det har vi holdt siden.',
+        },
+        {
+          year: '2022',
+          title: 'Hele høsten i brug',
+          description:
+            'Vi begynder at aftage avlernes fulde høst – også de skæve – og halverer spildet på marken.',
+        },
+        {
+          year: '2024',
+          title: 'Del af Frokost Konsortiet',
+          description: 'Fra Jorden bliver en del af familien – samme jord, større bord.',
+        },
+      ],
+      'Vores rejse',
+      'Fra to avlere og fire kunder til det grønne køkken i familien.',
+    ),
+    team(
+      [
+        {
+          image: img('koekkenchef'),
+          name: 'Steffen Krog',
+          role: 'Køkkenchef & medstifter',
+          quote: 'Jeg ringer til avlerne, før jeg skriver menuen – aldrig omvendt.',
+        },
+      ],
+      'Mød køkkenet',
+      'Manden bag menuen – og bindeleddet til markerne.',
+    ),
+    mediaBlock(img('koekkenet')),
+    formBlock(
+      tilbudsFormID,
+      richText(
+        heading('h2', 'Få et tilbud'),
+        p('Fortæl os om jeres arbejdsplads, så vender vi tilbage med et grønt tilbud inden for én hverdag.'),
+      ),
+    ),
   ],
   meta: {
     title: 'Om Fra Jorden',

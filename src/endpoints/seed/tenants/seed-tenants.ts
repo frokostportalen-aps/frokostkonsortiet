@@ -5,27 +5,20 @@ import path from 'path'
 
 import { TENANTS } from './data'
 import type { PageContext, SeedDoc, TenantMeta } from './data/types'
+import { heading, p as para, richText } from './lexical'
+import type { Form } from '../../../payload-types'
+import { pickLinkDomain, urlForTenantDomain } from '../../../utilities/tenantDomains'
 
 const ctx = { disableRevalidate: true }
 const PORT = 3000
 
-// Cross-site links point at another tenant's own domain (locally on :3000).
-const urlForDomain = (domain: string) =>
-  domain.includes('localhost') ? `http://${domain}:${PORT}/` : `https://${domain}/`
-
 /**
- * Which of a tenant's domains the cross-site menu should link to. A local seed
- * links to the `*.localhost` dev domains; a production seed sets
- * `SEED_LINK_DOMAIN=public` to link to the public `new.*` domains instead
- * (falling back to the first non-localhost domain, then the first domain).
+ * Which of a tenant's domains the cross-site menu should link to: shared
+ * policy from `utilities/tenantDomains`. A local seed links to the
+ * `*.localhost` dev domains; a production seed sets `SEED_LINK_DOMAIN=public`
+ * to link to the public `new.*` domains instead.
  */
 const preferPublicLinks = process.env.SEED_LINK_DOMAIN === 'public'
-const linkDomain = (domains: string[]): string =>
-  preferPublicLinks
-    ? (domains.find((d) => d.startsWith('new.')) ??
-      domains.find((d) => !d.includes('localhost')) ??
-      domains[0])
-    : (domains.find((d) => d.includes('localhost')) ?? domains[0])
 
 // ── idempotent upsert helpers ──────────────────────────────────────────────
 //
@@ -95,6 +88,7 @@ const MIME: Record<string, string> = {
   '.webp': 'image/webp',
   '.gif': 'image/gif',
   '.avif': 'image/avif',
+  '.mp4': 'video/mp4',
 }
 
 /** Reuse an existing image (matched on its filename prefix) or upload it fresh. */
@@ -250,7 +244,9 @@ export async function seedTenants(payload: Payload, opts: SeedOptions = {}): Pro
   const siteUrl = (slug: string): string => {
     const t = tenantBySlug.get(slug)
     if (!t) throw new Error(`siteUrl: unknown tenant '${slug}'`)
-    return urlForDomain(linkDomain(t.domains))
+    const domain = pickLinkDomain(t.domains, preferPublicLinks)
+    if (!domain) throw new Error(`siteUrl: tenant '${slug}' has no domains`)
+    return urlForTenantDomain(domain, String(PORT))
   }
 
   for (const t of TENANTS) {
@@ -303,12 +299,69 @@ export async function seedTenants(payload: Payload, opts: SeedOptions = {}): Pro
       return id
     }
 
+    // The tenant's standing quote/contact form ("Få et tilbud") — target of
+    // every CTA on the site. Additive runs leave an existing form untouched
+    // (editor tweaks survive); --force resets its fields to seed defaults but
+    // keeps the document id, so submissions and page references never orphan.
+    const existingForm = await payload.find({
+      collection: 'forms',
+      where: { and: [{ title: { equals: 'Få et tilbud' } }, { tenant: { equals: tenantID } }] },
+      limit: 1,
+      pagination: false,
+    })
+    const formData = {
+      title: 'Få et tilbud',
+      tenant: tenantID,
+      submitButtonLabel: 'Send forespørgsel',
+      confirmationType: 'message' as const,
+      confirmationMessage: richText(
+        heading('h3', 'Tak for jeres forespørgsel!'),
+        para('Vi vender tilbage inden for én hverdag med et tilbud, der passer til jeres arbejdsplads.'),
+      ) as unknown as Form['confirmationMessage'],
+      emails: [
+        {
+          emailTo: 'kontakt@frokostkonsortiet.dk',
+          subject: `Ny tilbudsforespørgsel – ${t.name}`,
+        },
+      ],
+      fields: [
+        { blockType: 'text' as const, name: 'navn', label: 'Navn', required: true, width: 50 },
+        { blockType: 'text' as const, name: 'virksomhed', label: 'Virksomhed', required: true, width: 50 },
+        { blockType: 'email' as const, name: 'email', label: 'E-mail', required: true, width: 50 },
+        { blockType: 'text' as const, name: 'telefon', label: 'Telefon', required: false, width: 50 },
+        {
+          blockType: 'number' as const,
+          name: 'antalMedarbejdere',
+          label: 'Antal medarbejdere',
+          required: false,
+          width: 50,
+        },
+        {
+          blockType: 'textarea' as const,
+          name: 'besked',
+          label: 'Fortæl kort om jeres behov',
+          required: false,
+        },
+      ],
+    }
+    const form = existingForm.docs[0]
+      ? force
+        ? await payload.update({
+            collection: 'forms',
+            id: existingForm.docs[0].id,
+            context: ctx,
+            data: formData,
+          })
+        : existingForm.docs[0]
+      : await payload.create({ collection: 'forms', context: ctx, data: formData })
+
     const pageCtx: PageContext = {
       tenantID,
       authorID: admin.id as string,
       img,
       tenants: tenantMetas,
       siteUrl,
+      tilbudsFormID: form.id as string,
     }
 
     // Pages — one factory per file in the tenant's pages/ folder.

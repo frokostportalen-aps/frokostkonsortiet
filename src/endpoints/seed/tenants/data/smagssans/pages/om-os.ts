@@ -4,6 +4,7 @@ import {
   content,
   cta,
   customLink,
+  formBlock,
   heading,
   hero,
   linkColumn,
@@ -14,7 +15,7 @@ import {
   timeline,
 } from '../../builders'
 
-export const omOs: PageFactory = ({ tenantID, img }) => ({
+export const omOs: PageFactory = ({ tenantID, img, tilbudsFormID }) => ({
   title: 'Om Smagssans',
   slug: 'om-os',
   _status: 'published',
@@ -190,6 +191,13 @@ export const omOs: PageFactory = ({ tenantID, img }) => ({
         p('Skriv eller ring på 72 10 88 10, så vender vi tilbage. Du kan også få tilsendt ugens menu.'),
       ),
       [customLink('Se vores frokostordning', '/frokost-ud-af-huset')],
+    ),
+    formBlock(
+      tilbudsFormID,
+      richText(
+        heading('h2', 'Få et tilbud'),
+        p('Fortæl os om jeres arbejdsplads, så sammensætter vi en frokostordning, der passer til jeres behov og budget.'),
+      ),
     ),
   ],
   meta: {
