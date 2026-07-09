@@ -17,7 +17,11 @@ type NavItem = NonNullable<HeaderType['navItems']>[number]
 const menuItemState = (active: boolean) =>
   active ? 'bg-accent text-primary' : 'text-foreground hover:bg-accent hover:text-accent-foreground'
 
-export const HeaderNav: React.FC<{ data: HeaderType | null }> = ({ data }) => {
+export const HeaderNav: React.FC<{
+  data: HeaderType | null
+  /** The site's standing CTA (from the tenant's design tokens). */
+  cta?: { label: string; url: string }
+}> = ({ data, cta }) => {
   const navItems = data?.navItems || []
   const [open, setOpen] = useState(false)
   const pathname = usePathname()
@@ -52,6 +56,15 @@ export const HeaderNav: React.FC<{ data: HeaderType | null }> = ({ data }) => {
         >
           <SearchIcon className="w-5" />
         </Link>
+        {cta && (
+          <CMSLink
+            type="custom"
+            url={cta.url}
+            label={cta.label}
+            appearance="default"
+            className="ml-1"
+          />
+        )}
       </nav>
 
       {/* Mobile */}
@@ -80,6 +93,18 @@ export const HeaderNav: React.FC<{ data: HeaderType | null }> = ({ data }) => {
                 Søg
               </Link>
             </SheetClose>
+            {cta && (
+              <SheetClose asChild>
+                <CMSLink
+                  type="custom"
+                  url={cta.url}
+                  label={cta.label}
+                  appearance="default"
+                  size="lg"
+                  className="mx-3 mt-3"
+                />
+              </SheetClose>
+            )}
           </nav>
         </SheetContent>
       </Sheet>
@@ -96,7 +121,7 @@ const DesktopItem: React.FC<{
 }> = ({ item, active, isActive }) => {
   const subItems = item.subItems ?? []
   const linkClass = cn(
-    'whitespace-nowrap text-sm font-medium transition-colors hover:text-primary',
+    'whitespace-nowrap rounded-sm text-sm font-medium transition-colors hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary',
     active ? 'text-primary' : 'text-foreground/80',
   )
 

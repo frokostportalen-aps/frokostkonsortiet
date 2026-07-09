@@ -25,20 +25,28 @@ export const getTenantBySlug = (slug: string) =>
   })()
 
 /**
- * All tenant slugs — used by `generateStaticParams` to prerender every site.
+ * All tenants with their public fields (name, slug, domains, isMain) — used by
+ * the footer's family directory to cross-link every kitchen in the family.
  */
-export const getAllTenantSlugs = unstable_cache(
-  async (): Promise<string[]> => {
+export const getAllTenants = unstable_cache(
+  async (): Promise<Tenant[]> => {
     const payload = await getPayload({ config: configPromise })
     const { docs } = await payload.find({
       collection: 'tenants',
       depth: 0,
       limit: 1000,
       pagination: false,
-      select: { slug: true },
+      sort: 'createdAt',
     })
-    return docs.map((t) => t.slug).filter(Boolean) as string[]
+    return docs
   },
-  ['tenant-slugs'],
+  ['tenants-all'],
   { tags: ['tenant-domains'] },
 )
+
+/**
+ * All tenant slugs — used by `generateStaticParams` to prerender every site.
+ * Derived from `getAllTenants`, so the two share one query and one cache entry.
+ */
+export const getAllTenantSlugs = async (): Promise<string[]> =>
+  (await getAllTenants()).map((t) => t.slug)
