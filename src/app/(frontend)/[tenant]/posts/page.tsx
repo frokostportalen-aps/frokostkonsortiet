@@ -7,7 +7,7 @@ import configPromise from '@payload-config'
 import { getPayload } from 'payload'
 import React from 'react'
 import PageClient from './page.client'
-import { getAllTenantSlugs, getTenantBySlug } from '@/utilities/getTenant'
+import { getAllTenantSlugs } from '@/utilities/getTenant'
 import { getTenantPostsWhere } from '@/utilities/tenantPostsFilter'
 
 export const dynamic = 'force-static'
@@ -47,7 +47,7 @@ export default async function Page({ params: paramsPromise }: Args) {
       <PageClient />
       <div className="container mb-16">
         <div className="prose dark:prose-invert max-w-none">
-          <h1>Posts</h1>
+          <h1>Nyheder</h1>
         </div>
       </div>
 
@@ -71,10 +71,8 @@ export default async function Page({ params: paramsPromise }: Args) {
   )
 }
 
-export async function generateMetadata({ params: paramsPromise }: Args): Promise<Metadata> {
-  const { tenant } = await paramsPromise
-  const tenantDoc = await getTenantBySlug(tenant)
+export function generateMetadata(): Metadata {
   return {
-    title: `${tenantDoc?.name ?? 'Frokost Konsortiet'} Posts`,
+    title: 'Nyheder',
   }
 }

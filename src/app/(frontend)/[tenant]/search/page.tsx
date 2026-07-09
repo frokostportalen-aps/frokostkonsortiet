@@ -61,7 +61,7 @@ export default async function Page({ params: paramsPromise, searchParams: search
       <PageClient />
       <div className="container mb-16">
         <div className="prose dark:prose-invert max-w-none text-center">
-          <h1 className="mb-8 lg:mb-16">Search</h1>
+          <h1 className="mb-8 lg:mb-16">Søg</h1>
 
           <div className="max-w-[50rem] mx-auto">
             <Search />
@@ -72,7 +72,7 @@ export default async function Page({ params: paramsPromise, searchParams: search
       {posts.totalDocs > 0 ? (
         <CollectionArchive posts={posts.docs as CardPostData[]} />
       ) : (
-        <div className="container">No results found.</div>
+        <div className="container text-center text-muted-foreground">Ingen resultater fundet.</div>
       )}
     </div>
   )
@@ -80,6 +80,6 @@ export default async function Page({ params: paramsPromise, searchParams: search
 
 export function generateMetadata(): Metadata {
   return {
-    title: `Payload Website Template Search`,
+    title: 'Søg',
   }
 }
