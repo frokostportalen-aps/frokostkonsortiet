@@ -18,9 +18,15 @@ type CMSLinkType = {
   size?: ButtonProps['size'] | null
   type?: 'custom' | 'reference' | null
   url?: string | null
-}
+} & Omit<React.AnchorHTMLAttributes<HTMLAnchorElement>, 'href' | 'type'>
 
-export const CMSLink: React.FC<CMSLinkType> = (props) => {
+/**
+ * Forwards ref + rest props (onClick, aria-*, …) to the underlying anchor, so
+ * the component works inside Radix `asChild` slots (e.g. `SheetClose` in the
+ * mobile menu) — a Slot injects its close-handler as props, and dropping them
+ * leaves dead buttons.
+ */
+export const CMSLink = React.forwardRef<HTMLAnchorElement, CMSLinkType>((props, ref) => {
   const {
     type,
     appearance = 'inline',
@@ -31,6 +37,7 @@ export const CMSLink: React.FC<CMSLinkType> = (props) => {
     reference,
     size: sizeFromProps,
     url,
+    ...rest
   } = props
 
   const href =
@@ -48,7 +55,7 @@ export const CMSLink: React.FC<CMSLinkType> = (props) => {
   /* Ensure we don't break any styles set by richText */
   if (appearance === 'inline') {
     return (
-      <Link className={cn(className)} href={href || url || ''} {...newTabProps}>
+      <Link className={cn(className)} href={href || url || ''} ref={ref} {...newTabProps} {...rest}>
         {label && label}
         {children && children}
       </Link>
@@ -57,10 +64,11 @@ export const CMSLink: React.FC<CMSLinkType> = (props) => {
 
   return (
     <Button asChild className={className} size={size} variant={appearance}>
-      <Link className={cn(className)} href={href || url || ''} {...newTabProps}>
+      <Link className={cn(className)} href={href || url || ''} ref={ref} {...newTabProps} {...rest}>
         {label && label}
         {children && children}
       </Link>
     </Button>
   )
-}
+})
+CMSLink.displayName = 'CMSLink'

@@ -1,43 +1,37 @@
 'use client'
 
 import { cn } from '@/utilities/ui'
-import React, { useEffect, useRef } from 'react'
+import React from 'react'
 
 import type { Props as MediaProps } from '../types'
 
 import { getMediaUrl } from '@/utilities/getMediaUrl'
 
 export const VideoMedia: React.FC<MediaProps> = (props) => {
-  const { onClick, resource, videoClassName } = props
-
-  const videoRef = useRef<HTMLVideoElement>(null)
-  // const [showFallback] = useState<boolean>()
-
-  useEffect(() => {
-    const { current: video } = videoRef
-    if (video) {
-      video.addEventListener('suspend', () => {
-        // setShowFallback(true);
-        // console.warn('Video was suspended, rendering fallback image.')
-      })
-    }
-  }, [])
+  const { fill, onClick, resource, videoClassName } = props
 
   if (resource && typeof resource === 'object') {
-    const { filename } = resource
+    // Use the resource's own URL (the Payload media endpoint) — NOT the
+    // static /media/ path. In production files live in R2 and are streamed
+    // through /api/media/file/<name> with Range support; the static path
+    // only exists on local disk.
+    const { mimeType, updatedAt, url } = resource
 
+    // Autoplays muted (browsers block autoplay WITH sound), but the controls
+    // let the viewer unmute, scrub and pause — the videos carry their audio.
     return (
       <video
         autoPlay
-        className={cn(videoClassName)}
-        controls={false}
+        // `fill` mirrors next/image: cover the nearest positioned ancestor —
+        // so a video chosen as hero/card media behaves like a photo would.
+        className={cn('h-full w-full object-cover', fill && 'absolute inset-0', videoClassName)}
+        controls
         loop
         muted
         onClick={onClick}
         playsInline
-        ref={videoRef}
       >
-        <source src={getMediaUrl(`/media/${filename}`)} />
+        <source src={getMediaUrl(url, updatedAt)} type={mimeType || undefined} />
       </video>
     )
   }
