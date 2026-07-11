@@ -69,14 +69,20 @@ export const ArchiveBlock: React.FC<
 
   return (
     <div id={`block-${id}`}>
-      {introContent && (
+      {/* The link fields work with or without an intro — an editor filling
+          only linkLabel/linkUrl still gets the "see all" link. */}
+      {(introContent || linkLabel || linkUrl) && (
         <div className="container mb-10 flex flex-wrap items-end justify-between gap-4">
-          <RichText
-            className="ms-0 max-w-[48rem] [&_h3]:text-3xl [&_h3]:font-semibold [&_h3]:tracking-tight md:[&_h3]:text-4xl [&_p]:mt-2 [&_p]:text-muted-foreground"
-            data={introContent}
-            enableGutter={false}
-          />
-          <ArrowLink href={linkUrl || '/posts'}>{linkLabel || 'Alle nyheder'}</ArrowLink>
+          {introContent && (
+            <RichText
+              className="ms-0 max-w-[48rem] [&_h3]:text-3xl [&_h3]:font-semibold [&_h3]:tracking-tight md:[&_h3]:text-4xl [&_p]:mt-2 [&_p]:text-muted-foreground"
+              data={introContent}
+              enableGutter={false}
+            />
+          )}
+          <ArrowLink className={introContent ? undefined : 'ms-auto'} href={linkUrl || '/posts'}>
+            {linkLabel || 'Alle nyheder'}
+          </ArrowLink>
         </div>
       )}
       <CollectionArchive posts={posts} />
