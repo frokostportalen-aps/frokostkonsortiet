@@ -21,8 +21,10 @@ const getImageURL = (image?: Media | Config['db']['defaultIDType'] | null) => {
 
 export const generateMeta = async (args: {
   doc: Partial<Page> | Partial<Post> | null
+  /** Which collection the doc came from — drives the og:url path prefix. */
+  collection?: 'pages' | 'posts'
 }): Promise<Metadata> => {
-  const { doc } = args
+  const { doc, collection } = args
 
   const ogImage = getImageURL(doc?.meta?.image)
 
@@ -51,8 +53,10 @@ export const generateMeta = async (args: {
 
   // og:url must be the document's own path (resolved against metadataBase) —
   // posts live under /posts/, pages at the root, the front page at '/'.
+  // Prefer the caller's explicit collection: the `heroImage` sniff fails for
+  // posts without a hero image (mongoose omits unset fields entirely).
   const slug = typeof doc?.slug === 'string' ? doc.slug : ''
-  const isPost = !!doc && 'heroImage' in doc
+  const isPost = collection ? collection === 'posts' : !!doc && 'heroImage' in doc
   const ogPath = !slug || slug === 'home' ? '/' : `${isPost ? '/posts' : ''}/${slug}`
 
   return {
