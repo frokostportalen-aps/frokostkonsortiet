@@ -7,7 +7,7 @@ import type { Footer as FooterType } from '@/payload-types'
 import { ThemeSelector } from '@/providers/Theme/ThemeSelector'
 import { CMSLink } from '@/components/Link'
 import { Logo } from '@/components/Logo/Logo'
-import { getTenantDesign } from '@/themes/tenantThemes'
+import { getDialect } from '@/themes/dialect'
 import { getAllTenants } from '@/utilities/getTenant'
 import { getTenantCrossURL } from '@/utilities/getURL'
 import { signatureMarkClass } from '@/components/SignatureMark'
@@ -25,7 +25,7 @@ export async function Footer({ tenantSlug }: { tenantSlug: string }) {
   ])
   const navItems = footerData?.navItems || []
 
-  const design = getTenantDesign(tenantSlug)
+  const dialect = getDialect(tenantSlug)
   const currentTenant = tenants.find((t) => t.slug === tenantSlug)
   const mainTenant = tenants.find((t) => t.isMain)
   // Main site first, then the kitchens, so the directory reads as one family.
@@ -45,12 +45,12 @@ export async function Footer({ tenantSlug }: { tenantSlug: string }) {
           <Link href="/">
             <Logo tenantSlug={tenantSlug} />
           </Link>
-          {design.tagline && (
+          {dialect.tagline && (
             <p className="max-w-xs text-sm leading-relaxed text-muted-foreground">
-              {design.tagline}
+              {dialect.tagline}
             </p>
           )}
-          <span aria-hidden className={`block ${signatureMarkClass.footer[design.signature]}`} />
+          <span aria-hidden className={`block ${signatureMarkClass.footer[dialect.signature]}`} />
         </div>
 
         {/* Shortcuts */}

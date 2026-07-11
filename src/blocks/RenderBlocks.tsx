@@ -2,8 +2,6 @@ import React, { Fragment } from 'react'
 
 import type { Page } from '@/payload-types'
 
-import { getTenantDesign } from '@/themes/tenantThemes'
-
 import { ArchiveBlock } from '@/blocks/ArchiveBlock/Component'
 import { CallToActionBlock } from '@/blocks/CallToAction/Component'
 import { ClientListBlock } from '@/blocks/ClientList/Component'
@@ -56,10 +54,6 @@ export const RenderBlocks: React.FC<{
 
   const hasBlocks = blocks && Array.isArray(blocks) && blocks.length > 0
 
-  // The site's design personality (signature/eyebrow) so blocks can carry the
-  // tenant's motif without each one re-resolving it.
-  const design = getTenantDesign(tenantSlug)
-
   if (hasBlocks) {
     return (
       <Fragment>
@@ -77,12 +71,7 @@ export const RenderBlocks: React.FC<{
             if (Block) {
               return (
                 <div className="my-16 md:my-24" data-block-type={blockType} key={index}>
-                  <Block
-                    {...block}
-                    tenantSlug={tenantSlug}
-                    design={design}
-                    disableInnerContainer
-                  />
+                  <Block {...block} tenantSlug={tenantSlug} disableInnerContainer />
                 </div>
               )
             }

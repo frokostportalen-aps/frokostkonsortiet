@@ -1,6 +1,6 @@
 import React from 'react'
 
-import type { Signature } from '@/themes/tenantThemes'
+import type { Signature } from '@/themes/dialect'
 import { cn } from '@/utilities/ui'
 
 /**

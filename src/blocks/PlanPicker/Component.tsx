@@ -3,7 +3,8 @@
 import React, { useEffect, useId, useRef, useState } from 'react'
 
 import type { Form, PlanPickerBlock as PlanPickerBlockProps } from '@/payload-types'
-import type { TenantDesign } from '@/themes/tenantThemes'
+
+import { getDialect } from '@/themes/dialect'
 
 import { needLabel, QUOTE_FORM_FIELDS } from './options'
 
@@ -21,7 +22,7 @@ import { submitFormSubmission } from '@/blocks/Form/submitFormSubmission'
 import { cn } from '@/utilities/ui'
 
 type Plan = NonNullable<PlanPickerBlockProps['plans']>[number]
-type Props = PlanPickerBlockProps & { design?: TenantDesign }
+type Props = PlanPickerBlockProps & { tenantSlug?: string }
 type FormField = NonNullable<Form['fields']>[number]
 
 /** The slider tops out here and reads as "100+" — matching treats it as 100. */
@@ -62,8 +63,9 @@ export const PlanPickerBlock: React.FC<Props> = ({
   intro,
   plans,
   form,
-  design,
+  tenantSlug,
 }) => {
+  const { signature, eyebrow } = getDialect(tenantSlug)
   const uid = useId()
   const needs = Array.from(new Set((plans || []).map((plan) => plan.need)))
   const [step, setStep] = useState(0)
@@ -267,8 +269,8 @@ export const PlanPickerBlock: React.FC<Props> = ({
               className="animate-in duration-300 fade-in slide-in-from-right-2 motion-reduce:animate-none"
             >
               <div className="grid items-start gap-6 md:grid-cols-[1fr_1.2fr] md:gap-10">
-                <SignatureCard signature={design?.signature}>
-                  <Eyebrow style={design?.eyebrow}>Vores anbefaling til jer</Eyebrow>
+                <SignatureCard signature={signature}>
+                  <Eyebrow style={eyebrow}>Vores anbefaling til jer</Eyebrow>
                   <h3
                     ref={setStepFocus}
                     tabIndex={-1}

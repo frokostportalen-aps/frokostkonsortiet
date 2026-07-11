@@ -1,7 +1,7 @@
 import React from 'react'
 
 import type { Page } from '@/payload-types'
-import type { TenantDesign } from '@/themes/tenantThemes'
+import type { Dialect } from '@/themes/dialect'
 
 import { Eyebrow } from '@/components/Eyebrow'
 import { signatureMarkClass } from '@/components/SignatureMark'
@@ -11,12 +11,12 @@ type LowImpactHeroType =
   | {
       children?: React.ReactNode
       richText?: never
-      design?: TenantDesign
+      dialect?: Dialect
     }
   | (Omit<Page['hero'], 'richText'> & {
       children?: never
       richText?: Page['hero']['richText']
-      design?: TenantDesign
+      dialect?: Dialect
     })
 
 
@@ -25,13 +25,13 @@ type LowImpactHeroType =
  * the tenant's signature mark — so content pages open in the site's own voice
  * instead of a bare CMS h1.
  */
-export const LowImpactHero: React.FC<LowImpactHeroType> = ({ children, richText, design }) => {
+export const LowImpactHero: React.FC<LowImpactHeroType> = ({ children, richText, dialect }) => {
   return (
     <div className="container mt-14 md:mt-20">
       <div className="max-w-[52rem]">
-        {design?.tagline && (
-          <Eyebrow style={design.eyebrow} withRule className="mb-5">
-            {design.tagline}
+        {dialect?.tagline && (
+          <Eyebrow style={dialect.eyebrow} withRule className="mb-5">
+            {dialect.tagline}
           </Eyebrow>
         )}
         {children ||
@@ -42,8 +42,8 @@ export const LowImpactHero: React.FC<LowImpactHeroType> = ({ children, richText,
               enableGutter={false}
             />
           ))}
-        {design && (
-          <span aria-hidden className={`mt-7 block ${signatureMarkClass.pageHeader[design.signature]}`} />
+        {dialect && (
+          <span aria-hidden className={`mt-7 block ${signatureMarkClass.pageHeader[dialect.signature]}`} />
         )}
       </div>
     </div>
