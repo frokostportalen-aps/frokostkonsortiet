@@ -2,6 +2,7 @@ import React from 'react'
 
 import type { StepsBlock as StepsBlockProps } from '@/payload-types'
 
+import { NumberBadge } from '@/components/NumberBadge'
 import { SectionHeader } from '@/components/SectionHeader'
 
 const colsForCount: Record<number, string> = {
@@ -29,12 +30,7 @@ export const StepsBlock: React.FC<StepsBlockProps> = ({ heading, intro, items })
         {items.map((step, i) => (
           <li key={i} className="flex flex-col">
             <div className="flex items-center gap-4">
-              <span
-                aria-hidden
-                className="font-heading flex size-11 shrink-0 items-center justify-center rounded-full bg-primary text-lg font-semibold text-primary-foreground"
-              >
-                {i + 1}
-              </span>
+              <NumberBadge className="size-11 text-lg">{i + 1}</NumberBadge>
               {/* The connector — the thread that carries the eye to the next
                   step; the last step lets it run off unfinished. */}
               <span aria-hidden className="h-px flex-1 bg-border" />
