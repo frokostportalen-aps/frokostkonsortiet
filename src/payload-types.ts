@@ -1045,6 +1045,9 @@ export interface PlanPickerBlock {
   plans?:
     | {
         need: 'frokost' | 'kantine' | 'catering';
+        /**
+         * Vælgeren spørger op til 100 personer ("100+"), så højst 100 her.
+         */
         minPeople: number;
         title: string;
         description?: string | null;
