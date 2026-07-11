@@ -19,8 +19,10 @@ export const Eyebrow: React.FC<{
   style?: EyebrowStyle
   /** Draw a short brand-colour rule before the label (the editorial marker). */
   withRule?: boolean
+  /** Custom marker classes (e.g. from signatureMarkClass) — replaces the rule. */
+  mark?: string
   className?: string
-}> = ({ children, style = 'uppercase', withRule = false, className }) => (
+}> = ({ children, style = 'uppercase', withRule = false, mark, className }) => (
   <p
     className={cn(
       'flex items-center gap-3 font-semibold text-primary',
@@ -28,7 +30,11 @@ export const Eyebrow: React.FC<{
       className,
     )}
   >
-    {withRule && <span aria-hidden className="h-px w-8 shrink-0 bg-primary/70" />}
+    {mark ? (
+      <span aria-hidden className={cn('shrink-0', mark)} />
+    ) : (
+      withRule && <span aria-hidden className="h-px w-8 shrink-0 bg-primary/70" />
+    )}
     <span>{children}</span>
   </p>
 )

@@ -5,6 +5,8 @@ import type { TenantDesign } from '@/themes/tenantThemes'
 
 import RichText from '@/components/RichText'
 import { CMSLink } from '@/components/Link'
+import { Eyebrow } from '@/components/Eyebrow'
+import { signatureMarkClass } from '@/components/SignatureMark'
 
 type Props = CTABlockProps & { design?: TenantDesign }
 
@@ -27,10 +29,13 @@ export const CallToActionBlock: React.FC<Props> = ({ links, richText, design }) 
         <div className="relative flex flex-col gap-8 md:flex-row md:items-center md:justify-between">
           <div className="max-w-[44rem]">
             {design?.tagline && (
-              <p className="mb-4 flex items-center gap-3 text-xs font-semibold uppercase tracking-[0.22em] text-primary-foreground/70">
-                <span aria-hidden className="h-px w-8 bg-current opacity-60" />
+              <Eyebrow
+                style={design.eyebrow}
+                mark={signatureMarkClass.ctaBand[design.signature]}
+                className="mb-4 text-primary-foreground/70"
+              >
                 {design.tagline}
-              </p>
+              </Eyebrow>
             )}
             {/* Explicit heading colours (not prose-invert): the band is
                 `primary`, which flips light↔dark per tenant, so headings must

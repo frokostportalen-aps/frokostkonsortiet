@@ -7,7 +7,7 @@ import type { Signature } from '@/themes/tenantThemes'
  * variant side by side instead of hunting five per-file maps.
  */
 export const signatureMarkClass: Record<
-  'section' | 'pageHeader' | 'footer' | 'heroEyebrow',
+  'section' | 'pageHeader' | 'footer' | 'heroEyebrow' | 'ctaBand',
   Record<Signature, string>
 > = {
   /** The rule under section headings (Content block). */
@@ -33,5 +33,12 @@ export const signatureMarkClass: Record<
     rule: 'h-px w-8 bg-current opacity-60',
     block: 'h-2 w-7 bg-primary',
     sketch: 'h-[3px] w-9 rounded-full bg-primary',
+  },
+  /** Before the CTA band's tagline — the band is full-strength `primary`,
+   *  so the mark must follow the text colour rather than --primary. */
+  ctaBand: {
+    rule: 'h-px w-8 bg-current opacity-60',
+    block: 'h-2 w-7 bg-current opacity-80',
+    sketch: 'h-[3px] w-9 rounded-full bg-current opacity-80',
   },
 }
