@@ -45,7 +45,14 @@ export const PlanPicker: Block = {
           type: 'number',
           required: true,
           defaultValue: 1,
+          min: 1,
+          // The picker's slider tops out at 100 ("100+"), so a higher
+          // threshold could never be matched — keep the field within reach.
+          max: 100,
           label: 'Fra antal personer',
+          admin: {
+            description: 'Vælgeren spørger op til 100 personer ("100+"), så højst 100 her.',
+          },
         },
         {
           name: 'title',
