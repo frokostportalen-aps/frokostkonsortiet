@@ -4,10 +4,11 @@ import React from 'react'
 import RichText from '@/components/RichText'
 
 import type { ContentBlock as ContentBlockProps } from '@/payload-types'
-import type { Signature, TenantDesign } from '@/themes/tenantThemes'
+import type { TenantDesign } from '@/themes/tenantThemes'
 
 import { CMSLink } from '../../components/Link'
 import { SignatureCard } from '@/components/SignatureCard'
+import { signatureMarkClass } from '@/components/SignatureMark'
 
 type Props = ContentBlockProps & { design?: TenantDesign }
 
@@ -18,13 +19,6 @@ const colsSpanClasses = {
   twoThirds: '8',
 } as const
 
-// The section-header rule beneath the first heading echoes the card marker, so
-// the tenant's motif reads the same everywhere.
-const sectionMark: Record<Signature, string> = {
-  rule: 'h-px w-14 bg-primary',
-  block: 'h-1 w-14 rounded-full bg-primary',
-  sketch: 'h-[3px] w-12 rounded-full bg-primary/80',
-}
 
 /**
  * A flexible columns block. The column size decides the treatment, which keeps
@@ -53,7 +47,7 @@ export const ContentBlock: React.FC<Props> = ({ columns, design }) => {
               <div className="col-span-4 lg:col-span-12" key={index}>
                 {richText && <RichText data={richText} enableGutter={false} />}
                 {isSectionHeader && (
-                  <span aria-hidden className={cn('mt-5 block', sectionMark[signature])} />
+                  <span aria-hidden className={cn('mt-5 block', signatureMarkClass.section[signature])} />
                 )}
                 {enableLink && <CMSLink className="mt-4" {...link} />}
               </div>

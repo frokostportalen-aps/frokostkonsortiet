@@ -32,6 +32,8 @@ export type PageContext = {
   img: (key: string) => string
   tenants: TenantMeta[]
   siteUrl: (slug: string) => string
+  /** The tenant's standing "Få et tilbud" form (created by the engine). */
+  tilbudsFormID: string
 }
 
 /** A document the engine upserts (keyed on its `slug` within the tenant). */

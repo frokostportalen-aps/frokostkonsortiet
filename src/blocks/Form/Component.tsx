@@ -1,15 +1,15 @@
 'use client'
-import type { FormFieldBlock, Form as FormType } from '@payloadcms/plugin-form-builder/types'
+import type { Form as FormType } from '@payloadcms/plugin-form-builder/types'
 
 import { useRouter } from 'next/navigation'
-import React, { useCallback, useState } from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { useForm, FormProvider } from 'react-hook-form'
 import RichText from '@/components/RichText'
 import { Button } from '@/components/ui/button'
 import type { DefaultTypedEditorState } from '@payloadcms/richtext-lexical'
 
 import { fields } from './fields'
-import { getClientSideURL } from '@/utilities/getURL'
+import { submitFormSubmission } from './submitFormSubmission'
 
 export type FormBlockType = {
   blockName?: string
@@ -31,9 +31,16 @@ export const FormBlock: React.FC<
     introContent,
   } = props
 
-  const formMethods = useForm({
-    defaultValues: formFromProps.fields,
+  // Default values keyed by field name — the fields array itself is not a
+  // valid RHF value tree (an array root breaks named-field state for
+  // Controller-based fields like the select). Only read on first render.
+  const defaultValues: Record<string, unknown> = {}
+  formFromProps.fields?.forEach((field) => {
+    if ('name' in field && field.name) {
+      defaultValues[field.name] = 'defaultValue' in field ? field.defaultValue : undefined
+    }
   })
+  const formMethods = useForm<Record<string, unknown>>({ defaultValues })
   const {
     control,
     formState: { errors },
@@ -43,12 +50,39 @@ export const FormBlock: React.FC<
 
   const [isLoading, setIsLoading] = useState(false)
   const [hasSubmitted, setHasSubmitted] = useState<boolean>()
-  const [error, setError] = useState<{ message: string; status?: string } | undefined>()
+  const [error, setError] = useState<{ message: string } | undefined>()
   const router = useRouter()
 
+  // Next scrolls to the `#tilbud` anchor when navigating, but it measures the
+  // target before late layout (images/fonts settling above) has pushed the
+  // form further down — the visitor lands mid-page. Re-align while the page
+  // settles: follow body resizes for a short window, and stand down the
+  // moment the visitor scrolls on their own.
+  const anchorRef = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+    const el = anchorRef.current
+    if (window.location.hash !== '#tilbud' || !el) return
+
+    const align = () => el.scrollIntoView()
+    const observer = new ResizeObserver(align)
+    // Every kind of scroll intent must stand the effect down — keyboard
+    // (PageDown/arrows/space) and scrollbar drags fire neither wheel nor
+    // touchstart, and must not be fought for the whole window.
+    const stopEvents = ['wheel', 'touchstart', 'keydown', 'pointerdown'] as const
+    const stop = () => {
+      observer.disconnect()
+      clearTimeout(timer)
+      stopEvents.forEach((name) => window.removeEventListener(name, stop))
+    }
+    align()
+    observer.observe(document.body)
+    stopEvents.forEach((name) => window.addEventListener(name, stop, { passive: true }))
+    const timer = setTimeout(stop, 2000)
+    return stop
+  }, [])
+
   const onSubmit = useCallback(
-    (data: FormFieldBlock[]) => {
-      let loadingTimerID: ReturnType<typeof setTimeout>
+    (data: Record<string, unknown>) => {
       const submitForm = async () => {
         setError(undefined)
 
@@ -58,53 +92,24 @@ export const FormBlock: React.FC<
         }))
 
         // delay loading indicator by 1s
-        loadingTimerID = setTimeout(() => {
+        const loadingTimerID = setTimeout(() => {
           setIsLoading(true)
         }, 1000)
 
-        try {
-          const req = await fetch(`${getClientSideURL()}/api/form-submissions`, {
-            body: JSON.stringify({
-              form: formID,
-              submissionData: dataToSend,
-            }),
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            method: 'POST',
-          })
+        const result = await submitFormSubmission(formID, dataToSend)
 
-          const res = await req.json()
+        clearTimeout(loadingTimerID)
+        setIsLoading(false)
 
-          clearTimeout(loadingTimerID)
+        if (!result.ok) {
+          setError({ message: result.message })
+          return
+        }
 
-          if (req.status >= 400) {
-            setIsLoading(false)
+        setHasSubmitted(true)
 
-            setError({
-              message: res.errors?.[0]?.message || 'Internal Server Error',
-              status: res.status,
-            })
-
-            return
-          }
-
-          setIsLoading(false)
-          setHasSubmitted(true)
-
-          if (confirmationType === 'redirect' && redirect) {
-            const { url } = redirect
-
-            const redirectUrl = url
-
-            if (redirectUrl) router.push(redirectUrl)
-          }
-        } catch (err) {
-          console.warn(err)
-          setIsLoading(false)
-          setError({
-            message: 'Something went wrong.',
-          })
+        if (confirmationType === 'redirect' && redirect?.url) {
+          router.push(redirect.url)
         }
       }
 
@@ -114,20 +119,25 @@ export const FormBlock: React.FC<
   )
 
   return (
-    <div className="container lg:max-w-[48rem]">
+    // `#tilbud` is the site-wide anchor for the standing quote form — every
+    // "Få et tilbud" CTA points here so visitors land at the form, not the
+    // top of whichever page hosts it.
+    <div id="tilbud" ref={anchorRef} className="container scroll-mt-24 lg:max-w-[44rem]">
       {enableIntro && introContent && !hasSubmitted && (
         <RichText className="mb-8 lg:mb-12" data={introContent} enableGutter={false} />
       )}
-      <div className="p-4 lg:p-6 border border-border rounded-[0.8rem]">
+      <div className="rounded-[calc(var(--radius)*1.5)] border border-border bg-card p-6 md:p-10">
         <FormProvider {...formMethods}>
           {!isLoading && hasSubmitted && confirmationType === 'message' && (
             <RichText data={confirmationMessage} />
           )}
-          {isLoading && !hasSubmitted && <p>Loading, please wait...</p>}
-          {error && <div>{`${error.status || '500'}: ${error.message || ''}`}</div>}
+          {isLoading && !hasSubmitted && <p className="text-muted-foreground">Sender…</p>}
+          {error && <div className="mb-4 text-sm font-medium text-error">{error.message}</div>}
           {!hasSubmitted && (
             <form id={formID} onSubmit={handleSubmit(onSubmit)}>
-              <div className="mb-4 last:mb-0">
+              {/* flex-wrap + flex-basis from each field's Width, so 50%-fields
+                  sit two on a row and full-width fields take the whole line. */}
+              <div className="mb-8 flex flex-wrap gap-x-4 gap-y-6">
                 {formFromProps &&
                   formFromProps.fields &&
                   formFromProps.fields?.map((field, index) => {
@@ -135,23 +145,22 @@ export const FormBlock: React.FC<
                     const Field: React.FC<any> = fields?.[field.blockType as keyof typeof fields]
                     if (Field) {
                       return (
-                        <div className="mb-6 last:mb-0" key={index}>
-                          <Field
-                            form={formFromProps}
-                            {...field}
-                            {...formMethods}
-                            control={control}
-                            errors={errors}
-                            register={register}
-                          />
-                        </div>
+                        <Field
+                          key={index}
+                          form={formFromProps}
+                          {...field}
+                          {...formMethods}
+                          control={control}
+                          errors={errors}
+                          register={register}
+                        />
                       )
                     }
                     return null
                   })}
               </div>
 
-              <Button form={formID} type="submit" variant="default">
+              <Button form={formID} size="lg" type="submit" variant="default">
                 {submitButtonLabel}
               </Button>
             </form>

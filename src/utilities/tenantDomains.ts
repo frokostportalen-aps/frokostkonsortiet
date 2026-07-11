@@ -27,3 +27,25 @@ export function resolveTenantSlug(host: string, data: TenantDomainData): string 
   const normalized = normalizeHost(host)
   return data.map[normalized] ?? data.mainSlug
 }
+
+/**
+ * The single source of truth for which of a tenant's domains a cross-site
+ * link should target — shared by the seed's menu links and the footer's
+ * family directory, so the policy can't drift between them.
+ *
+ * Public links prefer the `new.*` staging domains (the primary domains are
+ * not live yet), then any non-localhost domain; local links prefer the
+ * `*.localhost` dev domains.
+ */
+export const pickLinkDomain = (domains: string[], preferPublic: boolean): string | undefined =>
+  preferPublic
+    ? (domains.find((d) => d.startsWith('new.')) ??
+      domains.find((d) => !d.includes('localhost')) ??
+      domains[0])
+    : (domains.find((d) => d.includes('localhost')) ?? domains[0])
+
+/** Absolute URL for a chosen domain (localhost gets http + the given port). */
+export const urlForTenantDomain = (domain: string, localPort?: string): string =>
+  domain.includes('localhost')
+    ? `http://${domain}${localPort ? `:${localPort}` : ''}/`
+    : `https://${domain}/`

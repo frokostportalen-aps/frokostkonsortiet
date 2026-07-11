@@ -210,6 +210,11 @@ export interface Page {
     | FAQBlock
     | TestimonialsBlock
     | StatsBlock
+    | PriceMenuBlock
+    | StepsBlock
+    | TeamBlock
+    | PlanPickerBlock
+    | ClientListBlock
     | TimelineBlock
   )[];
   meta?: {
@@ -652,6 +657,14 @@ export interface ArchiveBlock {
         value: string | Post;
       }[]
     | null;
+  /**
+   * Teksten på "se alle"-linket ved intro'en. Tom = "Alle nyheder".
+   */
+  linkLabel?: string | null;
+  /**
+   * Hvor linket fører hen. Tomt = "/posts".
+   */
+  linkUrl?: string | null;
   id?: string | null;
   blockName?: string | null;
   blockType: 'archive';
@@ -930,6 +943,148 @@ export interface StatsBlock {
   id?: string | null;
   blockName?: string | null;
   blockType: 'stats';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "PriceMenuBlock".
+ */
+export interface PriceMenuBlock {
+  heading?: string | null;
+  intro?: string | null;
+  /**
+   * Et menukort i sektioner – fx "Frokostordning", "Tilkøb", "Drikkevarer". Hver sektion har sine egne linjer med pris.
+   */
+  sections?:
+    | {
+        title: string;
+        description?: string | null;
+        items?:
+          | {
+              name: string;
+              description?: string | null;
+              /**
+               * Fx "58 kr." eller "fra 145 kr."
+               */
+              price: string;
+              /**
+               * Fx "pr. kuvert", "pr. md." eller "pr. person".
+               */
+              unit?: string | null;
+              /**
+               * Fremhæver linjen som det anbefalede valg.
+               */
+              featured?: boolean | null;
+              id?: string | null;
+            }[]
+          | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Fx "Alle priser er ekskl. moms og levering."
+   */
+  note?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'priceMenu';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "StepsBlock".
+ */
+export interface StepsBlock {
+  heading?: string | null;
+  intro?: string | null;
+  /**
+   * En nummereret proces – fx "I ringer → vi smager til → frokosten lander".
+   */
+  items?:
+    | {
+        title: string;
+        description?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'steps';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TeamBlock".
+ */
+export interface TeamBlock {
+  heading?: string | null;
+  intro?: string | null;
+  members?:
+    | {
+        image: string | Media;
+        name: string;
+        role?: string | null;
+        /**
+         * Én sætning i personens egne ord – vises under portrættet.
+         */
+        quote?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'team';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "PlanPickerBlock".
+ */
+export interface PlanPickerBlock {
+  heading?: string | null;
+  intro?: string | null;
+  /**
+   * Vælgeren matcher besøgendes behov + antal mod disse anbefalinger. Ved flere match vælges den med højeste "fra antal"; rammer antallet under alle, vises den nærmeste ordning med en note om minimum.
+   */
+  plans?:
+    | {
+        need: 'frokost' | 'kantine' | 'catering';
+        /**
+         * Vælgeren spørger op til 100 personer ("100+"), så højst 100 her.
+         */
+        minPeople: number;
+        title: string;
+        description?: string | null;
+        /**
+         * Fx "fra 58 kr. pr. kuvert".
+         */
+        priceLabel?: string | null;
+        /**
+         * Hvor "Læs mere"-knappen fører hen, fx "/frokost-ud-af-huset".
+         */
+        url: string;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Formularen besøgende udfylder i sidste trin (typisk "Få et tilbud"). Behov og antal udfyldes automatisk fra deres svar.
+   */
+  form: string | Form;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'planPicker';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ClientListBlock".
+ */
+export interface ClientListBlock {
+  heading?: string | null;
+  clients?:
+    | {
+        name: string;
+        id?: string | null;
+      }[]
+    | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'clientList';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1359,6 +1514,11 @@ export interface PagesSelect<T extends boolean = true> {
         faq?: T | FAQBlockSelect<T>;
         testimonials?: T | TestimonialsBlockSelect<T>;
         stats?: T | StatsBlockSelect<T>;
+        priceMenu?: T | PriceMenuBlockSelect<T>;
+        steps?: T | StepsBlockSelect<T>;
+        team?: T | TeamBlockSelect<T>;
+        planPicker?: T | PlanPickerBlockSelect<T>;
+        clientList?: T | ClientListBlockSelect<T>;
         timeline?: T | TimelineBlockSelect<T>;
       };
   meta?:
@@ -1471,6 +1631,8 @@ export interface ArchiveBlockSelect<T extends boolean = true> {
   categories?: T;
   limit?: T;
   selectedDocs?: T;
+  linkLabel?: T;
+  linkUrl?: T;
   id?: T;
   blockName?: T;
 }
@@ -1531,6 +1693,107 @@ export interface StatsBlockSelect<T extends boolean = true> {
     | {
         value?: T;
         label?: T;
+        id?: T;
+      };
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "PriceMenuBlock_select".
+ */
+export interface PriceMenuBlockSelect<T extends boolean = true> {
+  heading?: T;
+  intro?: T;
+  sections?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+        items?:
+          | T
+          | {
+              name?: T;
+              description?: T;
+              price?: T;
+              unit?: T;
+              featured?: T;
+              id?: T;
+            };
+        id?: T;
+      };
+  note?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "StepsBlock_select".
+ */
+export interface StepsBlockSelect<T extends boolean = true> {
+  heading?: T;
+  intro?: T;
+  items?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+        id?: T;
+      };
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TeamBlock_select".
+ */
+export interface TeamBlockSelect<T extends boolean = true> {
+  heading?: T;
+  intro?: T;
+  members?:
+    | T
+    | {
+        image?: T;
+        name?: T;
+        role?: T;
+        quote?: T;
+        id?: T;
+      };
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "PlanPickerBlock_select".
+ */
+export interface PlanPickerBlockSelect<T extends boolean = true> {
+  heading?: T;
+  intro?: T;
+  plans?:
+    | T
+    | {
+        need?: T;
+        minPeople?: T;
+        title?: T;
+        description?: T;
+        priceLabel?: T;
+        url?: T;
+        id?: T;
+      };
+  form?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ClientListBlock_select".
+ */
+export interface ClientListBlockSelect<T extends boolean = true> {
+  heading?: T;
+  clients?:
+    | T
+    | {
+        name?: T;
         id?: T;
       };
   id?: T;

@@ -93,7 +93,7 @@ export const kantine: PageFactory = ({ tenantID, img }) => ({
         heading('h3', 'Vil du have et tilbud?'),
         p('Vi kigger gerne forbi og giver et bud på, hvordan jeres kantine kan drives.'),
       ),
-      [customLink('Få et tilbud', '/om-os')],
+      [customLink('Få et tilbud', '/om-os#tilbud')],
     ),
   ],
   meta: {

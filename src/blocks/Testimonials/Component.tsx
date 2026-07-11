@@ -2,6 +2,8 @@ import React from 'react'
 
 import type { TestimonialsBlock as Props } from '@/payload-types'
 
+import { SectionHeader } from '@/components/SectionHeader'
+
 type Item = NonNullable<Props['items']>[number]
 
 /** Up to two initials from a name, for the fallback avatar. */
@@ -24,11 +26,11 @@ const Card: React.FC<{ item: Item }> = ({ item }) => {
     // dims every card (`group-hover:opacity-60`); the card under the cursor wins
     // that back with `hover:!opacity-100` (the `!` beats group-hover's higher
     // specificity) and lifts + lights up its border.
-    <figure className="mr-5 flex w-[19rem] shrink-0 flex-col gap-4 rounded-xl border border-border bg-card p-6 shadow-sm transition duration-300 group-hover:opacity-60 hover:!opacity-100 hover:-translate-y-1.5 hover:border-primary hover:shadow-xl md:w-[22rem]">
-      <span aria-hidden className="font-serif text-5xl leading-[0.4] text-primary/30">
+    <figure className="mr-5 flex w-[19rem] shrink-0 flex-col gap-4 rounded-[calc(var(--radius)*1.25)] border border-border bg-card p-7 shadow-sm transition duration-300 group-hover:opacity-60 hover:!opacity-100 hover:-translate-y-1.5 hover:border-primary hover:shadow-xl md:w-[22rem]">
+      <span aria-hidden className="font-serif text-5xl leading-[0.4] text-primary/40">
         &ldquo;
       </span>
-      <blockquote className="flex-1 text-sm leading-relaxed text-card-foreground/90">
+      <blockquote className="flex-1 text-[0.9375rem] leading-relaxed text-card-foreground/90">
         {quote}
       </blockquote>
       <figcaption className="mt-2 flex items-center gap-3">
@@ -81,24 +83,21 @@ const Row: React.FC<{ items: Item[]; direction: 'ltr' | 'rtl' }> = ({ items, dir
 export const TestimonialsBlock: React.FC<Props> = ({ heading, intro, items }) => {
   if (!items?.length) return null
 
-  // Two opposing rows: the first in order, the second reversed, so the rows
-  // don't look like carbon copies sliding past each other.
-  const twoRows = items.length >= 4
-  const rows: Item[][] = twoRows ? [items, [...items].reverse()] : [items]
+  // Two opposing rows built from DISJOINT halves (odd/even), so the same quote
+  // never scrolls past twice in the viewport at once.
+  const twoRows = items.length >= 6
+  const rows: Item[][] = twoRows
+    ? [items.filter((_, i) => i % 2 === 0), items.filter((_, i) => i % 2 === 1)]
+    : [items]
 
   return (
     // Clip only the horizontal axis: the wide tracks must not create a
     // scrollbar, but the cards' shadow and hover-lift need to stay visible
     // vertically (overflow-hidden would crop the top/bottom row, obvious on zoom).
-    <section className="overflow-x-clip">
-      {(heading || intro) && (
-        <div className="container mb-10 text-center">
-          {heading && (
-            <h2 className="text-3xl font-semibold tracking-tight md:text-4xl">{heading}</h2>
-          )}
-          {intro && <p className="mx-auto mt-3 max-w-2xl text-muted-foreground">{intro}</p>}
-        </div>
-      )}
+    // The tinted full-bleed band sets the voices apart from the white page —
+    // the tenant's own `secondary` surface, so the break stays in-family.
+    <section className="overflow-x-clip bg-secondary/60 py-16 md:py-20">
+      <SectionHeader heading={heading} intro={intro} className="container mb-10" />
       {/* `group` drives the hover pause + dim on the tracks/cards below; py gives
           the shadow + hover-lift room so they aren't clipped. */}
       <div className="testimonial-marquee group flex flex-col gap-5 py-3">

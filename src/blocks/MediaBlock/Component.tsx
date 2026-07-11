@@ -32,6 +32,8 @@ export const MediaBlock: React.FC<Props> = (props) => {
   let caption
   if (media && typeof media === 'object') caption = media.caption
 
+  const isVideo = media && typeof media === 'object' && media.mimeType?.includes('video')
+
   return (
     <div
       className={cn(
@@ -44,6 +46,14 @@ export const MediaBlock: React.FC<Props> = (props) => {
     >
       {(media || staticImage) && (
         <Media
+          // Videos keep their own aspect ratio (no crop — burnt-in subtitles
+          // and faces must never be cut), centred at a comfortable width.
+          className={
+            isVideo
+              ? 'mx-auto w-full max-w-[44rem] overflow-hidden rounded-[var(--radius)]'
+              : undefined
+          }
+          videoClassName="h-auto w-full object-contain"
           imgClassName={cn('border border-border rounded-[0.8rem]', imgClassName)}
           resource={media}
           src={staticImage}

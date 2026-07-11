@@ -12,9 +12,11 @@ import { HeaderNav } from './Nav'
 interface HeaderClientProps {
   data: Header | null
   tenantSlug?: string
+  /** The site's standing CTA (resolved server-side from the tenant tokens). */
+  cta?: { label: string; url: string }
 }
 
-export const HeaderClient: React.FC<HeaderClientProps> = ({ data, tenantSlug }) => {
+export const HeaderClient: React.FC<HeaderClientProps> = ({ data, tenantSlug, cta }) => {
   /* Storing the value in a useState to avoid hydration errors */
   const [theme, setTheme] = useState<string | null>(null)
   const { headerTheme, setHeaderTheme } = useHeaderTheme()
@@ -43,7 +45,7 @@ export const HeaderClient: React.FC<HeaderClientProps> = ({ data, tenantSlug }) 
             className="text-foreground"
           />
         </Link>
-        <HeaderNav data={data} />
+        <HeaderNav data={data} cta={cta} />
       </div>
     </header>
   )

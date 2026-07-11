@@ -10,10 +10,13 @@ import {
   mediaContent,
   p,
   richText,
+  stats,
   testimonials,
+  clientList,
+  planPicker,
 } from '../../builders'
 
-export const home: PageFactory = ({ tenantID, img }) => ({
+export const home: PageFactory = ({ tenantID, img, tilbudsFormID }) => ({
   title: 'Fra Jorden – frokost',
   slug: 'home',
   _status: 'published',
@@ -26,12 +29,12 @@ export const home: PageFactory = ({ tenantID, img }) => ({
         'Fra Jorden dyrker frokost med respekt for naturen. Økologiske grøntsager, korte forsyningskæder og grøn gastronomi gør hver ret både god for jer og for kloden.',
       ),
     ),
-    [customLink('Om os', '/om-os'), customLink('Nyheder', '/posts', 'outline')],
+    [customLink('Få et tilbud', '/om-os#tilbud'), customLink('Se vores køkken', '/baeredygtighed', 'outline')],
   ),
   layout: [
     content(
       [
-        column('full', heading('h2', 'Velkommen hos Fra Jorden')),
+        column('full', heading('h2', 'Grønt uden kompromis')),
         column(
           'oneThird',
           heading('h3', '100% økologisk'),
@@ -55,6 +58,17 @@ export const home: PageFactory = ({ tenantID, img }) => ({
         ),
       ],
       'Intro',
+    ),
+    stats(
+      [
+        { value: '100%', label: 'økologisk – uden undtagelser' },
+        { value: '14', label: 'faste avlere i sæsonen' },
+        { value: '< 24 t', label: 'fra høst til frokostbord' },
+        { value: '−40%', label: 'madspild – hele høsten kommer i brug' },
+      ],
+      undefined,
+      undefined,
+      'Nøgletal',
     ),
     mediaContent(
       img('forside-1'),
@@ -95,6 +109,38 @@ export const home: PageFactory = ({ tenantID, img }) => ({
       ),
       [customLink('Om os', '/om-os')],
     ),
+    planPicker({
+      heading: 'Hvilken ordning passer jer?',
+      intro: 'To spørgsmål – så peger vi jer i den rigtige retning.',
+      plans: [
+        {
+          need: 'frokost',
+          minPeople: 15,
+          title: 'Daglig frokost – Large',
+          description: 'Varm ret, salater og pålæg – 100% økologisk og leveret hver morgen.',
+          priceLabel: '69 kr. pr. kuvert',
+          url: '/frokost-ud-af-huset',
+        },
+        {
+          need: 'kantine',
+          minPeople: 40,
+          title: 'Kantinedrift',
+          description: 'Vi driver jeres kantine med det grønne køkken som fundament.',
+          priceLabel: 'Aftalepris',
+          url: '/kantine',
+        },
+        {
+          need: 'catering',
+          minPeople: 1,
+          title: 'Grøn catering',
+          description: 'Selskabsmenuer og receptioner af sæsonens økologiske råvarer.',
+          priceLabel: 'fra 145 kr. pr. person',
+          url: '/catering',
+        },
+      ],
+      form: tilbudsFormID,
+    }),
+    clientList(['Novo Campus', 'Urban Farming Lab', 'Ren Energi A/S', 'Klimafonden', 'Grøn Omstilling', 'Coworking Syd']),
     testimonials(
       'Det siger vores kunder',
       'Arbejdspladser i hele landet har Fra Jorden på menuen. Her er nogle af dem.',

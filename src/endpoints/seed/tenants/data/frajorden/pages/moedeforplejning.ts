@@ -63,7 +63,7 @@ export const moedeforplejning: PageFactory = ({ tenantID, img }) => ({
         heading('h3', 'Vil du have et tilbud på et større arrangement?'),
         p('Bestil online via KundePortalen, eller skriv til os for et tilbud.'),
       ),
-      [customLink('Få et tilbud', '/om-os')],
+      [customLink('Få et tilbud', '/om-os#tilbud')],
     ),
   ],
   meta: {

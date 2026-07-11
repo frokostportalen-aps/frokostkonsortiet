@@ -247,6 +247,27 @@
   }
 }
 
+/* The tenant's heading face (falls back to the body face) — the utility form
+   of the same variable the h1–h6 base rule uses, for non-heading elements
+   (prices, stat figures, wordmark-like labels). */
+.font-heading {
+  font-family: var(--font-heading, var(--font-sans));
+}
+
+/* Section headings need more presence than the typography plugin's default
+   1.5em — the food photography is loud, so the type has to hold its own.
+   (Unlayered on purpose: it must beat the prose utilities.) */
+.prose h2 {
+  font-size: 1.75rem;
+  line-height: 1.2;
+  letter-spacing: -0.015em;
+}
+@media (width >= 48rem) {
+  .prose h2 {
+    font-size: 2.125rem;
+  }
+}
+
 /* Consecutive Media + Content bands merge into one element: drop the gap... */
 [data-block-type='mediaContent']:has(+ [data-block-type='mediaContent']) {
   margin-bottom: 0;

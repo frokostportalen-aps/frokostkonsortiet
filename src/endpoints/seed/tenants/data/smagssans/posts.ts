@@ -1,12 +1,11 @@
 import type { PostFactory } from '../types'
 import { heading, p, richText } from '../builders'
 
-const efteraaretsSmage: PostFactory = ({ tenantID, authorID, img }) => ({
+const efteraaretsSmage: PostFactory = ({ tenantID, img }) => ({
   title: 'Efterårets smage',
   slug: 'efteraarets-smage',
   _status: 'published',
   tenant: tenantID,
-  authors: [authorID],
   heroImage: img('efteraarets-smage'),
   content: richText(
     heading(
@@ -29,12 +28,11 @@ const efteraaretsSmage: PostFactory = ({ tenantID, authorID, img }) => ({
   },
 })
 
-const kunstenAtKrydre: PostFactory = ({ tenantID, authorID, img }) => ({
+const kunstenAtKrydre: PostFactory = ({ tenantID, img }) => ({
   title: 'Kunsten at krydre',
   slug: 'kunsten-at-krydre',
   _status: 'published',
   tenant: tenantID,
-  authors: [authorID],
   heroImage: img('kunsten-at-krydre'),
   content: richText(
     heading(
@@ -56,4 +54,31 @@ const kunstenAtKrydre: PostFactory = ({ tenantID, authorID, img }) => ({
   },
 })
 
-export const posts: PostFactory[] = [efteraaretsSmage, kunstenAtKrydre]
+const tarteletten: PostFactory = ({ tenantID, img }) => ({
+  title: 'Tarteletten er tilbage',
+  slug: 'tarteletten-er-tilbage',
+  _status: 'published',
+  tenant: tenantID,
+  heroImage: img('tarteletten'),
+  content: richText(
+    heading(
+      'h2',
+      'Klassikerne forsvinder aldrig helt fra vores menu – de bliver bare bedre. Nu er tarteletten tilbage, med sprød bund og fyld af årstidens grønt.',
+    ),
+    p(
+      'Der er retter, kollegerne bliver ved med at spørge efter. Tarteletten er en af dem: sprød, varm og med en fylde, der smager af omhu. Vi laver bunden selv og skifter fyldet med sæsonen.',
+    ),
+    heading('h2', 'Klassisk, ikke gammeldags'),
+    p(
+      'Siden 1980 har vi lært, at det velkendte og det overraskende skal balancere. Derfor står tarteletten side om side med retter, I ikke har smagt før – og begge dele bliver spist op.',
+    ),
+  ),
+  meta: {
+    title: 'Tarteletten er tilbage',
+    description:
+      'Klassikerne forsvinder aldrig helt fra vores menu – de bliver bare bedre. Nu er tarteletten tilbage, med sprød bund og fyld af årstidens grønt.',
+    image: img('tarteletten'),
+  },
+})
+
+export const posts: PostFactory[] = [efteraaretsSmage, kunstenAtKrydre, tarteletten]

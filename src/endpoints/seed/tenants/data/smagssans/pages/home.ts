@@ -12,9 +12,11 @@ import {
   richText,
   stats,
   testimonials,
+  clientList,
+  planPicker,
 } from '../../builders'
 
-export const home: PageFactory = ({ tenantID, img }) => ({
+export const home: PageFactory = ({ tenantID, img, tilbudsFormID }) => ({
   title: 'Smagssans – frokost',
   slug: 'home',
   _status: 'published',
@@ -103,6 +105,38 @@ export const home: PageFactory = ({ tenantID, img }) => ({
       ),
       [customLink('Se menuvariationer', '/menuvariationer')],
     ),
+    planPicker({
+      heading: 'Hvilken ordning passer jer?',
+      intro: 'To spørgsmål – så peger vi jer i den rigtige retning.',
+      plans: [
+        {
+          need: 'frokost',
+          minPeople: 15,
+          title: 'Frokostordning – Den mest populære',
+          description: 'Varm ret, friske salater, pålæg og sødt – leveret færdiglavet hver dag.',
+          priceLabel: 'fra 63 kr. pr. kuvert',
+          url: '/frokost-ud-af-huset',
+        },
+        {
+          need: 'kantine',
+          minPeople: 40,
+          title: 'Kantineordning',
+          description: 'Vores kok anretter og driver frokosten hos jer – I lægger bare lokalet til.',
+          priceLabel: 'Aftalepris',
+          url: '/kantine',
+        },
+        {
+          need: 'catering',
+          minPeople: 1,
+          title: 'Catering & selskaber',
+          description: 'Fra morgenbord til flerretters middag – tilpasset anledningen.',
+          priceLabel: 'fra 85 kr. pr. person',
+          url: '/catering',
+        },
+      ],
+      form: tilbudsFormID,
+    }),
+    clientList(['Vad & Lange Arkitekter', 'Designbureauet Form', 'Munk Consulting', 'Puls Media', 'BioNordic', 'Studio Nord']),
     testimonials(
       'Det siger vores kunder',
       'Arbejdspladser i hele landet har Smagssans på menuen. Her er nogle af dem.',

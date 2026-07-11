@@ -6,12 +6,17 @@ import { getTenantDesign } from '@/themes/tenantThemes'
 
 import { ArchiveBlock } from '@/blocks/ArchiveBlock/Component'
 import { CallToActionBlock } from '@/blocks/CallToAction/Component'
+import { ClientListBlock } from '@/blocks/ClientList/Component'
 import { ContentBlock } from '@/blocks/Content/Component'
 import { FAQBlock } from '@/blocks/FAQ/Component'
 import { FormBlock } from '@/blocks/Form/Component'
 import { MediaBlock } from '@/blocks/MediaBlock/Component'
 import { MediaContentBlock } from '@/blocks/MediaContent/Component'
+import { PlanPickerBlock } from '@/blocks/PlanPicker/Component'
+import { PriceMenuBlock } from '@/blocks/PriceMenu/Component'
 import { StatsBlock } from '@/blocks/Stats/Component'
+import { StepsBlock } from '@/blocks/Steps/Component'
+import { TeamBlock } from '@/blocks/Team/Component'
 import { TestimonialsBlock } from '@/blocks/Testimonials/Component'
 import { TimelineBlock } from '@/blocks/Timeline/Component'
 
@@ -23,7 +28,12 @@ const blockComponents = {
   formBlock: FormBlock,
   mediaBlock: MediaBlock,
   mediaContent: MediaContentBlock,
+  clientList: ClientListBlock,
+  planPicker: PlanPickerBlock,
+  priceMenu: PriceMenuBlock,
   stats: StatsBlock,
+  steps: StepsBlock,
+  team: TeamBlock,
   testimonials: TestimonialsBlock,
   timeline: TimelineBlock,
 }
@@ -56,7 +66,7 @@ export const RenderBlocks: React.FC<{
 
             if (Block) {
               return (
-                <div className="my-16" data-block-type={blockType} key={index}>
+                <div className="my-16 md:my-24" data-block-type={blockType} key={index}>
                   <Block
                     {...block}
                     tenantSlug={tenantSlug}

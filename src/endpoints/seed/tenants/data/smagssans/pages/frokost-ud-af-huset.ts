@@ -7,10 +7,11 @@ import {
   faq,
   heading,
   hero,
-  list,
   mediaContent,
   p,
+  priceMenu,
   richText,
+  steps,
 } from '../../builders'
 
 export const frokostUdAfHuset: PageFactory = ({ tenantID, img }) => ({
@@ -28,50 +29,69 @@ export const frokostUdAfHuset: PageFactory = ({ tenantID, img }) => ({
     ),
   ),
   layout: [
-    content(
-      [
-        column(
-          'full',
-          heading('h2', 'Priseksempler'),
-          p('Vi tilpasser frokostordningen efter jeres behov og budget. Her er tre populære menuer.'),
-        ),
-        column(
-          'oneThird',
-          heading('h3', 'Den mest populære'),
-          heading('h4', 'Fra 63 kr.'),
-          list([
-            'Varm ret med tilbehør',
-            'Friske salater',
-            'Pålæg og brød',
-            'Frugt eller sødt',
-          ]),
-        ),
-        column(
-          'oneThird',
-          heading('h3', 'Den lette'),
-          heading('h4', 'Fra 58 kr.'),
-          list([
-            'Lettere varm ret',
-            'Friske salater',
-            'Pålæg og brød',
-            'Færre kalorier, fuld smag',
-          ]),
-        ),
-        column(
-          'oneThird',
-          heading('h3', 'Vegetar'),
-          heading('h4', 'Fra 63 kr.'),
-          list([
-            'Grøn varm ret',
-            'Friske salater',
-            'Grønt pålæg og brød',
-            'Frugt eller sødt',
-          ]),
-        ),
-        column('full', p('Log ind for at se hele menuen. Alle priser er eksklusiv moms.')),
+    priceMenu({
+      heading: 'Menuer og priser',
+      intro:
+        'Vi tilpasser frokostordningen efter jeres behov og budget. Alle menuer leveres færdiglavet med chauffør.',
+      sections: [
+        {
+          title: 'Frokostordning',
+          description: 'Daglig frokost, klar til at stille frem.',
+          items: [
+            {
+              name: 'Den mest populære',
+              description: 'Varm ret med tilbehør, friske salater, pålæg og brød – og frugt eller sødt.',
+              price: 'fra 63 kr.',
+              unit: 'pr. kuvert',
+              featured: true,
+            },
+            {
+              name: 'Den lette',
+              description: 'Lettere varm ret, friske salater, pålæg og brød. Færre kalorier, fuld smag.',
+              price: 'fra 58 kr.',
+              unit: 'pr. kuvert',
+            },
+            {
+              name: 'Vegetar',
+              description: 'Grøn varm ret, friske salater, grønt pålæg og brød – og frugt eller sødt.',
+              price: 'fra 63 kr.',
+              unit: 'pr. kuvert',
+            },
+          ],
+        },
+        {
+          title: 'Tilkøb',
+          description: 'Gør frokosten komplet – leveres sammen med maden.',
+          items: [
+            {
+              name: 'Frugtordning',
+              description: 'Sæsonens frugt, klar i skålen.',
+              price: 'fra 6 kr.',
+              unit: 'pr. person',
+            },
+            {
+              name: 'Morgenbrød',
+              description: 'Friskbagt brød med smør og marmelade.',
+              price: 'fra 14 kr.',
+              unit: 'pr. person',
+            },
+            {
+              name: 'Mælk & plantedrikke',
+              description: 'Økologisk, kølet og klar i jeres køleskab.',
+              price: 'fra 9 kr.',
+              unit: 'pr. liter',
+            },
+            {
+              name: 'Fredagskage',
+              description: 'Hjemmebagt kage til ugens sidste time.',
+              price: 'fra 18 kr.',
+              unit: 'pr. person',
+            },
+          ],
+        },
       ],
-      'Priseksempler',
-    ),
+      note: 'Alle priser er ekskl. moms og baseret på levering fem dage om ugen. Log ind for at se hele menuen.',
+    }),
     mediaContent(
       img('forside-2'),
       'right',
@@ -93,6 +113,28 @@ export const frokostUdAfHuset: PageFactory = ({ tenantID, img }) => ({
         ),
       ],
       'Mad til alle',
+    ),
+    steps(
+      [
+        {
+          title: 'Ring eller skriv',
+          description: 'Fortæl os om jeres arbejdsplads – antal, ønsker og eventuelle hensyn.',
+        },
+        {
+          title: 'Vi smager til sammen',
+          description: 'I prøver menuen, og vi justerer, til den rammer jeres smag.',
+        },
+        {
+          title: 'Chaufføren leverer',
+          description: 'Maden er typisk hos jer kl. 10.30 – i termo- og transportkasser.',
+        },
+        {
+          title: 'Tilret i appen',
+          description: 'Gæster, ferie og kostønsker klarer hver medarbejder selv.',
+        },
+      ],
+      'Sådan foregår det',
+      'Fire trin – så er frokosten på plads.',
     ),
     faq(
       [
@@ -116,7 +158,7 @@ export const frokostUdAfHuset: PageFactory = ({ tenantID, img }) => ({
         heading('h3', 'Få et tilbud'),
         p('Fortæl os om jeres arbejdsplads, så sammensætter vi en frokostordning, der passer til jeres behov og budget.'),
       ),
-      [customLink('Få et tilbud', '/om-os')],
+      [customLink('Få et tilbud', '/om-os#tilbud')],
     ),
   ],
   meta: {

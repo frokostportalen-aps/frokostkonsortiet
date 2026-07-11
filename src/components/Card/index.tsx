@@ -11,7 +11,6 @@ import { Media } from '@/components/Media'
 export type CardPostData = Pick<Post, 'slug' | 'categories' | 'meta' | 'title'>
 
 export const Card: React.FC<{
-  alignItems?: 'center'
   className?: string
   doc?: CardPostData
   relationTo?: 'posts'
@@ -32,18 +31,28 @@ export const Card: React.FC<{
   return (
     <article
       className={cn(
-        'border border-border rounded-lg overflow-hidden bg-card hover:cursor-pointer',
+        'group relative flex h-full flex-col overflow-hidden rounded-[var(--radius)] border border-border bg-card transition duration-300 hover:-translate-y-1 hover:cursor-pointer hover:shadow-lg',
         className,
       )}
       ref={card.ref}
     >
-      <div className="relative w-full ">
-        {!metaImage && <div className="">No image</div>}
-        {metaImage && typeof metaImage !== 'string' && <Media resource={metaImage} size="33vw" />}
+      {/* A fixed 3:2 frame keeps rows level regardless of the photo's own
+          ratio; the slow zoom rewards the hover without shouting. */}
+      <div className="relative aspect-[3/2] w-full overflow-hidden">
+        {metaImage && typeof metaImage !== 'string' ? (
+          <Media
+            fill
+            imgClassName="object-cover transition-transform duration-500 group-hover:scale-[1.04]"
+            resource={metaImage}
+            size="33vw"
+          />
+        ) : (
+          <div aria-hidden className="absolute inset-0 bg-secondary" />
+        )}
       </div>
-      <div className="p-4">
+      <div className="flex flex-1 flex-col p-5 md:p-6">
         {showCategories && hasCategories && (
-          <div className="uppercase text-sm mb-4">
+          <div className="mb-3 text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
             {categories?.map((category, index) => {
               if (typeof category === 'object') {
                 const { title: titleFromCategory } = category
@@ -65,15 +74,19 @@ export const Card: React.FC<{
           </div>
         )}
         {titleToUse && (
-          <div className="prose">
-            <h3>
-              <Link className="not-prose" href={href} ref={link.ref}>
-                {titleToUse}
-              </Link>
-            </h3>
-          </div>
+          <h3 className="text-lg font-semibold leading-snug transition-colors group-hover:text-primary">
+            {/* Stretched link: the whole card is one semantic click target, so
+                middle-click/long-press work everywhere the hover promises. */}
+            <Link href={href} ref={link.ref} className="after:absolute after:inset-0">
+              {titleToUse}
+            </Link>
+          </h3>
         )}
-        {description && <div className="mt-2">{description && <p>{sanitizedDescription}</p>}</div>}
+        {description && (
+          <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+            {sanitizedDescription}
+          </p>
+        )}
       </div>
     </article>
   )

@@ -8,7 +8,7 @@ import { getPayload } from 'payload'
 import React from 'react'
 import PageClient from './page.client'
 import { notFound } from 'next/navigation'
-import { getAllTenantSlugs, getTenantBySlug } from '@/utilities/getTenant'
+import { getAllTenantSlugs } from '@/utilities/getTenant'
 import { getTenantPostsWhere } from '@/utilities/tenantPostsFilter'
 
 export const revalidate = 600
@@ -42,7 +42,7 @@ export default async function Page({ params: paramsPromise }: Args) {
       <PageClient />
       <div className="container mb-16">
         <div className="prose dark:prose-invert max-w-none">
-          <h1>Posts</h1>
+          <h1>Nyheder</h1>
         </div>
       </div>
 
@@ -67,10 +67,9 @@ export default async function Page({ params: paramsPromise }: Args) {
 }
 
 export async function generateMetadata({ params: paramsPromise }: Args): Promise<Metadata> {
-  const { tenant, pageNumber } = await paramsPromise
-  const tenantDoc = await getTenantBySlug(tenant)
+  const { pageNumber } = await paramsPromise
   return {
-    title: `${tenantDoc?.name ?? 'Frokost Konsortiet'} Posts Page ${pageNumber || ''}`,
+    title: `Nyheder – side ${pageNumber || ''}`,
   }
 }
 

@@ -86,6 +86,22 @@ export const Archive: Block = {
       label: 'Selection',
       relationTo: ['posts'],
     },
+    {
+      name: 'linkLabel',
+      type: 'text',
+      label: 'Linktekst',
+      admin: {
+        description: 'Teksten på "se alle"-linket ved intro\'en. Tom = "Alle nyheder".',
+      },
+    },
+    {
+      name: 'linkUrl',
+      type: 'text',
+      label: 'Link',
+      admin: {
+        description: 'Hvor linket fører hen. Tomt = "/posts".',
+      },
+    },
   ],
   labels: {
     plural: 'Archives',

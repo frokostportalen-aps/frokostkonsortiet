@@ -1,12 +1,11 @@
 import type { PostFactory } from '../types'
 import { heading, p, richText } from '../builders'
 
-const rodfrugternesAarstid: PostFactory = ({ tenantID, authorID, img }) => ({
+const rodfrugternesAarstid: PostFactory = ({ tenantID, img }) => ({
   title: 'Derfor er rodfrugter efterårets helte',
   slug: 'rodfrugternes-aarstid',
   _status: 'published',
   tenant: tenantID,
-  authors: [authorID],
   heroImage: img('rodfrugternes-aarstid'),
   content: richText(
     heading(
@@ -29,12 +28,11 @@ const rodfrugternesAarstid: PostFactory = ({ tenantID, authorID, img }) => ({
   },
 })
 
-const moedVoresAvlere: PostFactory = ({ tenantID, authorID, img }) => ({
+const moedVoresAvlere: PostFactory = ({ tenantID, img }) => ({
   title: 'Mød vores avlere',
   slug: 'moed-vores-avlere',
   _status: 'published',
   tenant: tenantID,
-  authors: [authorID],
   heroImage: img('moed-vores-avlere'),
   content: richText(
     heading(
@@ -57,4 +55,31 @@ const moedVoresAvlere: PostFactory = ({ tenantID, authorID, img }) => ({
   },
 })
 
-export const posts: PostFactory[] = [rodfrugternesAarstid, moedVoresAvlere]
+const groentISaeson: PostFactory = ({ tenantID, img }) => ({
+  title: 'Fra mark til frokost på 24 timer',
+  slug: 'groent-i-saeson',
+  _status: 'published',
+  tenant: tenantID,
+  heroImage: img('groent-i-saeson'),
+  content: richText(
+    heading(
+      'h2',
+      'Jo kortere vejen er, jo mere smager det. Sådan når sæsonens grønt frem, mens det stadig er sprødt.',
+    ),
+    p(
+      'Grønt, der høstes i går og serveres i dag, behøver ikke meget: lidt varme, godt salt, et skvæt citrus. Smagen er der allerede – vores arbejde er at lade være med at stå i vejen for den.',
+    ),
+    heading('h2', 'Sæsonen bestemmer menuen'),
+    p(
+      'Vi skriver ikke menuer måneder frem. Vi ringer til avlerne, hører hvad der er klar, og planlægger ugen derefter. Det gør frokosten levende – og det gør den grønnere.',
+    ),
+  ),
+  meta: {
+    title: 'Fra mark til frokost på 24 timer',
+    description:
+      'Jo kortere vejen er, jo mere smager det. Sådan når sæsonens grønt frem, mens det stadig er sprødt.',
+    image: img('groent-i-saeson'),
+  },
+})
+
+export const posts: PostFactory[] = [rodfrugternesAarstid, moedVoresAvlere, groentISaeson]

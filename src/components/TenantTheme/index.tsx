@@ -24,6 +24,18 @@ const BRAND_VARS = [
   ['primaryForeground', '--primary-foreground'],
 ] as const
 
+// Optional dark-mode overrides for the brand vars — for brands whose primary
+// is too dark to read against the shared dark surfaces (e.g. FK's ink, which
+// flips to its curry accent after dark).
+const DARK_ONLY_VARS = [
+  ['primaryDark', '--primary'],
+  ['primaryForegroundDark', '--primary-foreground'],
+  ['backgroundDark', '--background'],
+  ['cardDark', '--card'],
+  ['secondaryDark', '--secondary'],
+  ['borderDark', '--border'],
+] as const
+
 // Surfaces + shape only tint light mode, so dark mode stays a calm shared
 // neutral across the family while each site keeps its own daylight identity.
 const LIGHT_ONLY_VARS = [
@@ -41,7 +53,10 @@ const LIGHT_ONLY_VARS = [
   ['radius', '--radius'],
 ] as const
 
-type ThemeFieldKey = (typeof BRAND_VARS)[number][0] | (typeof LIGHT_ONLY_VARS)[number][0]
+type ThemeFieldKey =
+  | (typeof BRAND_VARS)[number][0]
+  | (typeof LIGHT_ONLY_VARS)[number][0]
+  | (typeof DARK_ONLY_VARS)[number][0]
 
 export function TenantTheme({ theme }: { theme?: ThemeVars | null }) {
   if (!theme) return null
@@ -56,8 +71,9 @@ export function TenantTheme({ theme }: { theme?: ThemeVars | null }) {
 
   const brandDecls = declarations(BRAND_VARS)
   const lightOnlyDecls = declarations(LIGHT_ONLY_VARS)
+  const darkOnlyDecls = declarations(DARK_ONLY_VARS)
 
-  if (!brandDecls && !lightOnlyDecls) return null
+  if (!brandDecls && !lightOnlyDecls && !darkOnlyDecls) return null
 
   // Brand vars hold in both modes, so one combined selector covers `:root`
   // (light) and `[data-theme='dark']`; both have equal specificity, so listing
@@ -69,6 +85,8 @@ export function TenantTheme({ theme }: { theme?: ThemeVars | null }) {
   const css = [
     brandDecls ? `:root,[data-theme='dark']{${brandDecls}}` : '',
     lightOnlyDecls ? `:root:not([data-theme='dark']){${lightOnlyDecls}}` : '',
+    // Emitted last, so it wins over the combined brand rule after dark.
+    darkOnlyDecls ? `[data-theme='dark']{${darkOnlyDecls}}` : '',
   ].join('')
 
   return <style dangerouslySetInnerHTML={{ __html: css }} />
