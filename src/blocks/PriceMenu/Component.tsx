@@ -1,13 +1,13 @@
 import React from 'react'
 
 import type { PriceMenuBlock as PriceMenuBlockProps } from '@/payload-types'
-import type { TenantDesign } from '@/themes/tenantThemes'
 
+import { getDialect } from '@/themes/dialect'
 import { SectionHeader } from '@/components/SectionHeader'
 import { SignatureCard } from '@/components/SignatureCard'
 import { cn } from '@/utilities/ui'
 
-type Props = PriceMenuBlockProps & { design?: TenantDesign }
+type Props = PriceMenuBlockProps & { tenantSlug?: string }
 
 /**
  * A restaurant-style menu with prices: sections as signature cards, each line
@@ -15,8 +15,10 @@ type Props = PriceMenuBlockProps & { design?: TenantDesign }
  * gesture. Prices render in the tenant's heading face, so a serif site gets
  * elegant figures and a sans site confident ones.
  */
-export const PriceMenuBlock: React.FC<Props> = ({ heading, intro, sections, note, design }) => {
+export const PriceMenuBlock: React.FC<Props> = ({ heading, intro, sections, note, tenantSlug }) => {
   if (!sections?.length) return null
+
+  const { signature } = getDialect(tenantSlug)
 
   const single = sections.length === 1
 
@@ -31,7 +33,7 @@ export const PriceMenuBlock: React.FC<Props> = ({ heading, intro, sections, note
         )}
       >
         {sections.map((section, i) => (
-          <SignatureCard key={i} signature={design?.signature}>
+          <SignatureCard key={i} signature={signature}>
             <h3 className="font-heading text-2xl font-semibold tracking-tight">
               {section.title}
             </h3>

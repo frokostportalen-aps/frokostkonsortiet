@@ -3,7 +3,7 @@ import { useHeaderThemeSync } from '@/providers/HeaderTheme'
 import React from 'react'
 
 import type { Page } from '@/payload-types'
-import type { TenantDesign } from '@/themes/tenantThemes'
+import type { Dialect } from '@/themes/dialect'
 
 import { CMSLink } from '@/components/Link'
 import { Eyebrow } from '@/components/Eyebrow'
@@ -13,7 +13,7 @@ import RichText from '@/components/RichText'
 
 type HeroProps = Page['hero'] & {
   heroTheme?: 'light' | 'dark'
-  design?: TenantDesign
+  dialect?: Dialect
 }
 
 const HeroLinks: React.FC<{
@@ -48,7 +48,7 @@ const HeroLinks: React.FC<{
  * scrim, so the header keeps the ambient theme — used by sites whose voice is
  * typographic rather than photographic.
  */
-const SplitHero: React.FC<HeroProps> = ({ links, media, mediaFit, richText, design }) => {
+const SplitHero: React.FC<HeroProps> = ({ links, media, mediaFit, richText, dialect }) => {
   // No scrim: the header keeps the ambient theme over an editorial split.
   useHeaderThemeSync(null)
 
@@ -61,9 +61,9 @@ const SplitHero: React.FC<HeroProps> = ({ links, media, mediaFit, richText, desi
     <div className="container pb-8 md:pb-16">
       <div className="grid items-center gap-10 md:grid-cols-2 md:gap-12 lg:gap-16">
         <div className="max-w-xl">
-          {design?.tagline && (
-            <Eyebrow style={design.eyebrow} withRule className="mb-6">
-              {design.tagline}
+          {dialect?.tagline && (
+            <Eyebrow style={dialect.eyebrow} withRule className="mb-6">
+              {dialect.tagline}
             </Eyebrow>
           )}
           {richText && (
@@ -101,20 +101,20 @@ const SplitHero: React.FC<HeroProps> = ({ links, media, mediaFit, richText, desi
  * Full-bleed photo with the headline laid over a readability scrim. The header
  * overlaps the photo (negative top margin) and adopts the hero theme so the
  * logo/menu stay legible against the image. The scrim can be tinted toward the
- * tenant's identity via `design.heroScrim` (bare oklch channels).
+ * tenant's identity via `dialect.heroScrim` (bare oklch channels).
  */
 const OverlayHero: React.FC<HeroProps> = ({
   links,
   media,
   richText,
   heroTheme = 'dark',
-  design,
+  dialect,
 }) => {
   // The header floats over the photo and adopts the hero's theme for contrast.
   useHeaderThemeSync(heroTheme)
 
   const dark = heroTheme === 'dark'
-  const scrimBase = design?.heroScrim ?? '0% 0 0'
+  const scrimBase = dialect?.heroScrim ?? '0% 0 0'
 
   return (
     <div
@@ -160,11 +160,11 @@ const OverlayHero: React.FC<HeroProps> = ({
           text block lands in the middle of the *visible* photo. */}
       <div className="container z-10 relative flex items-center justify-center pt-[10.4rem] pb-8">
         <div className="max-w-[40rem] md:text-center">
-          {design?.tagline && (
+          {dialect?.tagline && (
             <p className="mb-5 flex items-center gap-3 text-xs font-semibold uppercase tracking-[0.22em] text-primary md:justify-center">
-              <span aria-hidden className={signatureMarkClass.heroEyebrow[design.signature]} />
+              <span aria-hidden className={signatureMarkClass.heroEyebrow[dialect.signature]} />
               <span className={dark ? 'text-white/90' : 'text-foreground/80'}>
-                {design.tagline}
+                {dialect.tagline}
               </span>
             </p>
           )}
@@ -191,7 +191,7 @@ const OverlayHero: React.FC<HeroProps> = ({
 }
 
 export const HighImpactHero: React.FC<HeroProps> = (props) => {
-  return props.design?.heroVariant === 'split' ? (
+  return props.dialect?.heroVariant === 'split' ? (
     <SplitHero {...props} />
   ) : (
     <OverlayHero {...props} />

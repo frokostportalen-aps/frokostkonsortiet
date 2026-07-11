@@ -11,7 +11,7 @@
  *   • typography          – see `themes/fonts.ts`
  *   • shape (radius)      – injected as `--radius`
  *   • personality         – `eyebrow` / `heroVariant` / `signature` / `tagline`,
- *                           read by components via `getTenantDesign`
+ *                           resolved as a site's *dialect* (see `themes/dialect.ts`)
  *
  * Colour values accept any CSS colour (oklch, hex, …). Brand colours
  * (primary/accent) apply in both light and dark mode; surfaces and shape only
@@ -94,21 +94,6 @@ export type ThemeVars = {
    * neutral black.
    */
   heroScrim?: string
-}
-
-/** Resolved design personality with defaults applied. */
-export type TenantDesign = {
-  eyebrow: EyebrowStyle
-  heroVariant: HeroVariant
-  signature: Signature
-  tagline?: string
-  heroScrim?: string
-}
-
-const DESIGN_DEFAULTS: TenantDesign = {
-  eyebrow: 'uppercase',
-  heroVariant: 'overlay',
-  signature: 'rule',
 }
 
 export const tenantThemes: Record<string, ThemeVars> = {
@@ -226,16 +211,3 @@ export const getTenantTheme = (slug?: string | null): ThemeVars | null =>
 
 export const getTenantLogo = (slug?: string | null): TenantLogo | null =>
   getTenantTheme(slug)?.logo || null
-
-/** The resolved design personality for a site, with family defaults filled in. */
-export const getTenantDesign = (slug?: string | null): TenantDesign => {
-  const theme = getTenantTheme(slug)
-  if (!theme) return DESIGN_DEFAULTS
-  return {
-    eyebrow: theme.eyebrow ?? DESIGN_DEFAULTS.eyebrow,
-    heroVariant: theme.heroVariant ?? DESIGN_DEFAULTS.heroVariant,
-    signature: theme.signature ?? DESIGN_DEFAULTS.signature,
-    tagline: theme.tagline,
-    heroScrim: theme.heroScrim,
-  }
-}
