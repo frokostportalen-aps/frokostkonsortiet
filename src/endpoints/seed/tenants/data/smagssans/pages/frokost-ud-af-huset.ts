@@ -158,7 +158,7 @@ export const frokostUdAfHuset: PageFactory = ({ tenantID, img }) => ({
         heading('h3', 'Få et tilbud'),
         p('Fortæl os om jeres arbejdsplads, så sammensætter vi en frokostordning, der passer til jeres behov og budget.'),
       ),
-      [customLink('Få et tilbud', '/om-os')],
+      [customLink('Få et tilbud', '/om-os#tilbud')],
     ),
   ],
   meta: {

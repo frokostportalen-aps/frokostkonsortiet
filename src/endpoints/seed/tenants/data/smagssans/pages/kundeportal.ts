@@ -79,7 +79,7 @@ export const kundeportal: PageFactory = ({ tenantID, img }) => ({
         heading('h3', 'Kom nemt i gang'),
         p('Som kunde får I adgang til KundePortalen, hvor I selv styrer bestilling og tilretning.'),
       ),
-      [customLink('Få et tilbud', '/om-os')],
+      [customLink('Få et tilbud', '/om-os#tilbud')],
     ),
   ],
   meta: {

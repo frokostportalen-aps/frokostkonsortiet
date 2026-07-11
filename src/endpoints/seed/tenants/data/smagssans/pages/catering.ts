@@ -147,7 +147,7 @@ export const catering: PageFactory = ({ tenantID, img }) => ({
         heading('h3', 'Vil du have et tilbud?'),
         p('Fortæl os om jeres arrangement, så sammensætter vi en menu, der passer til anledningen.'),
       ),
-      [customLink('Få et tilbud', '/om-os')],
+      [customLink('Få et tilbud', '/om-os#tilbud')],
     ),
   ],
   meta: {

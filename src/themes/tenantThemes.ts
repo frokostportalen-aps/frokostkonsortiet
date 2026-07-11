@@ -180,7 +180,7 @@ export const tenantThemes: Record<string, ThemeVars> = {
     eyebrow: 'smallcaps',
     heroVariant: 'split',
     signature: 'rule',
-    headerCta: { label: 'Få et tilbud', url: '/om-os' },
+    headerCta: { label: 'Få et tilbud', url: '/om-os#tilbud' },
   },
 
   // ── Fra Jorden — forest floor: deep green on warm paper, sage accents.
@@ -215,7 +215,7 @@ export const tenantThemes: Record<string, ThemeVars> = {
     eyebrow: 'uppercase',
     heroVariant: 'overlay',
     signature: 'sketch',
-    headerCta: { label: 'Få et tilbud', url: '/om-os' },
+    headerCta: { label: 'Få et tilbud', url: '/om-os#tilbud' },
     // Forest-tinted scrim so the hero photo reads green, not neutral black.
     heroScrim: '20% 0.05 150',
   },

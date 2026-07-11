@@ -2,7 +2,7 @@
 import type { Form as FormType } from '@payloadcms/plugin-form-builder/types'
 
 import { useRouter } from 'next/navigation'
-import React, { useCallback, useState } from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { useForm, FormProvider } from 'react-hook-form'
 import RichText from '@/components/RichText'
 import { Button } from '@/components/ui/button'
@@ -53,6 +53,32 @@ export const FormBlock: React.FC<
   const [error, setError] = useState<{ message: string } | undefined>()
   const router = useRouter()
 
+  // Next scrolls to the `#tilbud` anchor when navigating, but it measures the
+  // target before late layout (images/fonts settling above) has pushed the
+  // form further down — the visitor lands mid-page. Re-align while the page
+  // settles: follow body resizes for a short window, and stand down the
+  // moment the visitor scrolls on their own.
+  const anchorRef = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+    const el = anchorRef.current
+    if (window.location.hash !== '#tilbud' || !el) return
+
+    const align = () => el.scrollIntoView()
+    const observer = new ResizeObserver(align)
+    const stop = () => {
+      observer.disconnect()
+      clearTimeout(timer)
+      window.removeEventListener('wheel', stop)
+      window.removeEventListener('touchstart', stop)
+    }
+    align()
+    observer.observe(document.body)
+    window.addEventListener('wheel', stop, { passive: true })
+    window.addEventListener('touchstart', stop, { passive: true })
+    const timer = setTimeout(stop, 2000)
+    return stop
+  }, [])
+
   const onSubmit = useCallback(
     (data: Record<string, unknown>) => {
       const submitForm = async () => {
@@ -91,7 +117,10 @@ export const FormBlock: React.FC<
   )
 
   return (
-    <div className="container lg:max-w-[44rem]">
+    // `#tilbud` is the site-wide anchor for the standing quote form — every
+    // "Få et tilbud" CTA points here so visitors land at the form, not the
+    // top of whichever page hosts it.
+    <div id="tilbud" ref={anchorRef} className="container scroll-mt-24 lg:max-w-[44rem]">
       {enableIntro && introContent && !hasSubmitted && (
         <RichText className="mb-8 lg:mb-12" data={introContent} enableGutter={false} />
       )}

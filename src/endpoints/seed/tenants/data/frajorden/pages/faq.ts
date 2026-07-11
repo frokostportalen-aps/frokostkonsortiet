@@ -41,7 +41,7 @@ export const faqPage: PageFactory = ({ tenantID, img }) => ({
         heading('h3', 'Fandt du ikke svar?'),
         p('Skriv til os, så vender vi tilbage hurtigst muligt.'),
       ),
-      [customLink('Få et tilbud', '/om-os')],
+      [customLink('Få et tilbud', '/om-os#tilbud')],
     ),
   ],
   meta: {
