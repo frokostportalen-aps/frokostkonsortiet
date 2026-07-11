@@ -1,5 +1,5 @@
 'use client'
-import type { FormFieldBlock, Form as FormType } from '@payloadcms/plugin-form-builder/types'
+import type { Form as FormType } from '@payloadcms/plugin-form-builder/types'
 
 import { useRouter } from 'next/navigation'
 import React, { useCallback, useState } from 'react'
@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button'
 import type { DefaultTypedEditorState } from '@payloadcms/richtext-lexical'
 
 import { fields } from './fields'
-import { getClientSideURL } from '@/utilities/getURL'
+import { submitFormSubmission } from './submitFormSubmission'
 
 export type FormBlockType = {
   blockName?: string
@@ -31,9 +31,16 @@ export const FormBlock: React.FC<
     introContent,
   } = props
 
-  const formMethods = useForm({
-    defaultValues: formFromProps.fields,
+  // Default values keyed by field name — the fields array itself is not a
+  // valid RHF value tree (an array root breaks named-field state for
+  // Controller-based fields like the select). Only read on first render.
+  const defaultValues: Record<string, unknown> = {}
+  formFromProps.fields?.forEach((field) => {
+    if ('name' in field && field.name) {
+      defaultValues[field.name] = 'defaultValue' in field ? field.defaultValue : undefined
+    }
   })
+  const formMethods = useForm<Record<string, unknown>>({ defaultValues })
   const {
     control,
     formState: { errors },
@@ -47,8 +54,7 @@ export const FormBlock: React.FC<
   const router = useRouter()
 
   const onSubmit = useCallback(
-    (data: FormFieldBlock[]) => {
-      let loadingTimerID: ReturnType<typeof setTimeout>
+    (data: Record<string, unknown>) => {
       const submitForm = async () => {
         setError(undefined)
 
@@ -58,52 +64,24 @@ export const FormBlock: React.FC<
         }))
 
         // delay loading indicator by 1s
-        loadingTimerID = setTimeout(() => {
+        const loadingTimerID = setTimeout(() => {
           setIsLoading(true)
         }, 1000)
 
-        try {
-          const req = await fetch(`${getClientSideURL()}/api/form-submissions`, {
-            body: JSON.stringify({
-              form: formID,
-              submissionData: dataToSend,
-            }),
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            method: 'POST',
-          })
+        const result = await submitFormSubmission(formID, dataToSend)
 
-          const res = await req.json()
+        clearTimeout(loadingTimerID)
+        setIsLoading(false)
 
-          clearTimeout(loadingTimerID)
+        if (!result.ok) {
+          setError({ message: result.message })
+          return
+        }
 
-          if (req.status >= 400) {
-            setIsLoading(false)
+        setHasSubmitted(true)
 
-            setError({
-              message: res.errors?.[0]?.message || 'Noget gik galt på serveren. Prøv venligst igen.',
-            })
-
-            return
-          }
-
-          setIsLoading(false)
-          setHasSubmitted(true)
-
-          if (confirmationType === 'redirect' && redirect) {
-            const { url } = redirect
-
-            const redirectUrl = url
-
-            if (redirectUrl) router.push(redirectUrl)
-          }
-        } catch (err) {
-          console.warn(err)
-          setIsLoading(false)
-          setError({
-            message: 'Noget gik galt. Prøv venligst igen.',
-          })
+        if (confirmationType === 'redirect' && redirect?.url) {
+          router.push(redirect.url)
         }
       }
 
