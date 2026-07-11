@@ -7,7 +7,7 @@ import { notFound, redirect } from 'next/navigation'
 
 interface Props {
   disableNotFound?: boolean
-  tenantSlug?: string
+  tenantSlug: string
   url: string
 }
 

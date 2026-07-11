@@ -3,13 +3,11 @@ import type { Metadata } from 'next/types'
 import { CollectionArchive } from '@/components/CollectionArchive'
 import { PageRange } from '@/components/PageRange'
 import { Pagination } from '@/components/Pagination'
-import configPromise from '@payload-config'
-import { getPayload } from 'payload'
 import React from 'react'
 import PageClient from './page.client'
 import { notFound } from 'next/navigation'
 import { getAllTenantSlugs } from '@/utilities/getTenant'
-import { getTenantPostsWhere } from '@/utilities/tenantPostsFilter'
+import { countPosts, listPosts } from '@/data/tenantContent'
 
 export const revalidate = 600
 
@@ -22,20 +20,12 @@ type Args = {
 
 export default async function Page({ params: paramsPromise }: Args) {
   const { tenant, pageNumber } = await paramsPromise
-  const payload = await getPayload({ config: configPromise })
 
   const sanitizedPageNumber = Number(pageNumber)
 
   if (!Number.isInteger(sanitizedPageNumber)) notFound()
 
-  const posts = await payload.find({
-    collection: 'posts',
-    depth: 1,
-    limit: 12,
-    page: sanitizedPageNumber,
-    overrideAccess: false,
-    where: await getTenantPostsWhere(tenant),
-  })
+  const posts = await listPosts({ tenantSlug: tenant, limit: 12, page: sanitizedPageNumber })
 
   return (
     <div className="pt-24 pb-24">
@@ -74,17 +64,12 @@ export async function generateMetadata({ params: paramsPromise }: Args): Promise
 }
 
 export async function generateStaticParams() {
-  const payload = await getPayload({ config: configPromise })
   const slugs = await getAllTenantSlugs()
 
   const params: { tenant: string; pageNumber: string }[] = []
 
   for (const tenant of slugs) {
-    const { totalDocs } = await payload.count({
-      collection: 'posts',
-      overrideAccess: false,
-      where: await getTenantPostsWhere(tenant),
-    })
+    const totalDocs = await countPosts({ tenantSlug: tenant })
 
     const totalPages = Math.ceil(totalDocs / 10)
 

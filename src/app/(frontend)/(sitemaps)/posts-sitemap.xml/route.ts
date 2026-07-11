@@ -5,6 +5,7 @@ import { unstable_cache } from 'next/cache'
 
 import { getTenantFromHost } from '@/utilities/getTenantFromHost'
 import { getTenantServerURL } from '@/utilities/getURL'
+import { ownedByTenant } from '@/data/tenantScope'
 
 const getPostsSitemap = (tenantSlug: string, siteUrl: string) =>
   unstable_cache(
@@ -19,7 +20,7 @@ const getPostsSitemap = (tenantSlug: string, siteUrl: string) =>
         limit: 1000,
         pagination: false,
         where: {
-          and: [{ _status: { equals: 'published' } }, { 'tenant.slug': { equals: tenantSlug } }],
+          and: [{ _status: { equals: 'published' } }, ownedByTenant(tenantSlug)],
         },
         select: {
           slug: true,
