@@ -34,7 +34,7 @@ export const HeaderClient: React.FC<HeaderClientProps> = ({ data, tenantSlug, ct
 
   return (
     <header className="container relative z-20   " {...(theme ? { 'data-theme': theme } : {})}>
-      <div className="py-8 flex justify-between">
+      <div className="py-8 flex items-center justify-between">
         <Link href="/">
           {/* text-foreground re-resolves under the header's data-theme, so the
               logo turns light on dark heroes and dark on light heroes. */}
