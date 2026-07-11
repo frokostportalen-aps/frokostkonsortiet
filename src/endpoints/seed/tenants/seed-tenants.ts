@@ -6,6 +6,7 @@ import path from 'path'
 import { TENANTS } from './data'
 import type { PageContext, SeedDoc, TenantMeta } from './data/types'
 import { heading, p as para, richText } from './lexical'
+import { NEED_OPTIONS, QUOTE_FORM_FIELDS } from '../../../blocks/PlanPicker/options'
 import type { Form } from '../../../payload-types'
 import { pickLinkDomain, urlForTenantDomain } from '../../../utilities/tenantDomains'
 
@@ -330,8 +331,23 @@ export async function seedTenants(payload: Payload, opts: SeedOptions = {}): Pro
         { blockType: 'email' as const, name: 'email', label: 'E-mail', required: true, width: 50 },
         { blockType: 'text' as const, name: 'telefon', label: 'Telefon', required: false, width: 50 },
         {
+          // Structured "what is this about" — shares its vocabulary and field
+          // name with the plan-picker wizard, which answers it on the
+          // visitor's behalf. Option values are the Danish labels so
+          // submissions and the notification e-mail read plainly.
+          blockType: 'select' as const,
+          name: QUOTE_FORM_FIELDS.need,
+          label: 'Hvad handler forespørgslen om?',
+          required: true,
+          width: 50,
+          options: [
+            ...NEED_OPTIONS.map((o) => ({ label: o.label, value: o.label })),
+            { label: 'Andet', value: 'Andet' },
+          ],
+        },
+        {
           blockType: 'number' as const,
-          name: 'antalMedarbejdere',
+          name: QUOTE_FORM_FIELDS.people,
           label: 'Antal medarbejdere',
           required: false,
           width: 50,
