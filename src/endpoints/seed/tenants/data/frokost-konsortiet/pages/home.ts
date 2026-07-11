@@ -190,7 +190,7 @@ export const home: PageFactory = ({ tenantID, img, tilbudsFormID }) => ({
     ),
   ],
   meta: {
-    title: 'Frokost Konsortiet',
+    title: 'Frokost Konsortiet – fællesskabet bag jeres frokostordning',
     description:
       'Frokost Konsortiet er fællesskabet bag dine bedste frokostpauser. Vi laver frokost med variation, kvalitet og bæredygtighed i centrum, så din arbejdsplads får noget godt at glæde sig til – hver eneste dag.',
     image: img('hero'),

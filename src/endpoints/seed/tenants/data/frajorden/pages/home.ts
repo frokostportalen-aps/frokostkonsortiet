@@ -194,7 +194,7 @@ export const home: PageFactory = ({ tenantID, img, tilbudsFormID }) => ({
     ),
   ],
   meta: {
-    title: 'Fra Jorden',
+    title: 'Fra Jorden – økologisk frokostordning fra jord til bord',
     description:
       'Fra Jorden dyrker frokost med respekt for naturen. Økologiske grøntsager, korte forsyningskæder og grøn gastronomi gør hver ret både god for jer og for kloden.',
     image: img('hero'),
