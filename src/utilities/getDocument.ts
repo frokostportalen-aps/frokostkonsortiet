@@ -4,19 +4,18 @@ import configPromise from '@payload-config'
 import { getPayload } from 'payload'
 import { unstable_cache } from 'next/cache'
 
+import { ownedByTenant } from '@/data/tenantScope'
+
 type Collection = keyof Config['collections']
 
-async function getDocument(collection: Collection, slug: string, tenantSlug?: string, depth = 0) {
+async function getDocument(collection: Collection, slug: string, tenantSlug: string, depth = 0) {
   const payload = await getPayload({ config: configPromise })
 
   const page = await payload.find({
     collection,
     depth,
     where: {
-      and: [
-        { slug: { equals: slug } },
-        ...(tenantSlug ? [{ 'tenant.slug': { equals: tenantSlug } }] : []),
-      ],
+      and: [{ slug: { equals: slug } }, ownedByTenant(tenantSlug)],
     },
   })
 
@@ -27,11 +26,11 @@ async function getDocument(collection: Collection, slug: string, tenantSlug?: st
  * Returns an unstable_cache function tagged per collection + tenant + slug so
  * documents with the same slug on different sites do not collide in the cache.
  */
-export const getCachedDocument = (collection: Collection, slug: string, tenantSlug?: string) =>
+export const getCachedDocument = (collection: Collection, slug: string, tenantSlug: string) =>
   unstable_cache(
     async () => getDocument(collection, slug, tenantSlug),
-    [collection, tenantSlug ?? 'all', slug],
+    [collection, tenantSlug, slug],
     {
-      tags: [`${collection}_${tenantSlug ?? 'all'}_${slug}`],
+      tags: [`${collection}_${tenantSlug}_${slug}`],
     },
   )
