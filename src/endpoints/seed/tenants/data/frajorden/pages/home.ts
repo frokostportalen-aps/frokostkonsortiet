@@ -16,7 +16,7 @@ import {
   planPicker,
 } from '../../builders'
 
-export const home: PageFactory = ({ tenantID, img }) => ({
+export const home: PageFactory = ({ tenantID, img, tilbudsFormID }) => ({
   title: 'Fra Jorden – frokost',
   slug: 'home',
   _status: 'published',
@@ -29,7 +29,7 @@ export const home: PageFactory = ({ tenantID, img }) => ({
         'Fra Jorden dyrker frokost med respekt for naturen. Økologiske grøntsager, korte forsyningskæder og grøn gastronomi gør hver ret både god for jer og for kloden.',
       ),
     ),
-    [customLink('Få et tilbud', '/om-os'), customLink('Se vores køkken', '/baeredygtighed', 'outline')],
+    [customLink('Få et tilbud', '/om-os#tilbud'), customLink('Se vores køkken', '/baeredygtighed', 'outline')],
   ),
   layout: [
     content(
@@ -138,7 +138,7 @@ export const home: PageFactory = ({ tenantID, img }) => ({
           url: '/catering',
         },
       ],
-      ctaUrl: '/om-os',
+      form: tilbudsFormID,
     }),
     clientList(['Novo Campus', 'Urban Farming Lab', 'Ren Energi A/S', 'Klimafonden', 'Grøn Omstilling', 'Coworking Syd']),
     testimonials(

@@ -16,7 +16,7 @@ import {
   planPicker,
 } from '../../builders'
 
-export const home: PageFactory = ({ tenantID, img }) => ({
+export const home: PageFactory = ({ tenantID, img, tilbudsFormID }) => ({
   title: 'Frokost Konsortiet – frokost',
   slug: 'home',
   _status: 'published',
@@ -136,7 +136,7 @@ export const home: PageFactory = ({ tenantID, img }) => ({
           url: '/services',
         },
       ],
-      ctaUrl: '/kontakt',
+      form: tilbudsFormID,
     }),
     clientList(['Aarhus Advokaterne', 'Vestas Partners', 'GreenField', 'Kbh. Mediehus', 'Krogh & Co.', 'Nordhavn Tech']),
     testimonials(

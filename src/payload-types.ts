@@ -1040,7 +1040,7 @@ export interface PlanPickerBlock {
   heading?: string | null;
   intro?: string | null;
   /**
-   * Vælgeren matcher besøgendes behov + antal mod disse anbefalinger. Ved flere match vælges den med højeste "fra antal".
+   * Vælgeren matcher besøgendes behov + antal mod disse anbefalinger. Ved flere match vælges den med højeste "fra antal"; rammer antallet under alle, vises den nærmeste ordning med en note om minimum.
    */
   plans?:
     | {
@@ -1059,11 +1059,10 @@ export interface PlanPickerBlock {
         id?: string | null;
       }[]
     | null;
-  ctaLabel?: string | null;
   /**
-   * Fører direkte til tilbudsformularen, fx "/om-os".
+   * Formularen besøgende udfylder i sidste trin (typisk "Få et tilbud"). Behov og antal udfyldes automatisk fra deres svar.
    */
-  ctaUrl?: string | null;
+  form: string | Form;
   id?: string | null;
   blockName?: string | null;
   blockType: 'planPicker';
@@ -1778,8 +1777,7 @@ export interface PlanPickerBlockSelect<T extends boolean = true> {
         url?: T;
         id?: T;
       };
-  ctaLabel?: T;
-  ctaUrl?: T;
+  form?: T;
   id?: T;
   blockName?: T;
 }

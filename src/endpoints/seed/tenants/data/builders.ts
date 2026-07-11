@@ -189,7 +189,7 @@ export const team = (
   members,
 })
 
-/** Interactive plan finder (need + headcount -> recommendation). */
+/** Interactive quote wizard (need + headcount -> recommendation + contact form). */
 export const planPicker = (
   opts: {
     heading?: string
@@ -202,8 +202,8 @@ export const planPicker = (
       priceLabel?: string
       url: string
     }[]
-    ctaLabel?: string
-    ctaUrl?: string
+    /** The tenant's standing quote form (ctx.tilbudsFormID). */
+    form: string
   },
   blockName = 'Ordningsvælger',
 ) => ({

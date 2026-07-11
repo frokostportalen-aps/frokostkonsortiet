@@ -30,7 +30,7 @@ export const PlanPicker: Block = {
       },
       admin: {
         description:
-          'Vælgeren matcher besøgendes behov + antal mod disse anbefalinger. Ved flere match vælges den med højeste "fra antal".',
+          'Vælgeren matcher besøgendes behov + antal mod disse anbefalinger. Ved flere match vælges den med højeste "fra antal"; rammer antallet under alle, vises den nærmeste ordning med en note om minimum.',
       },
       fields: [
         {
@@ -78,17 +78,14 @@ export const PlanPicker: Block = {
       ],
     },
     {
-      name: 'ctaLabel',
-      type: 'text',
-      label: 'CTA-tekst',
-      defaultValue: 'Få et tilbud',
-    },
-    {
-      name: 'ctaUrl',
-      type: 'text',
-      label: 'CTA-link',
+      name: 'form',
+      type: 'relationship',
+      relationTo: 'forms',
+      required: true,
+      label: 'Tilbudsformular',
       admin: {
-        description: 'Fører direkte til tilbudsformularen, fx "/om-os".',
+        description:
+          'Formularen besøgende udfylder i sidste trin (typisk "Få et tilbud"). Behov og antal udfyldes automatisk fra deres svar.',
       },
     },
   ],

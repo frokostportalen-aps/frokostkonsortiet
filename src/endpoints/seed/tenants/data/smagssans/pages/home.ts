@@ -16,7 +16,7 @@ import {
   planPicker,
 } from '../../builders'
 
-export const home: PageFactory = ({ tenantID, img }) => ({
+export const home: PageFactory = ({ tenantID, img, tilbudsFormID }) => ({
   title: 'Smagssans – frokost',
   slug: 'home',
   _status: 'published',
@@ -134,7 +134,7 @@ export const home: PageFactory = ({ tenantID, img }) => ({
           url: '/catering',
         },
       ],
-      ctaUrl: '/om-os',
+      form: tilbudsFormID,
     }),
     clientList(['Vad & Lange Arkitekter', 'Designbureauet Form', 'Munk Consulting', 'Puls Media', 'BioNordic', 'Studio Nord']),
     testimonials(
