@@ -24,14 +24,14 @@ export const getTenantServerURL = (tenant?: Tenant | null) => {
 export const getTenantCrossURL = (tenant: Tenant): string => {
   const domains = (tenant.domains ?? []).map((d) => d.domain)
   const server = getServerSideURL()
-  // Decide local vs public from the *explicit* env when present; without one,
-  // getServerSideURL falls back to localhost, which must not make a
-  // mis-configured production build link to *.localhost domains.
+  // A production build must never emit *.localhost family links, even when the
+  // server runs behind a proxy with NEXT_PUBLIC_SERVER_URL=http://localhost:3000
+  // — visitors can't resolve those. Only a dev build follows the env's word.
   const explicitServer =
     process.env.NEXT_PUBLIC_SERVER_URL || process.env.VERCEL_PROJECT_PRODUCTION_URL
-  const isLocal = explicitServer
-    ? /localhost|127\.0\.0\.1/.test(explicitServer)
-    : process.env.NODE_ENV !== 'production'
+  const isLocal =
+    process.env.NODE_ENV !== 'production' &&
+    (explicitServer ? /localhost|127\.0\.0\.1/.test(explicitServer) : true)
 
   const domain = pickLinkDomain(domains, !isLocal)
   if (!domain) return server
