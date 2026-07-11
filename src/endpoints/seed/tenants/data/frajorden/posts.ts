@@ -1,12 +1,11 @@
 import type { PostFactory } from '../types'
 import { heading, p, richText } from '../builders'
 
-const rodfrugternesAarstid: PostFactory = ({ tenantID, authorID, img }) => ({
+const rodfrugternesAarstid: PostFactory = ({ tenantID, img }) => ({
   title: 'Derfor er rodfrugter efterårets helte',
   slug: 'rodfrugternes-aarstid',
   _status: 'published',
   tenant: tenantID,
-  authors: [authorID],
   heroImage: img('rodfrugternes-aarstid'),
   content: richText(
     heading(
@@ -29,12 +28,11 @@ const rodfrugternesAarstid: PostFactory = ({ tenantID, authorID, img }) => ({
   },
 })
 
-const moedVoresAvlere: PostFactory = ({ tenantID, authorID, img }) => ({
+const moedVoresAvlere: PostFactory = ({ tenantID, img }) => ({
   title: 'Mød vores avlere',
   slug: 'moed-vores-avlere',
   _status: 'published',
   tenant: tenantID,
-  authors: [authorID],
   heroImage: img('moed-vores-avlere'),
   content: richText(
     heading(
@@ -57,12 +55,11 @@ const moedVoresAvlere: PostFactory = ({ tenantID, authorID, img }) => ({
   },
 })
 
-const groentISaeson: PostFactory = ({ tenantID, authorID, img }) => ({
+const groentISaeson: PostFactory = ({ tenantID, img }) => ({
   title: 'Fra mark til frokost på 24 timer',
   slug: 'groent-i-saeson',
   _status: 'published',
   tenant: tenantID,
-  authors: [authorID],
   heroImage: img('groent-i-saeson'),
   content: richText(
     heading(

@@ -11,10 +11,10 @@ export const PostHero: React.FC<{
 }> = ({ post }) => {
   const { categories, heroImage, populatedAuthors, publishedAt, title } = post
 
-  // Hide the byline when the only "author" is the CMS admin account — a real
-  // name builds trust; "Admin" does the opposite.
+  // Seeded posts carry no authors (a CMS account name is not a byline), so
+  // this only renders when an editor deliberately credits real people.
   const authors = formatAuthors(populatedAuthors ?? []) ?? ''
-  const hasAuthors = authors !== '' && authors.toLowerCase() !== 'admin'
+  const hasAuthors = authors !== ''
 
   return (
     <div className="relative -mt-[10.4rem] flex items-end">

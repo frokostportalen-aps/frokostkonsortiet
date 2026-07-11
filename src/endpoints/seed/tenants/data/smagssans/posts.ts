@@ -1,12 +1,11 @@
 import type { PostFactory } from '../types'
 import { heading, p, richText } from '../builders'
 
-const efteraaretsSmage: PostFactory = ({ tenantID, authorID, img }) => ({
+const efteraaretsSmage: PostFactory = ({ tenantID, img }) => ({
   title: 'Efterårets smage',
   slug: 'efteraarets-smage',
   _status: 'published',
   tenant: tenantID,
-  authors: [authorID],
   heroImage: img('efteraarets-smage'),
   content: richText(
     heading(
@@ -29,12 +28,11 @@ const efteraaretsSmage: PostFactory = ({ tenantID, authorID, img }) => ({
   },
 })
 
-const kunstenAtKrydre: PostFactory = ({ tenantID, authorID, img }) => ({
+const kunstenAtKrydre: PostFactory = ({ tenantID, img }) => ({
   title: 'Kunsten at krydre',
   slug: 'kunsten-at-krydre',
   _status: 'published',
   tenant: tenantID,
-  authors: [authorID],
   heroImage: img('kunsten-at-krydre'),
   content: richText(
     heading(
@@ -56,12 +54,11 @@ const kunstenAtKrydre: PostFactory = ({ tenantID, authorID, img }) => ({
   },
 })
 
-const tarteletten: PostFactory = ({ tenantID, authorID, img }) => ({
+const tarteletten: PostFactory = ({ tenantID, img }) => ({
   title: 'Tarteletten er tilbage',
   slug: 'tarteletten-er-tilbage',
   _status: 'published',
   tenant: tenantID,
-  authors: [authorID],
   heroImage: img('tarteletten'),
   content: richText(
     heading(
