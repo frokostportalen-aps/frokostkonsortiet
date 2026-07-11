@@ -78,6 +78,12 @@ export type ThemeVars = {
    */
   heroTheme?: 'light' | 'dark'
   logo?: TenantLogo
+  /**
+   * Generic font family for the SVG favicon's letter mark (favicons can't
+   * load webfonts), so the tab icon echoes the site's type. Defaults to
+   * 'sans-serif'.
+   */
+  faviconFamily?: 'serif' | 'sans-serif'
 
   // ── personality (read by components, not injected as CSS) ──────────────────
   /** A short brand line shown as the hero eyebrow, e.g. "Siden 1980". */
@@ -161,6 +167,7 @@ export const tenantThemes: Record<string, ThemeVars> = {
     radius: '0.75rem',
     heroTheme: 'dark',
     logo: { text: 'Smagssans' },
+    faviconFamily: 'serif',
     tagline: 'Siden 1980 · sæsonens køkken',
     eyebrow: 'smallcaps',
     heroVariant: 'split',
@@ -196,6 +203,7 @@ export const tenantThemes: Record<string, ThemeVars> = {
     radius: '0.25rem',
     heroTheme: 'dark',
     logo: { text: 'Fra Jorden' },
+    faviconFamily: 'serif',
     tagline: 'Økologisk · fra jorden til bordet',
     eyebrow: 'uppercase',
     heroVariant: 'overlay',
