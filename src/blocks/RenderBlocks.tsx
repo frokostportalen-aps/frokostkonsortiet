@@ -20,7 +20,17 @@ import { TeamBlock } from '@/blocks/Team/Component'
 import { TestimonialsBlock } from '@/blocks/Testimonials/Component'
 import { TimelineBlock } from '@/blocks/Timeline/Component'
 
-const blockComponents = {
+/** Every block type an editor can add (derived from the generated layout union). */
+type BlockType = NonNullable<Page['layout']>[number]['blockType']
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type BlockRenderer = React.ComponentType<any>
+
+// Renderers live here (the render graph, which may pull client/`.scss` imports),
+// kept apart from the Node config graph in `blockConfigs`. Typing the map as
+// `Record<BlockType, …>` makes TypeScript require a renderer for every block an
+// editor can add — so adding a block to `blockConfigs` without one fails to
+// compile instead of silently rendering nothing.
+const blockComponents: Record<BlockType, BlockRenderer> = {
   archive: ArchiveBlock,
   content: ContentBlock,
   cta: CallToActionBlock,
