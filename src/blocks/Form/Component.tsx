@@ -65,16 +65,18 @@ export const FormBlock: React.FC<
 
     const align = () => el.scrollIntoView()
     const observer = new ResizeObserver(align)
+    // Every kind of scroll intent must stand the effect down — keyboard
+    // (PageDown/arrows/space) and scrollbar drags fire neither wheel nor
+    // touchstart, and must not be fought for the whole window.
+    const stopEvents = ['wheel', 'touchstart', 'keydown', 'pointerdown'] as const
     const stop = () => {
       observer.disconnect()
       clearTimeout(timer)
-      window.removeEventListener('wheel', stop)
-      window.removeEventListener('touchstart', stop)
+      stopEvents.forEach((name) => window.removeEventListener(name, stop))
     }
     align()
     observer.observe(document.body)
-    window.addEventListener('wheel', stop, { passive: true })
-    window.addEventListener('touchstart', stop, { passive: true })
+    stopEvents.forEach((name) => window.addEventListener(name, stop, { passive: true }))
     const timer = setTimeout(stop, 2000)
     return stop
   }, [])
