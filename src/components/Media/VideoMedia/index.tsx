@@ -1,7 +1,7 @@
 'use client'
 
 import { cn } from '@/utilities/ui'
-import React from 'react'
+import React, { useEffect, useRef } from 'react'
 
 import type { Props as MediaProps } from '../types'
 
@@ -9,6 +9,25 @@ import { getMediaUrl } from '@/utilities/getMediaUrl'
 
 export const VideoMedia: React.FC<MediaProps> = (props) => {
   const { fill, onClick, resource, videoClassName } = props
+  const videoRef = useRef<HTMLVideoElement>(null)
+
+  // Mid-page videos are multi-MB files — with `autoPlay` they'd all download
+  // at page load and compete with the hero image. Start playback (and the
+  // bulk of the download) only when the video nears the viewport, and pause
+  // it again when it scrolls away.
+  useEffect(() => {
+    const video = videoRef.current
+    if (!video) return
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry?.isIntersecting) void video.play().catch(() => {})
+        else video.pause()
+      },
+      { rootMargin: '200px' },
+    )
+    observer.observe(video)
+    return () => observer.disconnect()
+  }, [resource])
 
   if (resource && typeof resource === 'object') {
     // Use the resource's own URL (the Payload media endpoint) — NOT the
@@ -17,11 +36,11 @@ export const VideoMedia: React.FC<MediaProps> = (props) => {
     // only exists on local disk.
     const { mimeType, updatedAt, url } = resource
 
-    // Autoplays muted (browsers block autoplay WITH sound), but the controls
+    // Plays muted (browsers block autoplay WITH sound), but the controls
     // let the viewer unmute, scrub and pause — the videos carry their audio.
     return (
       <video
-        autoPlay
+        ref={videoRef}
         // `fill` mirrors next/image: cover the nearest positioned ancestor —
         // so a video chosen as hero/card media behaves like a photo would.
         className={cn('h-full w-full object-cover', fill && 'absolute inset-0', videoClassName)}
@@ -30,6 +49,7 @@ export const VideoMedia: React.FC<MediaProps> = (props) => {
         muted
         onClick={onClick}
         playsInline
+        preload="metadata"
       >
         <source src={getMediaUrl(url, updatedAt)} type={mimeType || undefined} />
       </video>
