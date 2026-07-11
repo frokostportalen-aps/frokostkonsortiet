@@ -27,8 +27,13 @@ export async function Footer({ tenantSlug }: { tenantSlug: string }) {
 
   const design = getTenantDesign(tenantSlug)
   const currentTenant = tenants.find((t) => t.slug === tenantSlug)
+  const mainTenant = tenants.find((t) => t.isMain)
   // Main site first, then the kitchens, so the directory reads as one family.
-  const family = [...tenants].sort((a, b) => Number(b.isMain ?? false) - Number(a.isMain ?? false))
+  // A tenant without a public domain yet has no site to link to — leave it
+  // out rather than pointing its name at the wrong origin.
+  const family = tenants
+    .filter((t) => t.slug === tenantSlug || t.domains?.length)
+    .sort((a, b) => Number(b.isMain ?? false) - Number(a.isMain ?? false))
 
   const year = new Date().getFullYear()
 
@@ -92,8 +97,11 @@ export async function Footer({ tenantSlug }: { tenantSlug: string }) {
       <div className="border-t border-border">
         <div className="container flex flex-col items-start justify-between gap-4 py-6 text-sm text-muted-foreground md:flex-row md:items-center">
           <p>
-            © {year} {currentTenant?.name ?? 'Frokost Konsortiet'}
-            {!currentTenant?.isMain && ' · En del af Frokost Konsortiet'}
+            © {year} {currentTenant?.name ?? mainTenant?.name ?? 'Frokost Konsortiet'}
+            {currentTenant &&
+              !currentTenant.isMain &&
+              mainTenant &&
+              ` · En del af ${mainTenant.name}`}
           </p>
           <ThemeSelector />
         </div>
