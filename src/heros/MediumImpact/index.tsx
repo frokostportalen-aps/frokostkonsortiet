@@ -10,7 +10,7 @@ export const MediumImpactHero: React.FC<Page['hero']> = ({ links, media, mediaFi
   const contain = mediaFit === 'contain'
   return (
     <div className="container pt-6 md:pt-10">
-      <div className="max-w-3xl">
+      <div className="hero-entrance max-w-3xl">
         {richText && <RichText className="mb-6" data={richText} enableGutter={false} />}
 
         {Array.isArray(links) && links.length > 0 && (
@@ -38,7 +38,7 @@ export const MediumImpactHero: React.FC<Page['hero']> = ({ links, media, mediaFi
           >
             <Media
               fill
-              imgClassName={contain ? 'object-contain' : 'object-cover'}
+              imgClassName={`hero-media-settle ${contain ? 'object-contain' : 'object-cover'}`}
               priority
               resource={media}
             />

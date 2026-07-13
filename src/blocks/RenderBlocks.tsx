@@ -70,7 +70,7 @@ export const RenderBlocks: React.FC<{
 
             if (Block) {
               return (
-                <div className="my-16 md:my-24" data-block-type={blockType} key={index}>
+                <div className="my-16 md:my-24" data-block-type={blockType} data-reveal="" key={index}>
                   <Block {...block} tenantSlug={tenantSlug} disableInnerContainer />
                 </div>
               )

@@ -60,7 +60,7 @@ const SplitHero: React.FC<HeroProps> = ({ links, media, mediaFit, richText, dial
   return (
     <div className="container pb-8 md:pb-16">
       <div className="grid items-center gap-10 md:grid-cols-2 md:gap-12 lg:gap-16">
-        <div className="max-w-xl">
+        <div className="hero-entrance max-w-xl">
           {dialect?.tagline && (
             <Eyebrow style={dialect.eyebrow} withRule className="mb-6">
               {dialect.tagline}
@@ -84,7 +84,7 @@ const SplitHero: React.FC<HeroProps> = ({ links, media, mediaFit, richText, dial
           >
             <Media
               fill
-              imgClassName={contain ? 'object-contain' : 'object-cover'}
+              imgClassName={`hero-media-settle ${contain ? 'object-contain' : 'object-cover'}`}
               priority
               resource={media}
               size="(max-width: 768px) 100vw, 50vw"
@@ -124,7 +124,13 @@ const OverlayHero: React.FC<HeroProps> = ({
       {/* The photo — its own positioned layer, so `fill` has a valid parent. */}
       <div aria-hidden="true" className="absolute inset-0 overflow-hidden select-none">
         {media && typeof media === 'object' && (
-          <Media fill imgClassName="object-cover" priority resource={media} size="100vw" />
+          <Media
+            fill
+            imgClassName="hero-media-settle object-cover"
+            priority
+            resource={media}
+            size="100vw"
+          />
         )}
       </div>
 
@@ -159,7 +165,7 @@ const OverlayHero: React.FC<HeroProps> = ({
       {/* pt matches the header overlap (-mt above), so the vertically centred
           text block lands in the middle of the *visible* photo. */}
       <div className="container z-10 relative flex items-center justify-center pt-[10.4rem] pb-8">
-        <div className="max-w-[40rem] md:text-center">
+        <div className="hero-entrance max-w-[40rem] md:text-center">
           {dialect?.tagline && (
             <p className="mb-5 flex items-center gap-3 text-xs font-semibold uppercase tracking-[0.22em] text-primary md:justify-center">
               <span aria-hidden className={signatureMarkClass.heroEyebrow[dialect.signature]} />

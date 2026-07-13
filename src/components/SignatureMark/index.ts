@@ -5,8 +5,12 @@ import type { Signature } from '@/themes/dialect'
  * gathered in one place so the dialect system has a single source of truth.
  * The sizes differ deliberately per context — change them here and see every
  * variant side by side instead of hunting five per-file maps.
+ *
+ * Every variant also carries the plain `signature-mark` class (added once,
+ * below the map): it renders nothing by itself, but globals.css uses it to
+ * let the mark draw itself (scaleX) inside a scroll-revealed section.
  */
-export const signatureMarkClass: Record<
+const rawMarkClass: Record<
   'section' | 'pageHeader' | 'footer' | 'heroEyebrow' | 'ctaBand',
   Record<Signature, string>
 > = {
@@ -42,3 +46,15 @@ export const signatureMarkClass: Record<
     sketch: 'h-[3px] w-9 rounded-full bg-current opacity-80',
   },
 }
+
+export const signatureMarkClass = Object.fromEntries(
+  Object.entries(rawMarkClass).map(([context, variants]) => [
+    context,
+    Object.fromEntries(
+      Object.entries(variants).map(([signature, classes]) => [
+        signature,
+        `signature-mark ${classes}`,
+      ]),
+    ),
+  ]),
+) as typeof rawMarkClass
