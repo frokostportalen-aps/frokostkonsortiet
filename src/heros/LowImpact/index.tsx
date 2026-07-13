@@ -28,7 +28,7 @@ type LowImpactHeroType =
 export const LowImpactHero: React.FC<LowImpactHeroType> = ({ children, richText, dialect }) => {
   return (
     <div className="container mt-14 md:mt-20">
-      <div className="max-w-[52rem]">
+      <div className="hero-entrance max-w-[52rem]">
         {dialect?.tagline && (
           <Eyebrow style={dialect.eyebrow} withRule className="mb-5">
             {dialect.tagline}
@@ -43,7 +43,10 @@ export const LowImpactHero: React.FC<LowImpactHeroType> = ({ children, richText,
             />
           ))}
         {dialect && (
-          <span aria-hidden className={`mt-7 block ${signatureMarkClass.pageHeader[dialect.signature]}`} />
+          <span
+            aria-hidden
+            className={`mt-7 block ${signatureMarkClass.pageHeader[dialect.signature]}`}
+          />
         )}
       </div>
     </div>

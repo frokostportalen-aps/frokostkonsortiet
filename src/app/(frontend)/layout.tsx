@@ -6,6 +6,7 @@ import { GeistSans } from 'geist/font/sans'
 import React from 'react'
 
 import { AdminBar } from '@/components/AdminBar'
+import { ScrollReveal } from '@/components/ScrollReveal'
 import { Providers } from '@/providers'
 import { InitTheme } from '@/providers/Theme/InitTheme'
 import { mergeOpenGraph } from '@/utilities/mergeOpenGraph'
@@ -20,11 +21,19 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const { isEnabled } = await draftMode()
 
   return (
-    <html className={cn(GeistSans.variable, GeistMono.variable)} lang="da" suppressHydrationWarning>
+    <html
+      className={cn(GeistSans.variable, GeistMono.variable)}
+      // Tells Next the smooth scrolling is ours (globals.css, anchor jumps),
+      // so it can force instant scroll resets on route changes.
+      data-scroll-behavior="smooth"
+      lang="da"
+      suppressHydrationWarning
+    >
       <head>
         <InitTheme />
       </head>
       <body>
+        <ScrollReveal />
         <Providers>
           <AdminBar
             adminBarProps={{
