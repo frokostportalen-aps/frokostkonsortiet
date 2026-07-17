@@ -5,18 +5,20 @@ import { usePathname } from 'next/navigation'
 import React, { useEffect, useState } from 'react'
 
 import type { Header } from '@/payload-types'
+import type { TenantLogo } from '@/themes/tenantThemes'
 
 import { Logo } from '@/components/Logo/Logo'
 import { HeaderNav } from './Nav'
 
 interface HeaderClientProps {
   data: Header | null
-  tenantSlug?: string
   /** The site's standing CTA (resolved server-side from the tenant tokens). */
   cta?: { label: string; url: string }
+  /** The resolved logo (uploaded image or wordmark), resolved server-side. */
+  logo: TenantLogo
 }
 
-export const HeaderClient: React.FC<HeaderClientProps> = ({ data, tenantSlug, cta }) => {
+export const HeaderClient: React.FC<HeaderClientProps> = ({ data, cta, logo }) => {
   /* Storing the value in a useState to avoid hydration errors */
   const [theme, setTheme] = useState<string | null>(null)
   const { headerTheme, setHeaderTheme } = useHeaderTheme()
@@ -38,12 +40,7 @@ export const HeaderClient: React.FC<HeaderClientProps> = ({ data, tenantSlug, ct
         <Link href="/">
           {/* text-foreground re-resolves under the header's data-theme, so the
               logo turns light on dark heroes and dark on light heroes. */}
-          <Logo
-            loading="eager"
-            priority="high"
-            tenantSlug={tenantSlug}
-            className="text-foreground"
-          />
+          <Logo loading="eager" priority="high" logo={logo} className="text-foreground" />
         </Link>
         <HeaderNav data={data} cta={cta} />
       </div>

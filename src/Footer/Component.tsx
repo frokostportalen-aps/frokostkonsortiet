@@ -8,6 +8,7 @@ import { ThemeSelector } from '@/providers/Theme/ThemeSelector'
 import { CMSLink } from '@/components/Link'
 import { Logo } from '@/components/Logo/Logo'
 import { getDialect } from '@/themes/dialect'
+import { resolveTenantBrand } from '@/themes/resolveTenantBrand'
 import { getAllTenants } from '@/utilities/getTenant'
 import { getTenantCrossURL } from '@/utilities/getURL'
 import { signatureMarkClass } from '@/components/SignatureMark'
@@ -19,9 +20,10 @@ const footerLinkClass =
 
 export async function Footer({ tenantSlug }: { tenantSlug: string }) {
   // Independent lookups — run them concurrently.
-  const [footerData, tenants] = await Promise.all([
+  const [footerData, tenants, brand] = await Promise.all([
     getCachedGlobal('footer', tenantSlug, 1)() as Promise<FooterType | null>,
     getAllTenants(),
+    resolveTenantBrand(tenantSlug),
   ])
   const navItems = footerData?.navItems || []
 
@@ -38,12 +40,15 @@ export async function Footer({ tenantSlug }: { tenantSlug: string }) {
   const year = new Date().getFullYear()
 
   return (
-    <footer data-theme="dark" className="mt-auto border-t border-border bg-background text-foreground">
+    <footer
+      data-theme="dark"
+      className="mt-auto border-t border-border bg-background text-foreground"
+    >
       <div className="container grid gap-12 py-14 md:grid-cols-12 md:py-20">
         {/* Brand */}
         <div className="flex flex-col items-start gap-5 md:col-span-6 lg:col-span-5">
           <Link href="/">
-            <Logo tenantSlug={tenantSlug} />
+            <Logo logo={brand.logo} />
           </Link>
           {dialect.tagline && (
             <p className="max-w-xs text-sm leading-relaxed text-muted-foreground">
@@ -61,12 +66,7 @@ export async function Footer({ tenantSlug }: { tenantSlug: string }) {
           >
             <h2 className={footerHeadingClass}>Genveje</h2>
             {navItems.map(({ link }, i) => (
-              <CMSLink
-                key={i}
-                {...link}
-                appearance="inline"
-                className={footerLinkClass}
-              />
+              <CMSLink key={i} {...link} appearance="inline" className={footerLinkClass} />
             ))}
           </nav>
         )}
@@ -77,15 +77,14 @@ export async function Footer({ tenantSlug }: { tenantSlug: string }) {
             <h2 className={footerHeadingClass}>Familien</h2>
             {family.map((t) =>
               t.slug === tenantSlug ? (
-                <span key={t.slug} className="w-fit py-1.5 text-sm font-medium text-foreground md:py-0">
+                <span
+                  key={t.slug}
+                  className="w-fit py-1.5 text-sm font-medium text-foreground md:py-0"
+                >
                   {t.name}
                 </span>
               ) : (
-                <a
-                  key={t.slug}
-                  href={getTenantCrossURL(t)}
-                  className={footerLinkClass}
-                >
+                <a key={t.slug} href={getTenantCrossURL(t)} className={footerLinkClass}>
                   {t.name}
                 </a>
               ),

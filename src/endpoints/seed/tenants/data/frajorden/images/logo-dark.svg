@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 188 46" role="img" aria-label="Fra Jorden">
+  <!-- Light-on-dark variant: pale serif wordmark, brighter sage underline. -->
+  <text x="1" y="30" font-family="Georgia, 'Times New Roman', serif" font-size="29" fill="#eaf1de">Fra Jorden</text>
+  <path d="M3 40 q 44 5 92 1 t 88 -2" fill="none" stroke="#9cc27a" stroke-width="2.6" stroke-linecap="round"/>
+</svg>

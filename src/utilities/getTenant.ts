@@ -3,6 +3,7 @@ import type { Tenant } from '@/payload-types'
 import configPromise from '@payload-config'
 import { getPayload } from 'payload'
 import { unstable_cache } from 'next/cache'
+import { cache } from 'react'
 
 async function queryTenantBySlug(slug: string): Promise<Tenant | null> {
   const payload = await getPayload({ config: configPromise })
@@ -17,12 +18,16 @@ async function queryTenantBySlug(slug: string): Promise<Tenant | null> {
 }
 
 /**
- * Cached tenant lookup by slug, tagged so a tenant edit revalidates it.
+ * Cached tenant lookup by slug, tagged so a tenant edit revalidates it. The
+ * React cache() wrapper additionally dedupes concurrent lookups within one
+ * render pass (metadata, header and footer all ask for the same tenant), which
+ * unstable_cache alone doesn't do for in-flight misses.
  */
-export const getTenantBySlug = (slug: string) =>
+export const getTenantBySlug = cache((slug: string) =>
   unstable_cache(async () => queryTenantBySlug(slug), ['tenant', slug], {
     tags: ['tenant-domains', `tenant_${slug}`],
-  })()
+  })(),
+)
 
 /**
  * All tenants with their public fields (name, slug, domains, isMain) — used by

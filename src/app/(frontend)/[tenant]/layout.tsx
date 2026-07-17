@@ -9,7 +9,7 @@ import { mergeOpenGraph } from '@/utilities/mergeOpenGraph'
 import { getTenantBySlug } from '@/utilities/getTenant'
 import { getServerSideURL, getTenantServerURL } from '@/utilities/getURL'
 import { getTenantTheme } from '@/themes/tenantThemes'
-import { getTenantFavicon } from '@/themes/favicon'
+import { resolveTenantBrand } from '@/themes/resolveTenantBrand'
 import { getTenantFont } from '@/themes/fonts'
 
 type Args = {
@@ -45,15 +45,27 @@ export default async function TenantLayout({ children, params }: Args) {
 
 export async function generateMetadata({ params }: Args): Promise<Metadata> {
   const { tenant: tenantSlug } = await params
-  const tenant = await getTenantBySlug(tenantSlug)
-  const favicon = getTenantFavicon(tenantSlug)
+  const [tenant, brand] = await Promise.all([
+    getTenantBySlug(tenantSlug),
+    resolveTenantBrand(tenantSlug),
+  ])
+  const favicon = brand.favicon
 
   return {
     metadataBase: new URL(tenant ? getTenantServerURL(tenant) : getServerSideURL()),
     title: tenant?.name ? { default: tenant.name, template: `%s | ${tenant.name}` } : undefined,
     // Overrides the root layout's shared fallback icon, so each site carries
-    // its own mark in a row of browser tabs.
-    icons: favicon ? { icon: [{ url: favicon, type: 'image/svg+xml' }] } : undefined,
+    // its own mark in a row of browser tabs. An uploaded favicon (any image) or
+    // the generated SVG letter-mark data URI.
+    icons: favicon
+      ? {
+          icon: [
+            favicon.startsWith('data:')
+              ? { url: favicon, type: 'image/svg+xml' }
+              : { url: favicon },
+          ],
+        }
+      : undefined,
     openGraph: mergeOpenGraph(
       tenant?.name ? { siteName: tenant.name, title: tenant.name } : undefined,
     ),
