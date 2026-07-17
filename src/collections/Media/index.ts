@@ -56,6 +56,18 @@ export const Media: CollectionConfig = {
     staticDir: path.resolve(dirname, '../../../public/media'),
     adminThumbnail: 'thumbnail',
     focalPoint: true,
+    // Media streams through the API route (serverless function → R2) and is
+    // served uncached by default, so even a tiny header-logo SVG costs a full
+    // function round-trip on every page view. Cache aggressively instead: the
+    // frontend's media URLs are cache-busted (`getMediaUrl` appends the doc's
+    // `updatedAt`), so a changed upload always gets a fresh URL. The caveat is
+    // URLs *without* the tag (the admin's raw file URLs): replacing a file
+    // under the same filename (in practice only a `--force` re-seed) can show
+    // the old asset in the admin until a hard refresh.
+    modifyResponseHeaders: ({ headers }) => {
+      headers.set('Cache-Control', 'public, max-age=31536000, s-maxage=31536000, immutable')
+      return headers
+    },
     imageSizes: [
       {
         name: 'thumbnail',
