@@ -75,6 +75,7 @@ export interface Config {
     tenants: Tenant;
     header: Header;
     footer: Footer;
+    brand: Brand;
     redirects: Redirect;
     forms: Form;
     'form-submissions': FormSubmission;
@@ -95,6 +96,7 @@ export interface Config {
     tenants: TenantsSelect<false> | TenantsSelect<true>;
     header: HeaderSelect<false> | HeaderSelect<true>;
     footer: FooterSelect<false> | FooterSelect<true>;
+    brand: BrandSelect<false> | BrandSelect<true>;
     redirects: RedirectsSelect<false> | RedirectsSelect<true>;
     forms: FormsSelect<false> | FormsSelect<true>;
     'form-submissions': FormSubmissionsSelect<false> | FormSubmissionsSelect<true>;
@@ -1192,6 +1194,28 @@ export interface Footer {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "brand".
+ */
+export interface Brand {
+  id: string;
+  tenant?: (string | null) | Tenant;
+  /**
+   * Firmaets logo (vises i header og footer). Uden logo vises firmanavnet som tekst.
+   */
+  logo?: (string | null) | Media;
+  /**
+   * Lys udgave af logoet, til mørke flader (footer og mørke hero-baggrunde). Uden denne bruges det almindelige logo.
+   */
+  logoDark?: (string | null) | Media;
+  /**
+   * Fanebladsikon. Brug en kvadratisk PNG/SVG. Uden favicon genereres et bogstavmærke ud fra temaets farver.
+   */
+  favicon?: (string | null) | Media;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "redirects".
  */
 export interface Redirect {
@@ -1413,6 +1437,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'footer';
         value: string | Footer;
+      } | null)
+    | ({
+        relationTo: 'brand';
+        value: string | Brand;
       } | null)
     | ({
         relationTo: 'redirects';
@@ -2072,6 +2100,18 @@ export interface FooterSelect<T extends boolean = true> {
             };
         id?: T;
       };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "brand_select".
+ */
+export interface BrandSelect<T extends boolean = true> {
+  tenant?: T;
+  logo?: T;
+  logoDark?: T;
+  favicon?: T;
   updatedAt?: T;
   createdAt?: T;
 }

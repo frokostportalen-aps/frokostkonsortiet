@@ -10,6 +10,7 @@ import { Pages } from './collections/Pages'
 import { Posts } from './collections/Posts'
 import { Tenants } from './collections/Tenants'
 import { Users } from './collections/Users'
+import { Brand } from './Brand/config'
 import { Footer } from './Footer/config'
 import { Header } from './Header/config'
 import { plugins } from './plugins'
@@ -59,7 +60,7 @@ export default buildConfig({
     url: process.env.DATABASE_URL || '',
     migrationDir: path.resolve(dirname, 'migrations'),
   }),
-  collections: [Pages, Posts, Media, Categories, Users, Tenants, Header, Footer],
+  collections: [Pages, Posts, Media, Categories, Users, Tenants, Header, Footer, Brand],
   // Every tenant serves the admin/API and live preview from its own domain, so
   // all of them must be allowed origins. Set TENANT_ORIGINS to a comma list.
   cors: [

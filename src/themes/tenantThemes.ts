@@ -26,6 +26,9 @@
 export type TenantLogo = {
   text?: string
   src?: string
+  /** A light-on-dark logo variant, shown on dark surfaces (footer, dark heroes)
+   *  when present. Falls back to `src`. */
+  srcDark?: string
   width?: number
   height?: number
 }

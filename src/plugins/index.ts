@@ -108,6 +108,7 @@ export const plugins: Plugin[] = [
       media: {},
       header: { isGlobal: true },
       footer: { isGlobal: true },
+      brand: { isGlobal: true },
       redirects: {},
       forms: {},
       search: {},

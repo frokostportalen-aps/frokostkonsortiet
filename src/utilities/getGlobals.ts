@@ -8,7 +8,7 @@ import { unstable_cache } from 'next/cache'
  * given site, cached under a per-tenant tag so revalidating one site's header
  * does not bust another's.
  */
-type TenantGlobalSlug = 'header' | 'footer'
+type TenantGlobalSlug = 'header' | 'footer' | 'brand'
 
 async function getTenantGlobal(slug: TenantGlobalSlug, tenantSlug: string, depth = 1) {
   const payload = await getPayload({ config: configPromise })
