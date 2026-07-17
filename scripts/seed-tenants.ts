@@ -20,9 +20,10 @@ import { isProduction, targetLabel } from './seedTarget'
  */
 const revalidateSeeded = async (
   items: RevalidateRef[],
+  tags: string[],
   log: (msg: string) => void,
 ): Promise<void> => {
-  if (items.length === 0) return
+  if (items.length === 0 && tags.length === 0) return
   const secret = process.env.REVALIDATE_SECRET
   if (!secret) {
     log(
@@ -35,16 +36,20 @@ const revalidateSeeded = async (
     const res = await fetch(new URL('/next/revalidate', base), {
       method: 'POST',
       headers: { 'content-type': 'application/json', 'x-revalidate-secret': secret },
-      body: JSON.stringify({ items }),
+      body: JSON.stringify({ items, tags }),
     })
     if (!res.ok) {
-      log(`Revalidering fejlede (HTTP ${res.status}) — sider opdateres inden for revalidate-vinduet.`)
+      log(
+        `Revalidering fejlede (HTTP ${res.status}) — sider opdateres inden for revalidate-vinduet.`,
+      )
       return
     }
     const { revalidated } = (await res.json()) as { revalidated: number }
-    log(`✓ Revaliderede ${revalidated} stier via ${base}`)
+    log(`✓ Revaliderede ${revalidated} stier/tags via ${base}`)
   } catch (err) {
-    log(`Revalidering kunne ikke nå ${base} (${(err as Error).message}) — sider opdateres inden for revalidate-vinduet.`)
+    log(
+      `Revalidering kunne ikke nå ${base} (${(err as Error).message}) — sider opdateres inden for revalidate-vinduet.`,
+    )
   }
 }
 
@@ -98,9 +103,9 @@ const run = async () => {
 
   const payload = await getPayload({ config })
   payload.logger.info(`Seeding (${mode}${prod ? ', PRODUKTION' : ''}) → ${target}`)
-  const { revalidate } = await seedTenants(payload, { force })
+  const { revalidate, revalidateTags } = await seedTenants(payload, { force })
   payload.logger.info('Done seeding tenants.')
-  await revalidateSeeded(revalidate, (msg) => payload.logger.info(msg))
+  await revalidateSeeded(revalidate, revalidateTags, (msg) => payload.logger.info(msg))
   process.exit(0)
 }
 

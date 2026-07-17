@@ -89,6 +89,7 @@ const MIME: Record<string, string> = {
   '.webp': 'image/webp',
   '.gif': 'image/gif',
   '.avif': 'image/avif',
+  '.svg': 'image/svg+xml',
   '.mp4': 'video/mp4',
 }
 
@@ -193,11 +194,18 @@ export type SeedResult = {
    * these to `/next/revalidate` afterwards to purge the ISR cache immediately.
    */
   revalidate: RevalidateRef[]
+  /**
+   * Cache tags for the tenant globals (header/footer/brand) this run actually
+   * wrote. Their afterChange hooks can't fire during seeding either, so the CLI
+   * forwards these tags to `/next/revalidate`, which busts them directly.
+   */
+  revalidateTags: string[]
 }
 
 export async function seedTenants(payload: Payload, opts: SeedOptions = {}): Promise<SeedResult> {
   const force = opts.force ?? false
   const revalidate: RevalidateRef[] = []
+  const revalidateTags: string[] = []
 
   // Author for the seeded posts. Prefer an existing super-admin, then any
   // existing user; only create the dev admin when the database has NO users at
@@ -291,7 +299,9 @@ export async function seedTenants(payload: Payload, opts: SeedOptions = {}): Pro
     }
 
     // Upload this tenant's images and build the `img('name')` resolver.
-    const images = await loadImages(payload, t.slug, tenantID, path.join(t.dir, 'images'), { force })
+    const images = await loadImages(payload, t.slug, tenantID, path.join(t.dir, 'images'), {
+      force,
+    })
     const img = (key: string): string => {
       const id = images[key]
       if (!id) {
@@ -317,7 +327,9 @@ export async function seedTenants(payload: Payload, opts: SeedOptions = {}): Pro
       confirmationType: 'message' as const,
       confirmationMessage: richText(
         heading('h3', 'Tak for jeres forespørgsel!'),
-        para('Vi vender tilbage inden for én hverdag med et tilbud, der passer til jeres arbejdsplads.'),
+        para(
+          'Vi vender tilbage inden for én hverdag med et tilbud, der passer til jeres arbejdsplads.',
+        ),
       ) as unknown as Form['confirmationMessage'],
       emails: [
         {
@@ -327,9 +339,21 @@ export async function seedTenants(payload: Payload, opts: SeedOptions = {}): Pro
       ],
       fields: [
         { blockType: 'text' as const, name: 'navn', label: 'Navn', required: true, width: 50 },
-        { blockType: 'text' as const, name: 'virksomhed', label: 'Virksomhed', required: true, width: 50 },
+        {
+          blockType: 'text' as const,
+          name: 'virksomhed',
+          label: 'Virksomhed',
+          required: true,
+          width: 50,
+        },
         { blockType: 'email' as const, name: 'email', label: 'E-mail', required: true, width: 50 },
-        { blockType: 'text' as const, name: 'telefon', label: 'Telefon', required: false, width: 50 },
+        {
+          blockType: 'text' as const,
+          name: 'telefon',
+          label: 'Telefon',
+          required: false,
+          width: 50,
+        },
         {
           // Structured "what is this about" — shares its vocabulary and field
           // name with the plan-picker wizard, which answers it on the
@@ -417,10 +441,36 @@ export async function seedTenants(payload: Payload, opts: SeedOptions = {}): Pro
       })
     }
 
-    // Header + footer navigation come from the tenant's menu.ts.
+    // Tenant globals: header + footer navigation come from the tenant's
+    // menu.ts; brand assets (logo + optional light-on-dark variant + favicon)
+    // are loaded by convention from the tenant's images/ folder. Absent brand
+    // assets are written as explicit nulls, so a --force refresh clears fields
+    // whose seed image was removed (the media wipe above already deleted the
+    // referenced upload) instead of leaving dangling references — an unset
+    // favicon then falls back to the generated letter-mark.
     const { header, footer } = t.menu(pageCtx)
-    await upsertNav(payload, 'header', t.slug, tenantID, header, { force })
-    await upsertNav(payload, 'footer', t.slug, tenantID, footer, { force })
+    const globals = {
+      header: { navItems: header },
+      footer: { navItems: footer },
+      brand: {
+        logo: images['logo'] ?? null,
+        logoDark: images['logo-dark'] ?? null,
+        favicon: images['favicon'] ?? null,
+      },
+    } as const
+    for (const collection of ['header', 'footer', 'brand'] as const) {
+      const wrote = await upsertTenantGlobal(
+        payload,
+        collection,
+        t.slug,
+        tenantID,
+        globals[collection],
+        { force },
+      )
+      // The afterChange hooks are disabled during seeding, so report the tag
+      // for the CLI to bust via /next/revalidate.
+      if (wrote) revalidateTags.push(`${collection}_${t.slug}`)
+    }
 
     const newPages = pageResults.filter((r) => r.created).length
     const newPosts = postCreated.filter(Boolean).length
@@ -429,21 +479,23 @@ export async function seedTenants(payload: Payload, opts: SeedOptions = {}): Pro
     )
   }
 
-  return { revalidate }
+  return { revalidate, revalidateTags }
 }
 
 /**
- * Create the nav if the tenant has none; with force, refresh an existing one.
- * Additive runs leave an existing nav untouched (it may have been edited).
+ * Create a tenant-scoped global (header/footer nav, brand assets) if the tenant
+ * has none; with force, refresh an existing one. Additive runs leave an existing
+ * doc untouched (it may have been edited, so editor changes survive). Returns
+ * whether this run wrote the doc, so the caller can bust its cache tag.
  */
-async function upsertNav(
+async function upsertTenantGlobal(
   payload: Payload,
-  collection: 'header' | 'footer',
+  collection: 'header' | 'footer' | 'brand',
   tenantSlug: string,
   tenantID: string,
-  navItems: unknown[],
+  data: Record<string, unknown>,
   { force }: UpsertOpts,
-) {
+): Promise<boolean> {
   const existing = await payload.find({
     collection,
     where: { 'tenant.slug': { equals: tenantSlug } },
@@ -451,19 +503,19 @@ async function upsertNav(
     pagination: false,
   })
   if (existing.docs[0]) {
-    if (force) {
-      await payload.update({
-        collection,
-        id: existing.docs[0].id,
-        context: ctx,
-        data: { navItems } as never,
-      })
-    }
-  } else {
-    await payload.create({
+    if (!force) return false
+    await payload.update({
       collection,
+      id: existing.docs[0].id,
       context: ctx,
-      data: { tenant: tenantID, navItems } as never,
+      data: data as never,
     })
+    return true
   }
+  await payload.create({
+    collection,
+    context: ctx,
+    data: { tenant: tenantID, ...data } as never,
+  })
+  return true
 }

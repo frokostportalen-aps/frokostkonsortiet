@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 232 48" role="img" aria-label="Frokost Konsortiet">
+  <!-- Signature: a bold curry block bar — the parent's structural mark. -->
+  <rect x="0" y="0" width="7" height="48" rx="1" fill="#e9cd76"/>
+  <g fill="#23262f" font-family="'Helvetica Neue', Arial, system-ui, sans-serif" font-weight="700" letter-spacing="1.5">
+    <text x="20" y="21" font-size="18">FROKOST</text>
+    <text x="20" y="42" font-size="18">KONSORTIET</text>
+  </g>
+</svg>

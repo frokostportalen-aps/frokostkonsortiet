@@ -18,10 +18,20 @@ import type { RevalidateRef } from '@/endpoints/seed/tenants/seed-tenants'
  *
  *   POST /next/revalidate
  *   x-revalidate-secret: <REVALIDATE_SECRET>
- *   { "items": [{ "tenant": "smagssans", "slug": "home", "collection": "pages" }] }
+ *   {
+ *     "items": [{ "tenant": "smagssans", "slug": "home", "collection": "pages" }],
+ *     "tags": ["brand_smagssans"]
+ *   }
  */
 const pathFor = ({ tenant, slug, collection }: RevalidateRef): string =>
   collection === 'posts' ? postPath(tenant, slug) : pagePath(tenant, slug)
+
+/**
+ * The only tags callers may bust directly: the per-tenant globals the seed
+ * writes with `context.disableRevalidate` (their afterChange hooks never fire,
+ * so the seed reports exactly the tags it touched — see `SeedResult`).
+ */
+const TENANT_GLOBAL_TAG = /^(header|footer|brand)_[a-z0-9-]+$/
 
 export async function POST(req: NextRequest): Promise<Response> {
   const secret = process.env.REVALIDATE_SECRET
@@ -30,9 +40,13 @@ export async function POST(req: NextRequest): Promise<Response> {
   }
 
   let items: RevalidateRef[]
+  let tags: string[]
   try {
-    const body = (await req.json()) as { items?: RevalidateRef[] }
+    const body = (await req.json()) as { items?: RevalidateRef[]; tags?: unknown[] }
     items = Array.isArray(body.items) ? body.items : []
+    tags = (Array.isArray(body.tags) ? body.tags : []).filter(
+      (tag): tag is string => typeof tag === 'string' && TENANT_GLOBAL_TAG.test(tag),
+    )
   } catch {
     return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 })
   }
@@ -54,6 +68,11 @@ export async function POST(req: NextRequest): Promise<Response> {
   for (const tenant of sitemapTenants.pages) revalidateTag(`pages-sitemap-${tenant}`, 'max')
   for (const tenant of sitemapTenants.posts) revalidateTag(`posts-sitemap-${tenant}`, 'max')
 
+  // Replay the tenant-global tags the seed reported (header/footer nav, brand
+  // logo + favicon), so a seeded change shows immediately — these caches are
+  // tag-only with no expiry, so nothing else would ever refresh them.
+  for (const tag of tags) revalidateTag(tag, 'max')
+
   // Seeding also creates/updates tenants, but it runs with
   // `context.disableRevalidate`, so the Tenants afterChange hook that normally
   // busts the `tenant-domains` tag never fires. Bust it here so the proxy's
@@ -62,5 +81,5 @@ export async function POST(req: NextRequest): Promise<Response> {
   // because no host can be resolved to a tenant.
   revalidateTag('tenant-domains', 'max')
 
-  return NextResponse.json({ revalidated: paths.length, paths })
+  return NextResponse.json({ revalidated: paths.length + tags.length, paths, tags })
 }
