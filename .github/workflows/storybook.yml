@@ -1,0 +1,65 @@
+name: Storybook
+
+# The block library, published for the team and the client to browse:
+# https://frokostportalen-aps.github.io/frokostkonsortiet/
+#
+# Deploys from main only. Pull requests build the site as a check but publish
+# nothing, so a broken story is caught before it can replace a working page.
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# One deploy at a time. A queued run is superseded rather than cancelled
+# mid-flight, so an in-progress publish is never left half-applied.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      # Type errors don't fail a Storybook build, so check them separately —
+      # otherwise a story with a broken prop type publishes quietly.
+      - name: Typecheck
+        run: pnpm exec tsc --noEmit
+
+      # No .env here, and none needed: the stories render components from their
+      # props, and every fixture is committed under src/stories/.
+      - name: Build Storybook
+        run: pnpm build:storybook
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: storybook-static
+
+  deploy:
+    # Pull requests build above but stop here.
+    if: github.ref == 'refs/heads/main'
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

@@ -13,8 +13,17 @@ import type { Media } from '@/payload-types'
 export { heading, link, list, p, paragraph, richText, text } from './lexical'
 
 /**
+ * Where this Storybook is served from: `/` locally, `/<repo>/` on GitHub Pages.
+ *
+ * Asset URLs have to be built against it. An absolute `/img/…` resolves to the
+ * domain root, which on a project Pages site is a different site altogether —
+ * so every photo 404s there while working perfectly in local dev.
+ */
+const basePath = typeof document === 'undefined' ? '/' : new URL('.', document.baseURI).pathname
+
+/**
  * A Media document pointing at one of Storybook's own photos in
- * `stories/assets/`, served at `/img`.
+ * `stories/assets/`, served under `<base>img/`.
  */
 export const media = (
   filename: string,
@@ -23,7 +32,7 @@ export const media = (
   ({
     id: `mock-${filename}`,
     alt,
-    url: `/img/${filename}`,
+    url: `${basePath}img/${filename}`,
     filename,
     mimeType: filename.endsWith('.webp') ? 'image/webp' : 'image/jpeg',
     width,
