@@ -24,6 +24,7 @@ export const frokostKonsortiet: TenantDef = {
   ],
   tagline: 'Frokost, der samler os',
   dir: folderOf(import.meta.url),
+  contactEmail: 'kontakt@frokostkonsortiet.dk',
   pages: [home, omOs, services, frokostportalen, partnere, netvaerk, kontakt],
   posts,
   menu,

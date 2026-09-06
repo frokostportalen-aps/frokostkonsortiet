@@ -10,6 +10,9 @@ import { NEED_OPTIONS, QUOTE_FORM_FIELDS } from '../../../blocks/PlanPicker/opti
 import type { Form } from '../../../payload-types'
 import { pickLinkDomain, urlForTenantDomain } from '../../../utilities/tenantDomains'
 
+/** One entry in a form's notification-email list. */
+type FormEmail = NonNullable<Form['emails']>[number]
+
 const ctx = { disableRevalidate: true }
 const PORT = 3000
 
@@ -20,6 +23,14 @@ const PORT = 3000
  * to link to the public `new.*` domains instead.
  */
 const preferPublicLinks = process.env.SEED_LINK_DOMAIN === 'public'
+
+/**
+ * Fallback sender for sites that don't set their own `senderEmail`. Its domain
+ * is the one that has to be verified in Resend; keep it in step with
+ * EMAIL_DEFAULT_FROM_ADDRESS in `payload.config.ts`.
+ */
+const DEFAULT_FROM_ADDRESS =
+  process.env.EMAIL_DEFAULT_FROM_ADDRESS || 'no-reply@frokostkonsortiet.dk'
 
 // ── idempotent upsert helpers ──────────────────────────────────────────────
 //
@@ -332,9 +343,21 @@ export async function seedTenants(payload: Payload, opts: SeedOptions = {}): Pro
         ),
       ) as unknown as Form['confirmationMessage'],
       emails: [
+        // Each site owns its own lead inbox and sender identity; only the
+        // fallback address is platform-wide, so one verified domain covers
+        // every site that hasn't got one of its own.
         {
-          emailTo: 'kontakt@frokostkonsortiet.dk',
+          emailTo: t.contactEmail,
+          emailFrom: `${t.name} <${t.senderEmail || DEFAULT_FROM_ADDRESS}>`,
+          // Replying to the notification writes straight back to the visitor.
+          replyTo: '{{email}}',
           subject: `Ny tilbudsforespørgsel – ${t.name}`,
+          // plugin-form-builder expands `{{*:table}}` into a table of every
+          // submitted field, so fields an editor adds later show up too.
+          message: richText(
+            heading('h3', `Ny tilbudsforespørgsel fra ${t.name}`),
+            para('{{*:table}}'),
+          ) as unknown as FormEmail['message'],
         },
       ],
       fields: [

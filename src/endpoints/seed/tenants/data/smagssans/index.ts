@@ -21,6 +21,7 @@ export const smagssans: TenantDef = {
   domains: ['smagssans.localhost', 'smagssans.dk', 'new.smagssans.dk'],
   tagline: 'Det handler om at være glad for mad',
   dir: folderOf(import.meta.url),
+  contactEmail: 'kontakt@smagssans.dk',
   pages: [home, omOs, frokostUdAfHuset, kantine, menuvariationer, catering, moedeforplejning, frugtordning, baeredygtighed, kundeportal, faqPage],
   posts,
   menu,

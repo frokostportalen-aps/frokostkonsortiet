@@ -1,4 +1,5 @@
 import { mongooseAdapter } from '@payloadcms/db-mongodb'
+import { resendAdapter } from '@payloadcms/email-resend'
 import sharp from 'sharp'
 import path from 'path'
 import { buildConfig, PayloadRequest } from 'payload'
@@ -67,6 +68,31 @@ export default buildConfig({
     getServerSideURL(),
     ...(process.env.TENANT_ORIGINS?.split(',').map((o) => o.trim()) ?? []),
   ].filter(Boolean),
+  // Transactional mail — form notifications and password resets — goes out
+  // through Resend when an API key is present. Without one, e.g. local dev,
+  // Payload keeps its default adapter, which logs the mail instead of sending
+  // it, so nothing breaks and no real address is ever contacted by accident.
+  //
+  // These two are the *platform fallback*, not each site's identity: a site's
+  // own sender and lead inbox live on its tenant definition and are seeded
+  // onto its form. The fallback still matters because Payload's own auth mail
+  // (password resets) is sent with `email.defaultFromName/Address` hardcoded
+  // in `forgotPassword.ts` — there is no per-tenant seam for it.
+  ...(process.env.RESEND_API_KEY
+    ? {
+        email: resendAdapter({
+          apiKey: process.env.RESEND_API_KEY,
+          defaultFromAddress:
+            process.env.EMAIL_DEFAULT_FROM_ADDRESS || 'no-reply@frokostkonsortiet.dk',
+          defaultFromName: process.env.EMAIL_DEFAULT_FROM_NAME || 'Frokost Konsortiet',
+          // Staging safety valve: with this set, every mail is redirected here
+          // instead of reaching the real recipient.
+          ...(process.env.EMAIL_OVERRIDE_RECIPIENT
+            ? { overrideRecipientAddress: process.env.EMAIL_OVERRIDE_RECIPIENT }
+            : {}),
+        }),
+      }
+    : {}),
   plugins,
   secret: process.env.PAYLOAD_SECRET,
   sharp,
