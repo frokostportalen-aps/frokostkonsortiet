@@ -1,28 +1,34 @@
 name: Storybook
 
-# The block library, published for the team and the client to browse:
-# https://frokostportalen-aps.github.io/frokostkonsortiet/
+# The block library, published for the team and the client to browse.
 #
-# Deploys from main only. Pull requests build the site as a check but publish
-# nothing, so a broken story is caught before it can replace a working page.
+#   main          → https://frokostportalen-aps.github.io/frokostkonsortiet/
+#   pull request  → …/pr-<number>/         (removed again when the PR closes)
+#
+# Everything lands on the `gh-pages` branch, in a folder per pull request.
+# GitHub Pages serves one site per repository and has no preview environments
+# of its own, so the folder *is* the preview — which is also why Pages must be
+# set to "Deploy from a branch: gh-pages / (root)" rather than "GitHub Actions".
 on:
   push:
     branches: [main]
   pull_request:
+    types: [opened, synchronize, reopened, closed]
   workflow_dispatch:
 
 permissions:
   contents: read
 
-# One deploy at a time. A queued run is superseded rather than cancelled
-# mid-flight, so an in-progress publish is never left half-applied.
-concurrency:
-  group: pages
-  cancel-in-progress: false
-
 jobs:
   build:
+    # Nothing to build when a PR is merely being closed — that only cleans up.
+    if: github.event.action != 'closed'
     runs-on: ubuntu-latest
+    # Superseded builds of the same ref are worth cancelling; they publish
+    # nothing on their own.
+    concurrency:
+      group: storybook-build-${{ github.event.pull_request.number || github.ref }}
+      cancel-in-progress: true
     steps:
       - uses: actions/checkout@v4
 
@@ -45,21 +51,129 @@ jobs:
       - name: Build Storybook
         run: pnpm build:storybook
 
-      - uses: actions/upload-pages-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
+          name: storybook
           path: storybook-static
+          retention-days: 7
 
-  deploy:
-    # Pull requests build above but stop here.
-    if: github.ref == 'refs/heads/main'
+  publish:
+    # Only main and pull requests publish. Without the branch check, a manual
+    # workflow_dispatch from a feature branch would overwrite the public site
+    # at the root — and since the deploy force-pushes a single commit, there
+    # would be no history to roll back to.
+    #
+    # A pull request from a fork gets a read-only token and cannot publish; it
+    # still builds and typechecks above, and this job is skipped rather than
+    # failing.
+    if: >-
+      github.event.action != 'closed' &&
+      ((github.event_name == 'pull_request' &&
+        github.event.pull_request.head.repo.full_name == github.repository) ||
+       (github.event_name != 'pull_request' &&
+        github.ref == 'refs/heads/main'))
     needs: build
     runs-on: ubuntu-latest
     permissions:
-      pages: write
-      id-token: write
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+      contents: write
+      pull-requests: write
+    # Every publish and cleanup force-pushes the *same* branch, so they all
+    # share one queue. A group per PR would let two runs fetch the same tip,
+    # each build their own commit from it, and have the later force-push drop
+    # the other's folder. Never cancel mid-flight: a half-applied publish would
+    # leave the branch in a state no run owns.
+    concurrency:
+      group: gh-pages
+      cancel-in-progress: false
     steps:
-      - id: deployment
-        uses: actions/deploy-pages@v4
+      - uses: actions/checkout@v4
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: storybook
+          path: storybook-static
+
+      - name: Publish
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          branch: gh-pages
+          folder: storybook-static
+          # Root for main, a folder of its own for a pull request.
+          target-folder: ${{ github.event_name == 'pull_request' && format('pr-{0}', github.event.pull_request.number) || '.' }}
+          # A deploy to the root would otherwise wipe every open PR preview.
+          clean-exclude: pr-*
+          single-commit: true
+          commit-message: "storybook: ${{ github.event_name == 'pull_request' && format('preview for PR #{0}', github.event.pull_request.number) || 'main' }}"
+
+      - name: Link the preview from the pull request
+        if: github.event_name == 'pull_request'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR: ${{ github.event.pull_request.number }}
+          URL: https://frokostportalen-aps.github.io/frokostkonsortiet/pr-${{ github.event.pull_request.number }}/
+        run: |
+          # One comment per PR, edited on each push rather than a new one each time.
+          gh pr comment "$PR" --edit-last --create-if-none --body "📚 **Storybook for denne PR:** $URL
+
+          Skift site og lys/mørk i værktøjslinjen. Opdateres ved hvert push; fjernes når PR'en lukkes."
+
+  # Drop the preview folder once the pull request is done with, so gh-pages
+  # doesn't accumulate a directory per PR ever opened.
+  cleanup:
+    if: >-
+      github.event_name == 'pull_request' && github.event.action == 'closed' &&
+      github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    # Same queue as publish: merging a PR fires `closed` and a push to main at
+    # once, and those two would otherwise race — either the cleanup's push is
+    # rejected, or the main publish restores the folder the cleanup just took
+    # away.
+    concurrency:
+      group: gh-pages
+      cancel-in-progress: false
+    steps:
+      # The branch does not exist until something has published. A PR whose
+      # build failed and was then closed has nothing to clean up, and checking
+      # out a missing ref would fail the job before any guard could run.
+      - id: branch
+        run: |
+          if git ls-remote --exit-code --heads \
+            "https://github.com/${{ github.repository }}.git" gh-pages >/dev/null 2>&1
+          then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+            echo "gh-pages findes ikke endnu — intet at rydde op."
+          fi
+
+      - uses: actions/checkout@v4
+        if: steps.branch.outputs.exists == 'true'
+        with:
+          ref: gh-pages
+
+      - name: Remove pr-${{ github.event.pull_request.number }}
+        if: steps.branch.outputs.exists == 'true'
+        env:
+          DIR: pr-${{ github.event.pull_request.number }}
+          PR: ${{ github.event.pull_request.number }}
+        run: |
+          set -euo pipefail
+          if [ ! -d "$DIR" ]; then
+            echo "$DIR findes ikke — intet at rydde op."
+            exit 0
+          fi
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git rm -rq "$DIR"
+          git commit -qm "storybook: remove preview for PR #$PR"
+          # The queue above keeps publishes and cleanups apart, but the branch
+          # is force-pushed by the deploy action, so the local tip can still be
+          # stale. Rebase onto whatever is there and try again rather than
+          # failing the run.
+          git push || {
+            git fetch origin gh-pages
+            git rebase origin/gh-pages
+            git push
+          }
