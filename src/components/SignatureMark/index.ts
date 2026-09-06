@@ -10,9 +10,16 @@ import type { Signature } from '@/themes/dialect'
  * below the map): it renders nothing by itself, but globals.css uses it to
  * let the mark draw itself (scaleX) inside a scroll-revealed section.
  */
+/** The narrower mark, shared by the two contexts that use it. */
+const brandline = {
+  rule: 'h-px w-12 bg-primary',
+  block: 'h-1 w-12 rounded-full bg-primary',
+  sketch: 'h-[3px] w-10 rounded-full bg-primary/80',
+}
+
 const rawMarkClass: Record<
-  'section' | 'pageHeader' | 'footer' | 'heroEyebrow' | 'ctaBand',
-  Record<Signature, string>
+  'section' | 'pageHeader' | 'footer' | 'band' | 'card' | 'heroEyebrow' | 'ctaBand',
+  Partial<Record<Signature, string>>
 > = {
   /** The rule under section headings (Content block). */
   section: {
@@ -26,10 +33,16 @@ const rawMarkClass: Record<
     block: 'h-1.5 w-14 bg-primary',
     sketch: 'h-[3px] w-12 rounded-full bg-primary/80',
   },
-  /** The footer's brand sign-off. */
-  footer: {
-    rule: 'h-px w-12 bg-primary',
-    block: 'h-1 w-12 rounded-full bg-primary',
+  /** The footer's brand sign-off, and the mark above a media + content band's
+   *  copy — the same width for the same reason: both sit beside body text
+   *  rather than under a section heading. */
+  footer: brandline,
+  band: brandline,
+  /** Above a signature card's content. `block` has no mark of its own — its
+   *  left bar is the marker — so the key is absent and the caller renders
+   *  nothing rather than a hidden element. */
+  card: {
+    rule: 'h-px w-10 bg-primary',
     sketch: 'h-[3px] w-10 rounded-full bg-primary/80',
   },
   /** Before the overlay hero's tagline (light-on-photo context). */

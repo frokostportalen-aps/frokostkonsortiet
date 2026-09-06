@@ -49,12 +49,10 @@ export const MediaBlock: React.FC<Props> = (props) => {
           // Videos keep their own aspect ratio (no crop — burnt-in subtitles
           // and faces must never be cut), centred at a comfortable width.
           className={
-            isVideo
-              ? 'mx-auto w-full max-w-[44rem] overflow-hidden rounded-[var(--radius)]'
-              : undefined
+            isVideo ? 'mx-auto w-full max-w-[44rem] overflow-hidden rounded-lg' : undefined
           }
           videoClassName="h-auto w-full object-contain"
-          imgClassName={cn('border border-border rounded-[0.8rem]', imgClassName)}
+          imgClassName={cn('border border-border rounded-lg', imgClassName)}
           resource={media}
           src={staticImage}
         />

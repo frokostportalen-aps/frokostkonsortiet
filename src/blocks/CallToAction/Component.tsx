@@ -19,7 +19,10 @@ export const CallToActionBlock: React.FC<Props> = ({ links, richText, tenantSlug
   const { tagline, eyebrow, signature } = getDialect(tenantSlug)
   return (
     <div className="container">
-      <div className="relative overflow-hidden rounded-[calc(var(--radius)*1.5)] bg-primary p-10 text-primary-foreground md:p-16">
+      {/* The inner padding follows the site's text inset, so the band's copy
+          lands on the same left edge as the prose above and below it. Sites
+          that set no inset keep the band's own 4rem. */}
+      <div className="relative overflow-hidden rounded-band bg-primary p-10 text-primary-foreground md:p-[var(--text-inset,4rem)]">
         {/* A quiet oversized quote-mark watermark — food, voice, hospitality. */}
         <span
           aria-hidden
@@ -43,7 +46,7 @@ export const CallToActionBlock: React.FC<Props> = ({ links, richText, tenantSlug
                 follow --primary-foreground rather than the mode. */}
             {richText && (
               <RichText
-                className="mb-0 [&_h2]:text-3xl [&_h2]:leading-tight md:[&_h2]:text-4xl [&_h3]:text-2xl md:[&_h3]:text-3xl [&_h2]:text-primary-foreground [&_h3]:text-primary-foreground [&_p]:text-primary-foreground/85"
+                className="mb-0 [&_h2]:section-heading [&_h3]:text-2xl md:[&_h3]:text-3xl [&_h2]:text-primary-foreground [&_h3]:text-primary-foreground [&_p]:text-primary-foreground/85"
                 data={richText}
                 enableGutter={false}
               />

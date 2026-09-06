@@ -31,7 +31,7 @@ export const Card: React.FC<{
   return (
     <article
       className={cn(
-        'group relative flex h-full flex-col overflow-hidden rounded-[var(--radius)] border border-border bg-card transition duration-300 hover:-translate-y-1 hover:cursor-pointer hover:shadow-lg',
+        'group relative flex h-full flex-col overflow-hidden rounded-lg border border-border bg-card transition duration-300 hover:-translate-y-1 hover:cursor-pointer hover:shadow-lg',
         className,
       )}
       ref={card.ref}
@@ -52,7 +52,7 @@ export const Card: React.FC<{
       </div>
       <div className="flex flex-1 flex-col p-5 md:p-6">
         {showCategories && hasCategories && (
-          <div className="mb-3 text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+          <div className="mb-3 text-xs font-semibold uppercase tracking-label text-muted-foreground">
             {categories?.map((category, index) => {
               if (typeof category === 'object') {
                 const { title: titleFromCategory } = category

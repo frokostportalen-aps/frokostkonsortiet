@@ -19,6 +19,21 @@ export const Stats: Block = {
       label: 'Underoverskrift',
     },
     {
+      name: 'tone',
+      type: 'select',
+      defaultValue: 'brand',
+      label: 'Båndets farve',
+      admin: {
+        description:
+          'Brandfarve er sitets stærkeste flade. Klima bruger sitets øko-farve – vælg den, når tallene handler om CO2, økologi eller sæson. Sand er den rolige variant, når båndet ikke skal råbe.',
+      },
+      options: [
+        { label: 'Brandfarve', value: 'brand' },
+        { label: 'Klima', value: 'eco' },
+        { label: 'Sand', value: 'sand' },
+      ],
+    },
+    {
       name: 'items',
       type: 'array',
       minRows: 2,

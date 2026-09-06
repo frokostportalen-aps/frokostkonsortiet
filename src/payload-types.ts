@@ -210,6 +210,7 @@ export interface Page {
     | ArchiveBlock
     | FormBlock
     | FAQBlock
+    | IconRowBlock
     | TestimonialsBlock
     | StatsBlock
     | PriceMenuBlock
@@ -524,6 +525,10 @@ export interface CallToActionBlock {
  * via the `definition` "ContentBlock".
  */
 export interface ContentBlock {
+  /**
+   * Valgfrit. Lægger sektionen på et foto i fuld bredde med et læseslør over, så kortene står oven på billedet. Uden billede ser sektionen ud som hidtil.
+   */
+  background?: (string | null) | Media;
   columns?:
     | {
         size?: ('oneThird' | 'half' | 'twoThirds' | 'full') | null;
@@ -586,6 +591,11 @@ export interface MediaBlock {
 export interface MediaContentBlock {
   media: string | Media;
   imagePosition?: ('left' | 'right') | null;
+  /**
+   * Halvdelen: billedet fylder sin halvdel af båndet fra kant til kant. En tredjedel: et smallere billede med luft omkring og teksten i de resterende to tredjedele – til portrætter og motiver, der ikke skal fylde halvdelen.
+   */
+  mediaRatio?: ('half' | 'oneThird') | null;
+  textAlign?: ('left' | 'center') | null;
   richText?: {
     root: {
       type: string;
@@ -905,6 +915,59 @@ export interface FAQBlock {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "IconRowBlock".
+ */
+export interface IconRowBlock {
+  heading?: string | null;
+  /**
+   * Kort linje under overskriften, sat i sitets versaler – fx "Her er 3 regnestykker". Til den halve overskrift, ikke til en sætning.
+   */
+  eyebrow?: string | null;
+  intro?: string | null;
+  /**
+   * Vises som en række runde ikoner med tekst under. Ikonerne skifter tone på skift, så rækken får rytme – vælg dem, der faktisk viser noget forskelligt.
+   */
+  items?:
+    | {
+        icon:
+          | 'leaf'
+          | 'sprout'
+          | 'wheat'
+          | 'milk'
+          | 'ham'
+          | 'beef'
+          | 'fish'
+          | 'egg'
+          | 'carrot'
+          | 'salad'
+          | 'soup'
+          | 'apple'
+          | 'croissant'
+          | 'chef-hat'
+          | 'heart'
+          | 'truck'
+          | 'utensils-crossed';
+        /**
+         * Kort – fx "Vegetar" eller "Levering til tiden".
+         */
+        label: string;
+        /**
+         * Valgfri linje under teksten – fx "Mindst én varm ret hver dag".
+         */
+        note?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Valgfri tekst i et fremhævet felt under rækken – fx hvordan hensynene håndteres i praksis.
+   */
+  note?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'iconRow';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "TestimonialsBlock".
  */
 export interface TestimonialsBlock {
@@ -933,6 +996,10 @@ export interface StatsBlock {
   heading?: string | null;
   intro?: string | null;
   /**
+   * Brandfarve er sitets stærkeste flade. Klima bruger sitets øko-farve – vælg den, når tallene handler om CO2, økologi eller sæson. Sand er den rolige variant, når båndet ikke skal råbe.
+   */
+  tone?: ('brand' | 'eco' | 'sand') | null;
+  /**
    * Vises som store nøgletal i et bånd – fx "1980", "5 køkkener", "100% grøn strøm".
    */
   items?:
@@ -952,6 +1019,10 @@ export interface StatsBlock {
  */
 export interface PriceMenuBlock {
   heading?: string | null;
+  /**
+   * Kort linje under overskriften, sat i sitets versaler – fx "Her er 3 regnestykker". Til den halve overskrift, ikke til en sætning.
+   */
+  eyebrow?: string | null;
   intro?: string | null;
   /**
    * Et menukort i sektioner – fx "Frokostordning", "Tilkøb", "Drikkevarer". Hver sektion har sine egne linjer med pris.
@@ -1540,6 +1611,7 @@ export interface PagesSelect<T extends boolean = true> {
         archive?: T | ArchiveBlockSelect<T>;
         formBlock?: T | FormBlockSelect<T>;
         faq?: T | FAQBlockSelect<T>;
+        iconRow?: T | IconRowBlockSelect<T>;
         testimonials?: T | TestimonialsBlockSelect<T>;
         stats?: T | StatsBlockSelect<T>;
         priceMenu?: T | PriceMenuBlockSelect<T>;
@@ -1592,6 +1664,7 @@ export interface CallToActionBlockSelect<T extends boolean = true> {
  * via the `definition` "ContentBlock_select".
  */
 export interface ContentBlockSelect<T extends boolean = true> {
+  background?: T;
   columns?:
     | T
     | {
@@ -1629,6 +1702,8 @@ export interface MediaBlockSelect<T extends boolean = true> {
 export interface MediaContentBlockSelect<T extends boolean = true> {
   media?: T;
   imagePosition?: T;
+  mediaRatio?: T;
+  textAlign?: T;
   richText?: T;
   links?:
     | T
@@ -1693,6 +1768,26 @@ export interface FAQBlockSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "IconRowBlock_select".
+ */
+export interface IconRowBlockSelect<T extends boolean = true> {
+  heading?: T;
+  eyebrow?: T;
+  intro?: T;
+  items?:
+    | T
+    | {
+        icon?: T;
+        label?: T;
+        note?: T;
+        id?: T;
+      };
+  note?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "TestimonialsBlock_select".
  */
 export interface TestimonialsBlockSelect<T extends boolean = true> {
@@ -1716,6 +1811,7 @@ export interface TestimonialsBlockSelect<T extends boolean = true> {
 export interface StatsBlockSelect<T extends boolean = true> {
   heading?: T;
   intro?: T;
+  tone?: T;
   items?:
     | T
     | {
@@ -1732,6 +1828,7 @@ export interface StatsBlockSelect<T extends boolean = true> {
  */
 export interface PriceMenuBlockSelect<T extends boolean = true> {
   heading?: T;
+  eyebrow?: T;
   intro?: T;
   sections?:
     | T

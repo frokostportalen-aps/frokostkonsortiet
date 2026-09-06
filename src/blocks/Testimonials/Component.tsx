@@ -26,7 +26,7 @@ const Card: React.FC<{ item: Item }> = ({ item }) => {
     // dims every card (`group-hover:opacity-60`); the card under the cursor wins
     // that back with `hover:!opacity-100` (the `!` beats group-hover's higher
     // specificity) and lifts + lights up its border.
-    <figure className="mr-5 flex w-[19rem] shrink-0 flex-col gap-4 rounded-[calc(var(--radius)*1.25)] border border-border bg-card p-7 shadow-sm transition duration-300 group-hover:opacity-60 hover:!opacity-100 hover:-translate-y-1.5 hover:border-primary hover:shadow-xl md:w-[22rem]">
+    <figure className="mr-5 flex w-[19rem] shrink-0 flex-col gap-4 rounded-band border border-border bg-card p-7 shadow-sm transition duration-300 group-hover:opacity-60 hover:!opacity-100 hover:-translate-y-1.5 hover:border-primary hover:shadow-xl md:w-[22rem]">
       <span aria-hidden className="font-serif text-5xl leading-[0.4] text-primary/40">
         &ldquo;
       </span>
@@ -97,7 +97,7 @@ export const TestimonialsBlock: React.FC<Props> = ({ heading, intro, items }) =>
     // The tinted full-bleed band sets the voices apart from the white page —
     // the tenant's own `secondary` surface, so the break stays in-family.
     <section className="overflow-x-clip bg-secondary/60 py-16 md:py-20">
-      <SectionHeader heading={heading} intro={intro} className="container mb-10" />
+      <SectionHeader heading={heading} intro={intro} className="container" />
       {/* `group` drives the hover pause + dim on the tracks/cards below; py gives
           the shadow + hover-lift room so they aren't clipped. */}
       <div className="testimonial-marquee group flex flex-col gap-5 py-3">

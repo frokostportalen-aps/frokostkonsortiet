@@ -12,7 +12,7 @@ export const ClientListBlock: React.FC<ClientListBlockProps> = ({ heading, clien
   return (
     <div className="container text-center">
       {heading && (
-        <p className="text-xs font-semibold uppercase tracking-[0.22em] text-muted-foreground">
+        <p className="text-xs font-semibold uppercase tracking-caps text-muted-foreground">
           {heading}
         </p>
       )}
