@@ -8,7 +8,12 @@ import { formatDateDa } from '@/utilities/formatDateTime'
 
 export const PostHero: React.FC<{
   post: Post
-}> = ({ post }) => {
+  /**
+   * Whether the header floats over this hero. Brand chrome makes it an opaque
+   * light surface, and tucking under it would only crop the top of the photo.
+   */
+  floats?: boolean
+}> = ({ post, floats = true }) => {
   const { categories, heroImage, populatedAuthors, publishedAt, title } = post
 
   // Seeded posts carry no authors (a CMS account name is not a byline), so
@@ -17,7 +22,7 @@ export const PostHero: React.FC<{
   const hasAuthors = authors !== ''
 
   return (
-    <div className="relative -mt-[10.4rem] flex items-end">
+    <div className={`relative flex items-end ${floats ? '-mt-[4.4rem]' : ''}`}>
       {/* The photo — its own positioned layer, so `fill` has a valid parent. */}
       <div aria-hidden="true" className="absolute inset-0 overflow-hidden select-none">
         {heroImage && typeof heroImage !== 'string' && (
@@ -29,7 +34,7 @@ export const PostHero: React.FC<{
       <div className="container z-10 relative lg:grid lg:grid-cols-[1fr_48rem_1fr] text-white pb-10">
         <div className="col-start-1 col-span-1 md:col-start-2 md:col-span-2">
           {Array.isArray(categories) && categories.length > 0 && (
-            <div className="mb-5 text-xs font-semibold uppercase tracking-[0.18em] text-white/80">
+            <div className="mb-5 text-xs font-semibold uppercase tracking-eyebrow text-white/80">
               {categories.map((category, index) => {
                 if (typeof category === 'object' && category !== null) {
                   const isLast = index === categories.length - 1
@@ -45,7 +50,7 @@ export const PostHero: React.FC<{
             </div>
           )}
 
-          <h1 className="mb-6 max-w-[44rem] text-balance text-4xl font-bold leading-[1.08] tracking-[-0.02em] md:text-5xl lg:text-6xl">
+          <h1 className="mb-6 max-w-[44rem] text-balance text-4xl font-bold leading-[1.08] tracking-display md:text-5xl lg:text-6xl">
             {title}
           </h1>
 

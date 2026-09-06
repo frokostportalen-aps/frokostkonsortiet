@@ -69,8 +69,16 @@ export default async function Page({ params: paramsPromise }: Args) {
 
   const { hero, layout } = page
 
+  // No top padding here: each hero owns the space above it — the overlay pulls
+  // up behind the header, the wordmark band runs edge to edge, and the rest set
+  // their own. A page with no hero still clears the header on its first block's
+  // own margin.
+  //
+  // `flow-root` is what makes that safe: without padding to stop them, the first
+  // child's margins would collapse out through the article and move the whole
+  // page instead of spacing its first element.
   return (
-    <article className="pt-16 pb-24">
+    <article className="flow-root pb-24">
       <PageClient />
       {/* Allows redirects for valid pages too */}
       <PayloadRedirects disableNotFound tenantSlug={tenant} url={url} />

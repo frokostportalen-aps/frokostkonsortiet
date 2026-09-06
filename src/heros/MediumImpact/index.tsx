@@ -9,7 +9,7 @@ import RichText from '@/components/RichText'
 export const MediumImpactHero: React.FC<Page['hero']> = ({ links, media, mediaFit, richText }) => {
   const contain = mediaFit === 'contain'
   return (
-    <div className="container pt-6 md:pt-10">
+    <div className="container pt-22 md:pt-26">
       <div className="hero-entrance max-w-3xl">
         {richText && <RichText className="mb-6" data={richText} enableGutter={false} />}
 

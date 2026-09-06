@@ -9,6 +9,7 @@ import React from 'react'
 import RichText from '@/components/RichText'
 
 import { PostHero } from '@/heros/PostHero'
+import { getDialect } from '@/themes/dialect'
 import { generateMeta } from '@/utilities/generateMeta'
 import PageClient from './page.client'
 import { LivePreviewListener } from '@/components/LivePreviewListener'
@@ -51,7 +52,7 @@ export default async function Post({ params: paramsPromise }: Args) {
   if (!post) return <PayloadRedirects tenantSlug={tenant} url={url} />
 
   return (
-    <article className="pt-16 pb-16">
+    <article className="flow-root pb-16">
       <PageClient />
 
       {/* Allows redirects for valid pages too */}
@@ -59,7 +60,7 @@ export default async function Post({ params: paramsPromise }: Args) {
 
       {draft && <LivePreviewListener />}
 
-      <PostHero post={post} />
+      <PostHero post={post} floats={getDialect(tenant).chrome !== 'brand'} />
 
       <div className="flex flex-col items-center gap-4 pt-8">
         <div className="container">
