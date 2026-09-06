@@ -23,6 +23,11 @@ node_modules/
 /blob-report/
 /playwright/.cache/
 
+# Storybook's build output — generated, minified, and rebuilt by
+# `pnpm build:storybook` (and by the Pages workflow). Nothing in it is written
+# or read by a human; the source lives in .storybook/ and src/**/*.stories.tsx.
+storybook-static/
+
 # TypeScript incremental build info
 tsconfig.tsbuildinfo
 
