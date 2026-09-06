@@ -15,16 +15,28 @@ type Props = PriceMenuBlockProps & { tenantSlug?: string }
  * gesture. Prices render in the tenant's heading face, so a serif site gets
  * elegant figures and a sans site confident ones.
  */
-export const PriceMenuBlock: React.FC<Props> = ({ heading, intro, sections, note, tenantSlug }) => {
+export const PriceMenuBlock: React.FC<Props> = ({
+  heading,
+  eyebrow,
+  intro,
+  sections,
+  note,
+  tenantSlug,
+}) => {
   if (!sections?.length) return null
 
-  const { signature } = getDialect(tenantSlug)
+  const { signature, eyebrow: eyebrowStyle } = getDialect(tenantSlug)
 
   const single = sections.length === 1
 
   return (
     <div className="container">
-      <SectionHeader heading={heading} intro={intro} className="mb-10" />
+      <SectionHeader
+        heading={heading}
+        eyebrow={eyebrow}
+        intro={intro}
+        eyebrowStyle={eyebrowStyle}
+      />
 
       <div
         className={cn(
@@ -34,9 +46,7 @@ export const PriceMenuBlock: React.FC<Props> = ({ heading, intro, sections, note
       >
         {sections.map((section, i) => (
           <SignatureCard key={i} signature={signature}>
-            <h3 className="font-heading text-2xl font-semibold tracking-tight">
-              {section.title}
-            </h3>
+            <h3 className="font-heading text-2xl font-semibold tracking-tight">{section.title}</h3>
             {section.description && (
               <p className="mt-2 text-sm text-muted-foreground">{section.description}</p>
             )}
@@ -47,13 +57,13 @@ export const PriceMenuBlock: React.FC<Props> = ({ heading, intro, sections, note
                   key={j}
                   className={cn(
                     item.featured &&
-                      '-mx-3 rounded-[var(--radius)] bg-accent px-3 py-3 text-accent-foreground md:-mx-4 md:px-4',
+                      '-mx-3 rounded-lg bg-accent px-3 py-3 text-accent-foreground md:-mx-4 md:px-4',
                   )}
                 >
                   <div className="flex items-baseline gap-3">
                     <span className="font-semibold leading-snug">{item.name}</span>
                     {item.featured && (
-                      <span className="hidden shrink-0 rounded-full bg-primary px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.08em] text-primary-foreground sm:inline-block">
+                      <span className="hidden shrink-0 rounded-full bg-primary px-2 py-0.5 text-[10px] font-semibold uppercase tracking-smallcaps text-primary-foreground sm:inline-block">
                         Anbefalet
                       </span>
                     )}

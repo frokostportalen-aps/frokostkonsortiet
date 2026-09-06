@@ -68,6 +68,16 @@ export const Content: Block = {
   interfaceName: 'ContentBlock',
   fields: [
     {
+      name: 'background',
+      type: 'upload',
+      relationTo: 'media',
+      label: 'Baggrundsbillede',
+      admin: {
+        description:
+          'Valgfrit. Lægger sektionen på et foto i fuld bredde med et læseslør over, så kortene står oven på billedet. Uden billede ser sektionen ud som hidtil.',
+      },
+    },
+    {
       name: 'columns',
       type: 'array',
       admin: {

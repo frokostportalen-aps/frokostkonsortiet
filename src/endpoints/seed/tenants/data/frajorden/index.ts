@@ -1,19 +1,16 @@
 import type { TenantDef } from '../types'
 import { folderOf } from '../dir'
 import { menu } from './menu'
-import { posts } from './posts'
 import { home } from './pages/home'
-import { omOs } from './pages/om-os'
 import { frokostUdAfHuset } from './pages/frokost-ud-af-huset'
-import { kantine } from './pages/kantine'
-import { catering } from './pages/catering'
-import { moedeforplejning } from './pages/moedeforplejning'
-import { frugtordning } from './pages/frugtordning'
-import { drikkevarer } from './pages/drikkevarer'
-import { baeredygtighed } from './pages/baeredygtighed'
-import { kundeportal } from './pages/kundeportal'
 import { faqPage } from './pages/faq'
 
+/**
+ * Fra Jorden holder kun de sider, der har tekst fra Audryns oplæg: forsiden,
+ * Frokostordning-fanen og FAQ. Kantinedrift, catering, bæredygtighed, om os og
+ * kundeportalen var vores eget udkast og er taget ud, indtil der ligger rigtig
+ * tekst — det gamle indhold ligger i backup/seed/ og i git.
+ */
 export const fraJorden: TenantDef = {
   name: 'Fra Jorden',
   slug: 'frajorden',
@@ -21,7 +18,8 @@ export const fraJorden: TenantDef = {
   domains: ['frajorden.localhost', 'frajorden.dk', 'new.frajorden.dk'],
   tagline: 'Fra jorden til jeres frokostbord',
   dir: folderOf(import.meta.url),
-  pages: [home, omOs, frokostUdAfHuset, kantine, catering, moedeforplejning, frugtordning, drikkevarer, baeredygtighed, kundeportal, faqPage],
-  posts,
+  contactEmail: 'kontakt@frajorden.dk',
+  pages: [home, frokostUdAfHuset, faqPage],
+  posts: [],
   menu,
 }

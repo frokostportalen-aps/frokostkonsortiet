@@ -67,6 +67,9 @@ export const resolveTenantBrand = cache(async (tenantSlug: string): Promise<Tena
           brand?.logo && typeof brand.logo === 'object'
             ? (brand.logo.height ?? undefined)
             : undefined,
+        // Render size stays a design decision in the registry, even when the
+        // image itself comes from an upload.
+        displayHeight: registry?.displayHeight,
       }
     : // No uploaded logo → keep any registry image, but always carry the text —
       // and an uploaded dark variant, so dark surfaces can still show it.

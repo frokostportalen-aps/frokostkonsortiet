@@ -1,30 +1,31 @@
 import React from 'react'
 
 import type { MediaContentBlock as MediaContentBlockProps } from '@/payload-types'
-import type { Signature } from '@/themes/dialect'
-
 import { getDialect } from '@/themes/dialect'
 import { CMSLink } from '@/components/Link'
 import { Media } from '@/components/Media'
 import RichText from '@/components/RichText'
+import { signatureMarkClass } from '@/components/SignatureMark'
 import { cn } from '@/utilities/ui'
 
 type Props = MediaContentBlockProps & { tenantSlug?: string }
-
-const mark: Record<Signature, string> = {
-  rule: 'h-px w-12 bg-primary',
-  block: 'h-1 w-12 rounded-full bg-primary',
-  sketch: 'h-[3px] w-10 rounded-full bg-primary/80',
-}
 
 export const MediaContentBlock: React.FC<Props> = ({
   media,
   richText,
   links,
   imagePosition,
+  mediaRatio,
+  textAlign,
   tenantSlug,
 }) => {
   const imageRight = imagePosition === 'right'
+  // A third-width picture can't be bled to the edge the way a half-width one is:
+  // at that width `object-cover` would crop a portrait into a tall strip. So the
+  // narrow variant insets the image and lets the whole band carry the tint,
+  // which is also what the layouts asking for the split are drawn as.
+  const narrow = mediaRatio === 'oneThird'
+  const centred = textAlign === 'center'
   const { signature } = getDialect(tenantSlug)
 
   return (
@@ -34,30 +35,56 @@ export const MediaContentBlock: React.FC<Props> = ({
     // group's outer corners stay rounded — see globals.css, keyed off the
     // wrapper's data-block-type and the band's class.
     <div className="container">
-      <div className="media-content-band grid items-stretch overflow-hidden rounded-lg md:grid-cols-2">
-        {/* Image half — fills its cell edge to edge. */}
-        <div className={cn('relative min-h-[18rem] md:min-h-[26rem]', imageRight && 'md:order-2')}>
+      <div
+        // The variant is in the DOM because adjacent bands style each other:
+        // globals.css merges a run of flush bands into one element, and only
+        // flush bands may take part in that (see the rule for why).
+        data-variant={narrow ? 'inset' : 'flush'}
+        className={cn(
+          'media-content-band grid items-stretch overflow-hidden rounded-lg',
+          'bg-accent text-accent-foreground',
+          narrow ? 'md:grid-cols-3' : 'md:grid-cols-2',
+        )}
+      >
+        {/* Image side — edge to edge at half width, inset at a third. */}
+        <div
+          className={cn(
+            'relative',
+            narrow ? 'aspect-[4/5] m-6 md:m-10 md:self-center' : 'min-h-[18rem] md:min-h-[26rem]',
+            imageRight && 'md:order-2',
+          )}
+        >
           {media && typeof media === 'object' && (
             <Media
               fill
               imgClassName="object-cover"
               resource={media}
-              size="(max-width: 768px) 100vw, 50vw"
+              // The container caps at 96rem, so past that width the cell stops
+              // growing — a bare vw hint would keep asking for a larger source.
+              size={
+                narrow
+                  ? '(max-width: 768px) 100vw, (min-width: 1536px) 420px, 33vw'
+                  : '(max-width: 768px) 100vw, (min-width: 1536px) 736px, 50vw'
+              }
             />
           )}
         </div>
 
-        {/* Text half — tinted panel, vertically centred. */}
+        {/* Text side — tinted panel, vertically centred. */}
         <div
           className={cn(
-            'flex flex-col justify-center gap-5 bg-accent px-6 py-10 text-accent-foreground md:px-12 md:py-16',
+            'flex flex-col justify-center gap-5 px-6 py-10 md:px-12 md:py-16',
+            narrow && 'md:col-span-2',
+            centred && 'items-center text-center',
             imageRight && 'md:order-1',
           )}
         >
-          <span aria-hidden className={cn('block', mark[signature])} />
-          {richText && <RichText className="[&_p]:opacity-80" data={richText} enableGutter={false} />}
+          <span aria-hidden className={cn('block', signatureMarkClass.band[signature])} />
+          {richText && (
+            <RichText className="[&_p]:opacity-80" data={richText} enableGutter={false} />
+          )}
           {Array.isArray(links) && links.length > 0 && (
-            <ul className="flex flex-wrap gap-4">
+            <ul className={cn('flex flex-wrap gap-4', centred && 'justify-center')}>
               {links.map(({ link }, i) => (
                 <li key={i}>
                   <CMSLink {...link} />

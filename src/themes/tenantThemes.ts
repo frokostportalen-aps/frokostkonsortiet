@@ -14,8 +14,9 @@
  *                           resolved as a site's *dialect* (see `themes/dialect.ts`)
  *
  * Colour values accept any CSS colour (oklch, hex, …). Brand colours
- * (primary/accent) apply in both light and dark mode; surfaces and shape only
- * shape light mode, so dark mode stays a calm, shared neutral across the family.
+ * (primary/accent), shape and scale apply in both light and dark mode; the
+ * ambient surfaces only tint light mode, so dark mode stays a calm, shared
+ * neutral across the family.
  */
 
 /**
@@ -31,14 +32,32 @@ export type TenantLogo = {
   srcDark?: string
   width?: number
   height?: number
+  /**
+   * How tall the logo is rendered, in px (default 34). A wordmark reads fine at
+   * the default; a round or stacked mark needs more height before its type is
+   * legible, and the header grows with it.
+   */
+  displayHeight?: number
 }
+
+/**
+ * How a site dresses its chrome — the header and footer.
+ *   • `default` – they follow the page theme, and the header floats so a
+ *                 full-bleed hero can run up behind it
+ *   • `brand`   – they are fixed light surfaces (see `.brand-panel`), which a
+ *                 logo drawn for light backgrounds needs. The header is then
+ *                 opaque, so heroes must start below it rather than under it.
+ */
+export type Chrome = 'default' | 'brand'
 
 /** How small section labels ("eyebrows") are cased across a site. */
 export type EyebrowStyle = 'smallcaps' | 'uppercase' | 'plain'
 
 /** Front-page hero layout. `split` is editorial (type beside image); `overlay`
- *  is a full-bleed photo with the headline laid over it. */
-export type HeroVariant = 'split' | 'overlay'
+ *  is a full-bleed photo with the headline laid over it; `wordmark` is a brand
+ *  lockup — a diagonally cut photo against a solid panel, with the headline set
+ *  as an oversized two-tone wordmark across the cut. */
+export type HeroVariant = 'split' | 'overlay' | 'wordmark'
 
 /**
  * The one recurring motif a site is remembered by. Drives the accent on cards
@@ -76,6 +95,30 @@ export type ThemeVars = {
   foreground?: string
   radius?: string
   /**
+   * How much bigger this site sets its section headings than the family
+   * default, as a unitless multiplier ("1.25"). Injected as `--display-scale`
+   * and applied to `.prose h2` and `.section-heading`, so a site whose layout
+   * is drawn around large display type gets it everywhere at once instead of
+   * per block. Unset means the family default (1).
+   */
+  displayScale?: string
+  /**
+   * How far loose prose is indented so it lines up with the copy inside a
+   * band (which is inset by the band's own padding). Injected as
+   * `--text-inset` and read by `.prose-inset`. Unset means no indent — the
+   * family default, where prose sits flush with the band edge.
+   */
+  textInset?: string
+  /**
+   * The colour a site uses for climate and eco signals — CO2e figures, organic
+   * marks, the numbers band when it carries them. Named for the meaning rather
+   * than the placement, because that is how it is specified: Fra Jorden's
+   * palette gives it as "en dæmpet grøn til klima- og øko-signaler". Sites
+   * without one fall back to `primary` wherever it is offered.
+   */
+  eco?: string
+  ecoForeground?: string
+  /**
    * Whether the high-impact hero (image overlay) uses light text on a dark
    * scrim ('dark') or dark text ('light'). Defaults to 'dark'.
    */
@@ -92,14 +135,33 @@ export type ThemeVars = {
   /** A short brand line shown as the hero eyebrow, e.g. "Siden 1980". */
   tagline?: string
   eyebrow?: EyebrowStyle
+  chrome?: Chrome
   heroVariant?: HeroVariant
   signature?: Signature
   /** The site's standing call-to-action, shown as a button in the header. */
   headerCta?: { label: string; url: string }
   /**
+   * The `wordmark` hero's brand panel. Unlike the ambient surfaces these hold
+   * in *both* modes — the panel is a fixed brand surface, so its own text
+   * colours travel with it instead of following the theme:
+   *   • `heroPanel`           – the panel fill, and the wordmark's tone where it
+   *                             crosses the photo (the panel reads as if it
+   *                             continued through the letters)
+   *   • `heroWordmark`        – the wordmark on the panel
+   *   • `heroPanelForeground` – the subline on the panel
+   * Each falls back to a theme colour, so a site can use the variant without
+   * setting them: `--secondary` for the panel and `--secondary-foreground` for
+   * both text roles. (Not `--primary` for the wordmark — the variant's CSS
+   * re-points `--primary` at it, and a custom property that cycles computes to
+   * nothing.)
+   */
+  heroPanel?: string
+  heroWordmark?: string
+  heroPanelForeground?: string
+  /**
    * Base colour for the overlay hero's readability scrim, as bare oklch
    * channels ("L C H") — composed with alpha in the hero. Lets a site tint the
-   * photo toward its own identity (e.g. Fra Jorden's forest green) instead of
+   * photo toward its own identity (e.g. Fra Jorden's warm olive) instead of
    * neutral black.
    */
   heroScrim?: string
@@ -178,42 +240,66 @@ export const tenantThemes: Record<string, ThemeVars> = {
     headerCta: { label: 'Få et tilbud', url: '/om-os#tilbud' },
   },
 
-  // ── Fra Jorden — forest floor: deep green on warm paper, sage accents.
-  //    Source Serif, squared corners, a hand-made underline motif.
-  //    Hero: warm photo overlay.
+  // ── Fra Jorden — the palette Audryn specifies, taken from the logo: sand
+  //    #ECE6DC, terracotta #A0562D, ink #2A2A28. Terracotta is the only
+  //    saturated colour and carries the wordmark, the buttons and the secondary
+  //    voice; everything else is a step on the sand scale, so the page reads as
+  //    one warm paper with a single accent rather than a stack of tints.
+  //    Her fourth colour, a muted green #4E6B4A, carries the climate and eco
+  //    signals — today the numbers band, and the CO2e figures once the week
+  //    menu exists.
   frajorden: {
-    primary: 'oklch(40% 0.095 152)', // deep forest green
-    primaryForeground: 'oklch(98.5% 0.008 110)',
-    // Deep forest disappears against the dark surfaces; dark mode lifts it to
-    // a fresh pale leaf with deep-green text.
-    primaryDark: 'oklch(80% 0.08 148)',
-    primaryForegroundDark: 'oklch(22% 0.05 150)',
-    backgroundDark: 'oklch(15.5% 0.013 140)', // green-brown night
-    cardDark: 'oklch(20% 0.015 140)',
-    secondaryDark: 'oklch(26.5% 0.017 138)',
-    borderDark: 'oklch(29.5% 0.018 138)',
-    accent: 'oklch(92% 0.05 118)', // sage
-    accentForeground: 'oklch(26% 0.055 150)',
-    secondary: 'oklch(94.5% 0.035 112)',
-    secondaryForeground: 'oklch(26% 0.05 150)',
-    card: 'oklch(98% 0.012 105)',
-    cardForeground: 'oklch(23.5% 0.032 145)',
-    muted: 'oklch(95% 0.02 110)',
-    mutedForeground: 'oklch(42% 0.04 145)',
-    border: 'oklch(86.5% 0.028 118)',
-    background: 'oklch(98.8% 0.008 98)', // warm paper
-    foreground: 'oklch(23.5% 0.032 145)',
+    primary: 'oklch(53.3% 0.112 48)', // terracotta
+    primaryForeground: 'oklch(96.3% 0.013 82)', // lightest sand
+    // Terracotta holds against the dark surfaces, so dark mode keeps it rather
+    // than flipping to a lighter earth tone the way the olive palette had to.
+    primaryDark: 'oklch(58% 0.112 48)',
+    primaryForegroundDark: 'oklch(96.3% 0.013 82)',
+    backgroundDark: 'oklch(16% 0.006 80)',
+    cardDark: 'oklch(20.5% 0.007 80)',
+    secondaryDark: 'oklch(27.5% 0.008 80)',
+    borderDark: 'oklch(30.5% 0.009 80)',
+    // The surfaces are four steps down one sand ramp: page, band, panel,
+    // hairline. Keeping them on one hue is what stops the page looking washed
+    // out — the old palette lifted every surface towards white, so nothing had
+    // weight against the photography.
+    background: 'oklch(92.7% 0.015 81)', // sand — the paper itself
+    accent: 'oklch(89.1% 0.020 80)', // band, one step down
+    accentForeground: 'oklch(30.4% 0.013 72)',
+    secondary: 'oklch(87.0% 0.023 81)', // panel/card, two steps down
+    secondaryForeground: 'oklch(32.9% 0.013 67)',
+    muted: 'oklch(90.3% 0.017 79)',
+    mutedForeground: 'oklch(49.5% 0.055 58)', // terracotta, desaturated
+    border: 'oklch(83.7% 0.025 77)',
+    card: 'oklch(95.3% 0.011 85)', // lifted off the paper, not white
+    cardForeground: 'oklch(28.4% 0.004 107)',
+    foreground: 'oklch(28.4% 0.004 107)', // ink
     radius: '0.25rem',
+    displayScale: '1.25',
+    textInset: '3rem',
+    eco: 'oklch(49.5% 0.062 142)', // dæmpet grøn #4E6B4A
+    ecoForeground: 'oklch(96.3% 0.013 82)', // lightest sand
     heroTheme: 'dark',
-    logo: { text: 'Fra Jorden' },
+    // The front page is a brand lockup: the sand ramp's darkest step as the
+    // panel, terracotta for the wordmark, ink for the subline — the palette's
+    // own three colours, nothing borrowed.
+    heroPanel: 'oklch(84.4% 0.025 77)',
+    heroWordmark: 'oklch(53.3% 0.112 48)', // terracotta
+    heroPanelForeground: 'oklch(28.4% 0.004 107)', // ink
+    // A round badge with type around its edge: it needs the height to be read.
+    logo: { text: 'Fra Jorden', displayHeight: 56 },
     faviconFamily: 'serif',
     tagline: 'Økologisk · fra jorden til bordet',
     eyebrow: 'uppercase',
-    heroVariant: 'overlay',
+    // The round logo is drawn for light backgrounds, so header and footer stay
+    // light in both modes — and the header is opaque, so nothing tucks under it.
+    chrome: 'brand',
+    heroVariant: 'wordmark',
     signature: 'sketch',
-    headerCta: { label: 'Få et tilbud', url: '/om-os#tilbud' },
-    // Forest-tinted scrim so the hero photo reads green, not neutral black.
-    heroScrim: '20% 0.05 150',
+    // Tilbudsformularen bor på Frokostordning-siden — om-os findes ikke længere.
+    headerCta: { label: 'Få et tilbud', url: '/frokost-ud-af-huset#tilbud' },
+    // Warm olive-slate scrim so the hero photo reads earthy, not neutral black.
+    heroScrim: '28% 0.02 82',
   },
 }
 

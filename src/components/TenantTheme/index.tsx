@@ -10,8 +10,7 @@ import React from 'react'
  */
 
 // Strip anything that could break out of the CSS rule or inject markup.
-const sanitize = (value?: string | null): string =>
-  (value || '').replace(/[<>{};]/g, '').trim()
+const sanitize = (value?: string | null): string => (value || '').replace(/[<>{};]/g, '').trim()
 
 // [themeFieldName, cssVariable]
 // The brand hue holds in both light and dark mode: `primary` is a mid-dark
@@ -19,9 +18,25 @@ const sanitize = (value?: string | null): string =>
 // NOT here — across the family it's a pale warm *surface* (~92% lightness), so
 // it belongs with the light-only surfaces below; carried into dark mode it
 // produced pale islands and white-on-cream headings.
+// The wordmark hero's panel is a fixed brand surface rather than an ambient
+// one, so it and its two text colours hold in both modes (see `ThemeVars`).
 const BRAND_VARS = [
+  // Not a colour, but like the brand colours it holds in both modes: a site's
+  // type scale is the same after dark.
+  ['displayScale', '--display-scale'],
+  ['textInset', '--text-inset'],
   ['primary', '--primary'],
+  ['eco', '--eco'],
+  ['ecoForeground', '--eco-foreground'],
   ['primaryForeground', '--primary-foreground'],
+  ['heroPanel', '--hero-panel'],
+  ['heroWordmark', '--hero-wordmark'],
+  ['heroScrim', '--hero-scrim'],
+  ['heroPanelForeground', '--hero-panel-foreground'],
+  // Shape, like the scale above: a site's corners are its corners after dark
+  // too. Filed with the surfaces it would silently revert to the family
+  // default in dark mode — sharp corners turning round at night.
+  ['radius', '--radius'],
 ] as const
 
 // Optional dark-mode overrides for the brand vars — for brands whose primary
@@ -36,7 +51,7 @@ const DARK_ONLY_VARS = [
   ['borderDark', '--border'],
 ] as const
 
-// Surfaces + shape only tint light mode, so dark mode stays a calm shared
+// The ambient surfaces only tint light mode, so dark mode stays a calm shared
 // neutral across the family while each site keeps its own daylight identity.
 const LIGHT_ONLY_VARS = [
   ['accent', '--accent'],
@@ -50,7 +65,6 @@ const LIGHT_ONLY_VARS = [
   ['border', '--border'],
   ['background', '--background'],
   ['foreground', '--foreground'],
-  ['radius', '--radius'],
 ] as const
 
 type ThemeFieldKey =
@@ -76,15 +90,19 @@ export function TenantTheme({ theme }: { theme?: ThemeVars | null }) {
   if (!brandDecls && !lightOnlyDecls && !darkOnlyDecls) return null
 
   // Brand vars hold in both modes, so one combined selector covers `:root`
-  // (light) and `[data-theme='dark']`; both have equal specificity, so listing
-  // them together is identical to two separate rules. Surfaces/shape, by
+  // (light), `[data-theme='dark']` and `[data-theme='light']` — the last so a
+  // subtree pinned to the light palette keeps *this site's* brand colours
+  // rather than falling back to the family defaults in globals.css. They have
+  // equal specificity, so listing them together is identical to separate rules. Surfaces/shape, by
   // contrast, are guarded by `:not([data-theme='dark'])` rather than a plain
   // `:root`: this <style> is injected after globals.css, and a bare `:root`
   // rule would match in dark mode too (equal specificity, later in source) and
   // clobber globals' dark surfaces (light background + light text = invisible).
+  // They also target `[data-theme='light']`, so a subtree pinned to the light
+  // palette gets this site's surfaces rather than the family defaults.
   const css = [
-    brandDecls ? `:root,[data-theme='dark']{${brandDecls}}` : '',
-    lightOnlyDecls ? `:root:not([data-theme='dark']){${lightOnlyDecls}}` : '',
+    brandDecls ? `:root,[data-theme='dark'],[data-theme='light']{${brandDecls}}` : '',
+    lightOnlyDecls ? `:root:not([data-theme='dark']),[data-theme='light']{${lightOnlyDecls}}` : '',
     // Emitted last, so it wins over the combined brand rule after dark.
     darkOnlyDecls ? `[data-theme='dark']{${darkOnlyDecls}}` : '',
   ].join('')

@@ -19,7 +19,6 @@ type LowImpactHeroType =
       dialect?: Dialect
     })
 
-
 /**
  * The standard sub-page header: tagline eyebrow, a big balanced headline and
  * the tenant's signature mark — so content pages open in the site's own voice
@@ -27,7 +26,7 @@ type LowImpactHeroType =
  */
 export const LowImpactHero: React.FC<LowImpactHeroType> = ({ children, richText, dialect }) => {
   return (
-    <div className="container mt-14 md:mt-20">
+    <div className="container pt-30 md:pt-36">
       <div className="hero-entrance max-w-[52rem]">
         {dialect?.tagline && (
           <Eyebrow style={dialect.eyebrow} withRule className="mb-5">
@@ -37,7 +36,7 @@ export const LowImpactHero: React.FC<LowImpactHeroType> = ({ children, richText,
         {children ||
           (richText && (
             <RichText
-              className="[&_h1]:text-balance [&_h1]:text-4xl [&_h1]:font-bold [&_h1]:leading-[1.08] [&_h1]:tracking-[-0.02em] md:[&_h1]:text-5xl [&_p]:text-lg [&_p]:text-muted-foreground"
+              className="[&_h1]:text-balance [&_h1]:text-4xl [&_h1]:font-bold [&_h1]:leading-[1.08] [&_h1]:tracking-display md:[&_h1]:text-5xl [&_p]:text-lg [&_p]:text-muted-foreground"
               data={richText}
               enableGutter={false}
             />

@@ -8,6 +8,7 @@ import type { Header } from '@/payload-types'
 import type { TenantLogo } from '@/themes/tenantThemes'
 
 import { Logo } from '@/components/Logo/Logo'
+import { cn } from '@/utilities/ui'
 import { HeaderNav } from './Nav'
 
 interface HeaderClientProps {
@@ -16,9 +17,11 @@ interface HeaderClientProps {
   cta?: { label: string; url: string }
   /** The resolved logo (uploaded image or wordmark), resolved server-side. */
   logo: TenantLogo
+  /** This site dresses its chrome as a fixed light surface (see `Chrome`). */
+  brandChrome?: boolean
 }
 
-export const HeaderClient: React.FC<HeaderClientProps> = ({ data, cta, logo }) => {
+export const HeaderClient: React.FC<HeaderClientProps> = ({ data, cta, logo, brandChrome }) => {
   /* Storing the value in a useState to avoid hydration errors */
   const [theme, setTheme] = useState<string | null>(null)
   const { headerTheme, setHeaderTheme } = useHeaderTheme()
@@ -35,8 +38,15 @@ export const HeaderClient: React.FC<HeaderClientProps> = ({ data, cta, logo }) =
   }, [headerTheme])
 
   return (
-    <header className="container relative z-20   " {...(theme ? { 'data-theme': theme } : {})}>
-      <div className="py-8 flex items-center justify-between">
+    // Brand chrome pins the light palette: the header keeps the page's own paper
+    // surface in both modes rather than following the theme or borrowing the
+    // hero's, which a logo drawn for light backgrounds needs. It is then opaque,
+    // so the background spans the full width and the container sits inside.
+    <header
+      className={cn('relative z-20', brandChrome && 'bg-background text-foreground')}
+      data-theme={brandChrome ? 'light' : (theme ?? undefined)}
+    >
+      <div className="container py-4 flex items-center justify-between">
         <Link href="/">
           {/* text-foreground re-resolves under the header's data-theme, so the
               logo turns light on dark heroes and dark on light heroes. */}

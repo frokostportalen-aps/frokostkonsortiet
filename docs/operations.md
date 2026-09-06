@@ -69,15 +69,67 @@ super-admin exists and check how many pages/posts/media `--force` will delete.
 `--force` never touches `users` or `tenants`; it only wipes and rebuilds
 `pages`/`posts`/`media`. Redeploy afterwards (see above).
 
+## Transactional mail (Resend)
+
+Mail — form notifications and "forgot password" — goes through
+[Resend](https://resend.com). `payload.config.ts` only installs the adapter when
+`RESEND_API_KEY` is set; without it Payload keeps its default adapter, which
+**logs** the mail to the console instead of sending it. Local dev therefore
+needs no setup and can never mail a real customer by accident.
+
+### What lives where
+
+The one Resend account is platform-wide; the sender identity is per site.
+
+| Setting | Where | Why there |
+| --- | --- | --- |
+| `RESEND_API_KEY` | env | A secret, one per platform |
+| `EMAIL_DEFAULT_FROM_ADDRESS` / `_NAME` | env | Platform *fallback* — see below |
+| `EMAIL_OVERRIDE_RECIPIENT` | env | Redirects *every* mail here — staging only |
+| A site's lead inbox (`contactEmail`) | its `TenantDef` | Differs per site |
+| A site's own sender (`senderEmail`) | its `TenantDef`, optional | Differs per site |
+
+The env fallback is not "the from address for everything" — it is what gets used
+when there is no tenant to ask. That happens in exactly one place: Payload sends
+password-reset mail with `email.defaultFromName/Address` hardcoded in its own
+`forgotPassword.ts`, with no per-tenant seam. Everything a *visitor* triggers
+goes out under the site's own identity.
+
+Per-site mail config lives in `data/<tenant>/index.ts`:
+
+```ts
+contactEmail: 'kontakt@smagssans.dk',   // where forespørgsler land
+senderEmail: 'no-reply@smagssans.dk',   // optional; needs its own DNS verification
+```
+
+`seed-tenants.ts` bakes both onto the tenant's "Få et tilbud" form. A re-seed
+with `--force` pushes a change into existing forms; editors can also edit it per
+form under **Forms → Emails** in the admin.
+
+**Any sender domain must be verified in Resend** (DNS: SPF + DKIM). A site
+without `senderEmail` sends from the platform address under its own display name
+(`Smagssans <no-reply@frokostkonsortiet.dk>`), so one verification covers every
+site. Giving a site its own `senderEmail` is what costs another verification —
+the trade is a cleaner-looking sender against the DNS work.
+
+Notification mails carry the site name in the subject and set `replyTo` to the
+visitor's own address, so hitting reply answers the visitor directly. The body is
+a `{{*:table}}` placeholder, which plugin-form-builder expands into a table of
+every submitted field — including fields an editor adds later.
+
+Submissions are stored in the `form-submissions` collection regardless of
+whether the mail goes out, so a mail failure never loses a lead. Failures are
+logged (`Error while sending email to address: …`) rather than shown to the
+visitor.
+
 ## Restoring an admin login
 
-There is **no email adapter** configured in production, so Payload's
-"forgot password" flow cannot send reset mails. To create or reset a super-admin
-you run the Local API against the prod DB (a short `tsx` script using
+With Resend configured, Payload's "forgot password" flow works. If mail is
+broken — or you are bootstrapping the first user — create or reset a super-admin
+by running the Local API against the prod DB (a short `tsx` script using
 `getPayload` with `.env.production`):
 
 - Prefer **creating/resetting with a strong password** — never the seed default
   `password`.
 - Never delete the last super-admin. The seed's post-author logic reuses any
   existing super-admin, so deleting the one you log in with will lock you out.
-- Consider adding an email adapter so password resets work without DB access.

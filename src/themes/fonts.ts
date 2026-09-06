@@ -1,4 +1,4 @@
-import { Mulish, Playfair_Display, Poppins, Source_Serif_4 } from 'next/font/google'
+import { Jost, Mulish, Playfair_Display, Poppins } from 'next/font/google'
 
 /**
  * Per-site fonts, keyed by tenant slug. Each font exposes a CSS variable; the
@@ -21,9 +21,12 @@ const playfair = Playfair_Display({
   display: 'swap',
 })
 
-const sourceSerif = Source_Serif_4({
+// Fra Jorden's body face: a geometric sans under the display serif, so the
+// running text is a different voice from the headlines rather than the same
+// serif doing both jobs. Headings use Playfair (declared above).
+const jost = Jost({
   subsets: ['latin'],
-  variable: '--font-source-serif',
+  variable: '--font-jost',
   display: 'swap',
 })
 
@@ -32,7 +35,6 @@ const sourceSerif = Source_Serif_4({
 // text, so the body gets a proper sans.
 const mulish = Mulish({
   subsets: ['latin'],
-  weight: ['400', '500', '600', '700'],
   variable: '--font-mulish',
   display: 'swap',
 })
@@ -56,7 +58,12 @@ export const tenantFonts: Record<string, TenantFont> = {
     headingClassName: playfair.variable,
     headingVar: 'var(--font-playfair)',
   },
-  frajorden: { className: sourceSerif.variable, sansVar: 'var(--font-source-serif)' },
+  frajorden: {
+    className: jost.variable,
+    sansVar: 'var(--font-jost)',
+    headingClassName: playfair.variable,
+    headingVar: 'var(--font-playfair)',
+  },
 }
 
 export const getTenantFont = (slug?: string | null): TenantFont | null =>

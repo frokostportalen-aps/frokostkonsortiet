@@ -1,5 +1,7 @@
 import type { Block } from 'payload'
 
+import { eyebrowField } from '@/fields/eyebrow'
+
 export const PriceMenu: Block = {
   slug: 'priceMenu',
   interfaceName: 'PriceMenuBlock',
@@ -13,6 +15,7 @@ export const PriceMenu: Block = {
       type: 'text',
       label: 'Overskrift',
     },
+    eyebrowField,
     {
       name: 'intro',
       type: 'text',

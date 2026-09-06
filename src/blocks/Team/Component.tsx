@@ -21,20 +21,18 @@ export const TeamBlock: React.FC<TeamBlockProps> = ({ heading, intro, members })
 
   return (
     <div className="container">
-      <SectionHeader heading={heading} intro={intro} className="mb-10" />
+      <SectionHeader heading={heading} intro={intro} />
 
       <div className={`grid gap-8 md:gap-10 ${cols}`}>
         {members.map((member, i) => (
           <figure key={i} className="flex flex-col">
-            <div className="relative aspect-[4/5] w-full overflow-hidden rounded-[var(--radius)]">
+            <div className="relative aspect-[4/5] w-full overflow-hidden rounded-lg">
               {member.image && typeof member.image === 'object' && (
                 <Media fill imgClassName="object-cover" resource={member.image} size="33vw" />
               )}
             </div>
             <figcaption className="mt-5">
-              <p className="font-heading text-xl font-semibold tracking-tight">
-                {member.name}
-              </p>
+              <p className="font-heading text-xl font-semibold tracking-tight">{member.name}</p>
               {member.role && <p className="mt-0.5 text-sm text-muted-foreground">{member.role}</p>}
               {member.quote && (
                 <blockquote className="mt-3 border-l-2 border-primary/60 pl-3 text-sm leading-relaxed text-foreground/80">

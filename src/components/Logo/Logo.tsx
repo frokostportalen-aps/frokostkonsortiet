@@ -1,4 +1,5 @@
 import clsx from 'clsx'
+import NextImage from 'next/image'
 import React from 'react'
 
 import type { TenantLogo } from '@/themes/tenantThemes'
@@ -15,7 +16,9 @@ interface Props {
   logo: TenantLogo
 }
 
-const imgClass = 'h-[34px] w-auto max-w-[12rem] object-contain'
+const DEFAULT_LOGO_HEIGHT = 34
+
+const imgClass = 'w-auto max-w-[12rem] object-contain'
 
 export const Logo = (props: Props) => {
   const { loading: loadingFromProps, priority: priorityFromProps, className, logo } = props
@@ -36,11 +39,21 @@ export const Logo = (props: Props) => {
 
   if (!logo.src && !logo.srcDark) return wordmark()
 
+  // Rendered size, derived from the upload's own aspect ratio. Passing the real
+  // px to `next/image` — rather than the intrinsic size — is what keeps it from
+  // shipping a 1200px original for a 56px slot: it optimizes to the size asked
+  // for, in a modern format. `sizes` is a fixed px value because the logo never
+  // reflows.
+  const height = logo.displayHeight ?? DEFAULT_LOGO_HEIGHT
+  const ratio = (logo.width || 193) / (logo.height || DEFAULT_LOGO_HEIGHT)
   const shared = {
     alt: text,
-    width: logo.width || 193,
-    height: logo.height || 34,
-    decoding: 'async' as const,
+    height,
+    width: Math.round(height * ratio),
+    sizes: `${Math.round(height * ratio)}px`,
+    // Pin the rendered height: `w-auto` in the class would otherwise let the
+    // intrinsic size win, and the class alone can't (the anchor has no height).
+    style: { height },
   }
 
   // A light-on-dark variant swaps in on dark surfaces (footer, dark heroes) via
@@ -50,8 +63,7 @@ export const Logo = (props: Props) => {
   // compete with the header's eager, high-priority light logo — and where it is
   // visible it sits in the footer, below the fold.
   const darkImg = logo.srcDark ? (
-    /* eslint-disable-next-line @next/next/no-img-element */
-    <img
+    <NextImage
       {...shared}
       loading="lazy"
       className={clsx(imgClass, 'hidden dark:block', className)}
@@ -72,11 +84,10 @@ export const Logo = (props: Props) => {
 
   return (
     <>
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
+      <NextImage
         {...shared}
-        loading={loading}
-        fetchPriority={priority}
+        priority={priority === 'high'}
+        loading={priority === 'high' ? undefined : loading}
         className={clsx(imgClass, darkImg && 'dark:hidden', className)}
         src={logo.src}
       />

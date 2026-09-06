@@ -8,6 +8,7 @@ import { ClientListBlock } from '@/blocks/ClientList/Component'
 import { ContentBlock } from '@/blocks/Content/Component'
 import { FAQBlock } from '@/blocks/FAQ/Component'
 import { FormBlock } from '@/blocks/Form/Component'
+import { IconRowBlock } from '@/blocks/IconRow/Component'
 import { MediaBlock } from '@/blocks/MediaBlock/Component'
 import { MediaContentBlock } from '@/blocks/MediaContent/Component'
 import { PlanPickerBlock } from '@/blocks/PlanPicker/Component'
@@ -34,6 +35,7 @@ const blockComponents: Record<BlockType, BlockRenderer> = {
   cta: CallToActionBlock,
   faq: FAQBlock,
   formBlock: FormBlock,
+  iconRow: IconRowBlock,
   mediaBlock: MediaBlock,
   mediaContent: MediaContentBlock,
   clientList: ClientListBlock,

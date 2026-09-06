@@ -48,6 +48,19 @@ export type NavFactory = (ctx: PageContext) => { header: NavItem[]; footer: NavI
 export type TenantDef = TenantMeta & {
   /** This tenant's folder; the engine reads `images/` from here. */
   dir: string
+  /**
+   * Where this site's "Få et tilbud" forespørgsler land. Seeded onto the
+   * form's notification e-mail; editors can override it per form under
+   * Forms → Emails.
+   */
+  contactEmail: string
+  /**
+   * Optional: send this site's mail from its own domain. That domain must be
+   * verified in Resend (SPF + DKIM) or the send is rejected. Left out, the
+   * site sends from the platform default address under its own display name,
+   * which one verified domain covers for every site.
+   */
+  senderEmail?: string
   pages: PageFactory[]
   posts: PostFactory[]
   menu: NavFactory

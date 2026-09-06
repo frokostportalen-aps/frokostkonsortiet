@@ -9,8 +9,8 @@ import { cn } from '@/utilities/ui'
  * small-caps reads editorial, uppercase reads structural, plain reads quiet.
  */
 const styleClass: Record<EyebrowStyle, string> = {
-  smallcaps: 'text-sm [font-variant:small-caps] tracking-[0.08em]',
-  uppercase: 'text-xs uppercase tracking-[0.18em]',
+  smallcaps: 'text-sm [font-variant:small-caps] tracking-smallcaps',
+  uppercase: 'text-xs uppercase tracking-eyebrow',
   plain: 'text-xs tracking-wide',
 }
 

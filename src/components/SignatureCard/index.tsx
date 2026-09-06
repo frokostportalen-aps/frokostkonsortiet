@@ -1,6 +1,8 @@
 import React from 'react'
 
 import type { Signature } from '@/themes/dialect'
+
+import { signatureMarkClass } from '@/components/SignatureMark'
 import { cn } from '@/utilities/ui'
 
 /**
@@ -19,12 +21,11 @@ const shellBySignature: Record<Signature, string> = {
   sketch: 'border border-border bg-secondary',
 }
 
+// `block` has no mark — its left bar is the marker — so the table has no entry
+// and nothing is rendered. A hidden element would still cost a node per card.
 const Marker: React.FC<{ signature: Signature }> = ({ signature }) => {
-  if (signature === 'block') return null // the left bar is the marker
-  if (signature === 'sketch')
-    return <span aria-hidden className="mb-5 block h-[3px] w-10 rounded-full bg-primary/80" />
-  // rule
-  return <span aria-hidden className="mb-5 block h-px w-10 bg-primary" />
+  const mark = signatureMarkClass.card[signature]
+  return mark ? <span aria-hidden className={cn('mb-5 block', mark)} /> : null
 }
 
 type Props = {
@@ -47,7 +48,7 @@ export const SignatureCard: React.FC<Props> = ({
   children,
 }) => {
   const base = cn(
-    'group/card relative flex h-full flex-col rounded-[var(--radius)] p-6 text-card-foreground transition md:p-8',
+    'group/card relative flex h-full flex-col rounded-lg p-6 text-card-foreground transition md:p-8',
     shellBySignature[signature],
     (href || interactive) &&
       'hover:-translate-y-1 hover:shadow-lg focus-within:-translate-y-1 focus-within:shadow-lg',

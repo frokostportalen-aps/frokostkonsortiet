@@ -1,3 +1,4 @@
+import { cn } from '@/utilities/ui'
 import { getCachedGlobal } from '@/utilities/getGlobals'
 import Link from 'next/link'
 import React from 'react'
@@ -14,7 +15,7 @@ import { getTenantCrossURL } from '@/utilities/getURL'
 import { signatureMarkClass } from '@/components/SignatureMark'
 
 // Shared link/heading recipes — used by both footer columns.
-const footerHeadingClass = 'text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground'
+const footerHeadingClass = 'text-xs font-semibold uppercase tracking-eyebrow text-muted-foreground'
 const footerLinkClass =
   'w-fit py-1.5 text-sm text-foreground/80 transition-colors hover:text-foreground md:py-0'
 
@@ -28,6 +29,9 @@ export async function Footer({ tenantSlug }: { tenantSlug: string }) {
   const navItems = footerData?.navItems || []
 
   const dialect = getDialect(tenantSlug)
+  // Brand chrome closes the page on the brand surface rather than the shared
+  // dark one — and keeps a light-background logo legible.
+  const brandChrome = dialect.chrome === 'brand'
   const currentTenant = tenants.find((t) => t.slug === tenantSlug)
   const mainTenant = tenants.find((t) => t.isMain)
   // Main site first, then the kitchens, so the directory reads as one family.
@@ -41,8 +45,11 @@ export async function Footer({ tenantSlug }: { tenantSlug: string }) {
 
   return (
     <footer
-      data-theme="dark"
-      className="mt-auto border-t border-border bg-background text-foreground"
+      data-theme={brandChrome ? 'light' : 'dark'}
+      className={cn(
+        'mt-auto border-t border-border',
+        brandChrome ? 'brand-panel' : 'bg-background text-foreground',
+      )}
     >
       <div className="container grid gap-12 py-14 md:grid-cols-12 md:py-20">
         {/* Brand */}

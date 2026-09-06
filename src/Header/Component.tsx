@@ -2,6 +2,7 @@ import type { Header as HeaderType } from '@/payload-types'
 
 import { HeaderClient } from './Component.client'
 import { getCachedGlobal } from '@/utilities/getGlobals'
+import { getDialect } from '@/themes/dialect'
 import { getTenantTheme } from '@/themes/tenantThemes'
 import { resolveTenantBrand } from '@/themes/resolveTenantBrand'
 import React from 'react'
@@ -15,6 +16,9 @@ export async function Header({ tenantSlug }: { tenantSlug: string }) {
 
   // Resolved server-side so the theme registry stays out of the client bundle.
   const cta = getTenantTheme(tenantSlug)?.headerCta
+  const brandChrome = getDialect(tenantSlug).chrome === 'brand'
 
-  return <HeaderClient data={headerData} cta={cta} logo={brand.logo} />
+  return (
+    <HeaderClient data={headerData} cta={cta} logo={brand.logo} brandChrome={brandChrome} />
+  )
 }

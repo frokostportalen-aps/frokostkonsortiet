@@ -6,6 +6,7 @@ import { ClientList } from './ClientList/config'
 import { Content } from './Content/config'
 import { FAQ } from './FAQ/config'
 import { FormBlock } from './Form/config'
+import { IconRow } from './IconRow/config'
 import { MediaBlock } from './MediaBlock/config'
 import { MediaContent } from './MediaContent/config'
 import { PlanPicker } from './PlanPicker/config'
@@ -37,6 +38,7 @@ export const blockConfigs: Block[] = [
   Archive,
   FormBlock,
   FAQ,
+  IconRow,
   Testimonials,
   Stats,
   PriceMenu,

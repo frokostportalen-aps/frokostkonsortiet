@@ -126,7 +126,7 @@ export const FormBlock: React.FC<
       {enableIntro && introContent && !hasSubmitted && (
         <RichText className="mb-8 lg:mb-12" data={introContent} enableGutter={false} />
       )}
-      <div className="rounded-[calc(var(--radius)*1.5)] border border-border bg-card p-6 md:p-10">
+      <div className="rounded-band border border-border bg-card p-6 md:p-10">
         <FormProvider {...formMethods}>
           {!isLoading && hasSubmitted && confirmationType === 'message' && (
             <RichText data={confirmationMessage} />

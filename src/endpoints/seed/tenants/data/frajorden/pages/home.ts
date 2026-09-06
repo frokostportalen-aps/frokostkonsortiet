@@ -1,6 +1,5 @@
 import type { PageFactory } from '../../types'
 import {
-  archive,
   column,
   content,
   cta,
@@ -11,192 +10,139 @@ import {
   p,
   richText,
   stats,
-  testimonials,
-  clientList,
-  planPicker,
 } from '../../builders'
 
-export const home: PageFactory = ({ tenantID, img, tilbudsFormID }) => ({
+/**
+ * Forsiden, bygget udelukkende på teksterne fra Audryns oplæg: kokken, de tre
+ * ordninger, løftet, chipsene, klimaregnskabet, den åbne ugemenu og smagningen. Pris, minimum,
+ * deadline og hensyn hører til Frokostordning-siden og står kun dér — ingen
+ * sætning optræder to steder.
+ */
+export const home: PageFactory = ({ tenantID, img }) => ({
   title: 'Fra Jorden – frokost',
   slug: 'home',
   _status: 'published',
   tenant: tenantID,
-  hero: hero.high(
-    img('hero'),
-    richText(
-      heading('h1', 'Fra jorden til jeres frokostbord'),
-      p(
-        'Fra Jorden dyrker frokost med respekt for naturen. Økologiske grøntsager, korte forsyningskæder og grøn gastronomi gør hver ret både god for jer og for kloden.',
-      ),
-    ),
-    [customLink('Få et tilbud', '/om-os#tilbud'), customLink('Se vores køkken', '/baeredygtighed', 'outline')],
-  ),
+  // The wordmark hero letters the h1 itself, so it wants the brand name and a
+  // short subline — the longer promise lands in the section below. The layout
+  // holds no buttons here: the standing CTA lives in the header (headerCta).
+  hero: hero.high(img('hero'), richText(heading('h1', 'Fra jorden'), p('Til jeres frokostbord'))),
   layout: [
+    // Kokken — portrættet i en tredjedel, teksten i de to tredjedele. Teksten er
+    // venstrestillet som resten af siden: ét centreret element (tal-båndet) er
+    // et virkemiddel, to gør, at siden ikke står stille.
+    mediaContent(
+      img('koekkenchef'),
+      'left',
+      richText(
+        heading('h2', 'Der står en kok bag. Ikke en fabrik.'),
+        p(
+          '”Min mad er min signatur. Jeg kan ikke selv stå ved siden af hver eneste ret, når den bliver serveret, og derfor er mit team en vigtig del af det, vi sender ud. Sammen skal vi sikre, at hver eneste ret viser, hvad Fra Jorden står for: godt håndværk, ærlige råvarer, ordentlig tilsmagning og kærlighed til hver eneste detalje.”',
+        ),
+        p('Steffen Krogh, køkkenchef'),
+      ),
+      [],
+      'Kokken',
+      { ratio: 'oneThird' },
+    ),
+    // Vi tilbyder — de tre ordninger som kort på et foto.
+    // NB: kortteksten er den samme sætning på alle tre kort, præcis som i
+    // mockuppen. Kantinedrift og Event catering mangler deres egen tekst, og de
+    // to sider findes ikke endnu, så kortene linker ingen steder hen.
     content(
       [
-        column('full', heading('h2', 'Grønt uden kompromis')),
+        column('full', heading('h2', 'Vi tilbyder')),
         column(
           'oneThird',
-          heading('h3', '100% økologisk'),
+          heading('h3', 'Frokostordning'),
           p(
-            'Alle vores råvarer er økologiske. Det er ikke til forhandling – det er fundamentet under alt, vi laver.',
+            'Komplet kantinedrift med professionel bemanding og daglig forsyning af kvalitetsmad skræddersyet til jeres behov.',
           ),
         ),
         column(
           'oneThird',
-          heading('h3', 'Grøntsager i centrum'),
+          heading('h3', 'Kantinedrift'),
           p(
-            'Vi sætter grøntsagerne forrest på tallerkenen og viser, hvor mættende og smagfuldt det grønne køkken kan være.',
+            'Komplet kantinedrift med professionel bemanding og daglig forsyning af kvalitetsmad skræddersyet til jeres behov.',
           ),
         ),
         column(
           'oneThird',
-          heading('h3', 'Lokale leverandører'),
+          heading('h3', 'Event catering'),
           p(
-            'Vi køber tæt på og i sæson, så råvarerne er friske, sporbare og rejser så kort som muligt.',
+            'Komplet kantinedrift med professionel bemanding og daglig forsyning af kvalitetsmad skræddersyet til jeres behov.',
           ),
         ),
       ],
-      'Intro',
+      'Vi tilbyder',
+      img('forside-2'),
     ),
+    // Løftet — én gang, i klartekst.
+    content(
+      [
+        column(
+          'full',
+          heading('h2', 'Frokost, som folk faktisk ser frem til'),
+          p(
+            'Vi laver maden fra bunden hver morgen i vores eget køkken og stiller den frem på jeres frokostbord inden kl. 11.30. Nye retter hver dag, CO2-tal på hver ret – og en fast kok, I kender ved navn.',
+          ),
+        ),
+      ],
+      'Løftet',
+    ),
+    // Chipsene fra oplægget: de fire tal, køberen leder efter først.
     stats(
       [
-        { value: '100%', label: 'økologisk – uden undtagelser' },
-        { value: '14', label: 'faste avlere i sæsonen' },
-        { value: '< 24 t', label: 'fra høst til frokostbord' },
-        { value: '−40%', label: 'madspild – hele høsten kommer i brug' },
+        { value: 'Fra 15', label: 'medarbejdere' },
+        { value: 'Sjælland', label: 'og Hovedstaden' },
+        { value: 'CO2-tal', label: 'på hver ret' },
+        { value: '30 dage', label: 'løbende måned + 30 dage' },
       ],
       undefined,
       undefined,
       'Nøgletal',
+      // Tallene handler om levering, minimum og CO2 — bandet tager derfor
+      // øko-grønnen frem for terracottaen, som holdes til wordmark og knapper.
+      'eco',
     ),
-    mediaContent(
-      img('forside-1'),
-      'left',
-      richText(
-        heading('h2', 'Grøntsagen i hovedrollen'),
-        p(
-          'Økologiske råvarer fra danske avlere, korte forsyningskæder og minimalt madspild. Grøn gastronomi, der er god for både jer og planeten.',
-        ),
-      ),
-      [customLink('Om os', '/om-os')],
-    ),
-    mediaContent(
-      img('forside-2'),
-      'right',
-      richText(
-        heading('h2', 'Tæt på avlerne'),
-        p(
-          'Vi kender markerne og menneskene bag vores råvarer. Hele høsten kommer i brug – ikke kun de pæneste eksemplarer – så der er mindre spild på marken og mere smag i køkkenet.',
-        ),
-      ),
-      [customLink('Om os', '/om-os')],
-    ),
-    archive(
-      richText(
-        heading('h3', 'Seneste nyt'),
-        p('Læs med, når vi deler historier, sæsoner og smage fra køkkenet.'),
-      ),
-    ),
+    // Klimaregnskabet — hvad tallet er, og hvad det ikke er.
     mediaContent(
       img('forside-spotlight'),
       'right',
       richText(
-        heading('h2', 'Fra mark til frokostbord'),
+        heading('h2', 'Vi skjuler ikke klimaregnskabet'),
         p(
-          'Vi planlægger sæsonen sammen med vores avlere og bruger hele råvaren, så der er mindre spild på marken og mere smag i køkkenet.',
+          'Hver ret får et CO2-tal, som medarbejderne kan se, mens de tager mad. Det gør ikke maden grønnere i sig selv – men det gør valget synligt, og det flytter forbruget.',
         ),
       ),
-      [customLink('Om os', '/om-os')],
+      [],
+      'Klimaregnskab',
     ),
-    planPicker({
-      heading: 'Hvilken ordning passer jer?',
-      intro: 'To spørgsmål – så peger vi jer i den rigtige retning.',
-      plans: [
-        {
-          need: 'frokost',
-          minPeople: 15,
-          title: 'Daglig frokost – Large',
-          description: 'Varm ret, salater og pålæg – 100% økologisk og leveret hver morgen.',
-          priceLabel: '69 kr. pr. kuvert',
-          url: '/frokost-ud-af-huset',
-        },
-        {
-          need: 'kantine',
-          minPeople: 40,
-          title: 'Kantinedrift',
-          description: 'Vi driver jeres kantine med det grønne køkken som fundament.',
-          priceLabel: 'Aftalepris',
-          url: '/kantine',
-        },
-        {
-          need: 'catering',
-          minPeople: 1,
-          title: 'Grøn catering',
-          description: 'Selskabsmenuer og receptioner af sæsonens økologiske råvarer.',
-          priceLabel: 'fra 145 kr. pr. person',
-          url: '/catering',
-        },
-      ],
-      form: tilbudsFormID,
-    }),
-    clientList(['Novo Campus', 'Urban Farming Lab', 'Ren Energi A/S', 'Klimafonden', 'Grøn Omstilling', 'Coworking Syd']),
-    testimonials(
-      'Det siger vores kunder',
-      'Arbejdspladser i hele landet har Fra Jorden på menuen. Her er nogle af dem.',
-      [
-        {
-          quote:
-            'Vores CO₂-regnskab på frokosten er faldet markant, og maden er blevet bedre. Fra Jorden beviser, at det grønne valg også er det lækre valg.',
-          author: 'Anders Vinge',
-          role: 'Bæredygtighedschef, Klimafonden',
-        },
-        {
-          quote:
-            'Grøntsagen i hovedrollen lød kedeligt, til vi smagte det. Nu efterspørger selv de mest kødglade kolleger en ekstra portion.',
-          author: 'Maja Toft',
-          role: 'Driftsleder, Coworking Syd',
-        },
-        {
-          quote:
-            'Det er 100% økologisk uden at gå på kompromis med smagen. Vi kan stå inde for hver eneste ret, vi serverer for vores gæster.',
-          author: 'Søren Bach',
-          role: 'Kantineansvarlig, Novo Campus',
-        },
-        {
-          quote:
-            'At de kender avlerne bag råvarerne betyder alt for os. Det er sporbarhed, vi kan fortælle vores kunder om med stolthed.',
-          author: 'Ida Kjær',
-          role: 'Indkøbschef, Ren Energi A/S',
-        },
-        {
-          quote:
-            'Sæsonens råvarer gør, at menuen hele tiden skifter. Det holder frokosten spændende og minder os om, hvad der gror lige nu.',
-          author: 'Mikkel Roed',
-          role: 'Projektleder, Urban Farming Lab',
-        },
-        {
-          quote:
-            'Mindre madspild og mere smag – de to ting plejer at trække i hver sin retning. Fra Jorden får dem til at gå hånd i hånd.',
-          author: 'Trine Holst',
-          role: 'ESG-rådgiver, Grøn Omstilling',
-        },
-      ],
+    // Ugemenuen ligger frit fremme — ingen login, ingen mailkorrespondance.
+    mediaContent(
+      img('forside-1'),
+      'left',
+      richText(
+        heading('h2', 'Ugens menu, helt åbent'),
+        p(
+          'Ingen login, ingen mailkorrespondance. Klik dig gennem ugen og se præcis, hvad der bliver serveret – inklusive allergener og klimaaftryk pr. kilo.',
+        ),
+      ),
+      [customLink('Se ugens menu', '/frokost-ud-af-huset', 'outline')],
+      'Ugens menu',
     ),
     cta(
-      richText(
-        heading('h3', 'Smag det grønne køkken'),
-        p(
-          'Nysgerrig på en frokost, der er god for både jer og planeten? Lad os vise jer, hvad sæsonen byder på.',
-        ),
-      ),
-      [customLink('Kontakt os', '/om-os')],
+      richText(heading('h3', 'Vil I smage, før I beslutter jer?')),
+      [
+        customLink('Få et tilbud', '/frokost-ud-af-huset#tilbud'),
+        customLink('Book en smagning', '/frokost-ud-af-huset#tilbud', 'outline'),
+      ],
     ),
   ],
   meta: {
-    title: 'Fra Jorden – økologisk frokostordning fra jord til bord',
+    title: 'Fra Jorden – frokost, som folk faktisk ser frem til',
     description:
-      'Fra Jorden dyrker frokost med respekt for naturen. Økologiske grøntsager, korte forsyningskæder og grøn gastronomi gør hver ret både god for jer og for kloden.',
+      'Vi laver maden fra bunden hver morgen i vores eget køkken og stiller den frem inden kl. 11.30. Nye retter hver dag, CO2-tal på hver ret – og en fast kok, I kender ved navn.',
     image: img('hero'),
   },
 })

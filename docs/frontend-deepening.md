@@ -1,147 +1,179 @@
-# Frontend deepening — arkitekturopgaver
+# Frontend: ét komponentsystem, tre sites
 
-Fire deepening-muligheder fundet i en arkitekturgennemgang af frontend'en
-(`/improve-codebase-architecture`). Målet er at gøre shallow moduler dybe:
-mere adfærd bag mindre interface, bedre **locality** (ændringer samlet ét sted)
-og bedre testbarhed.
+Platformen hoster tre sites — Frokost Konsortiet, Smagssans og Fra Jorden — på
+hver sit domæne, ud af én Payload-instans og **ét sæt komponenter**. Ingen blok
+og ingen hero findes i tre udgaver. Forskellen mellem sitene bor fire steder,
+og det er dem, dette dokument beskriver: *"ét sprog, tre dialekter."*
 
-Sproget: **modul** (interface + implementation), **interface** (alt en kalder
-skal vide — inkl. invarianter), **dybde** (meget adfærd bag lille interface),
-**shallow** (interface ≈ implementation), **seam** (ét sted adfærd kan ændres),
-**deletion test** (forsvinder kompleksiteten hvis modulet slettes, eller dukker
-den op igen spredt ud?).
-
-Ingen af opgaverne modsiger [ADR-0001](adr/0001-multi-tenant-from-single-payload.md)
-eller [ADR-0002](adr/0002-additive-per-tenant-seed.md) — de handler om
-multi-tenant-strukturen og seed-strategien, ikke om læse-laget eller
-frontend-komposition.
-
-Hver opgave har sin egen branch (se nederst).
+Se også [ADR-0001](adr/0001-multi-tenant-from-single-payload.md) (multi-tenant
+ud af én instans) og [ADR-0002](adr/0002-additive-per-tenant-seed.md)
+(additiv seed pr. tenant).
 
 ---
 
-## 1. Tenant-scoping mangler en seam
+## De fire lag
 
-**Branch:** `refactor/tenant-data-access-seam`
-**Prioritet:** Højest — lukker ADR-0001's udpegede toprisiko.
+### 1. Paletten — CSS-variabler, injiceret pr. request
 
-**Filer:**
-- `src/utilities/tenantPostsFilter.ts` (`getTenantPostsWhere`)
-- `src/utilities/getDocument.ts` (`tenantSlug?` er valgfri)
-- Kaldesteder: `app/(frontend)/[tenant]/[slug]/page.tsx:114`,
-  `posts/[slug]/page.tsx:99`, `posts/page.tsx`, `search/page.tsx`,
-  `blocks/ArchiveBlock/Component.tsx:40`, `(sitemaps)/…`
+`src/themes/tenantThemes.ts` er registret: ét objekt pr. site med farver,
+`radius`, `displayScale`, `textInset`, `eco` og `heroScrim`.
+`src/components/TenantTheme/index.tsx` skriver dem ud som CSS-variabler i ét
+`<style>`-tag med tre regler:
 
-**Problem:** ADR-0001 udpeger cross-tenant-lækage som den vigtigste invariant,
-men den håndhæves kun ved konvention. `getTenantPostsWhere()` bliver hånd-flettet
-ind i `where`-klausuler 5+ steder; andre steder er `{ 'tenant.slug': { equals } }`
-hårdkodet inline. Læse-interfacet gør tenant *valgfri* (`getDocument(..., tenantSlug?)`,
-`ArchiveBlock`'s `tenantSlug?`) — glemmer man den, lækker ét køkkens indhold til et
-andet, og intet fanger det ved compile-tid eller i test.
-
-**Løsning:** Saml al indholdslæsning bag ét tenant-scoped data-access-modul, hvor
-man ikke kan hente pages/posts *uden* at angive en tenant (tenant bliver påkrævet
-del af interfacet). Aggregator-undtagelsen for main-tenanten bor så ét sted.
-
-**Gevinst:**
-- **Locality:** Hele lækage-risikoen samler sig ét sted; en reviewer læser ét modul.
-- **Leverage:** Nye features arver scoping gratis.
-- **Test:** Interfacet bliver testfladen — "køkken A ser aldrig køkken B" og
-  aggregator-adfærd kan enhedstestes. **Deletion test: består klart.**
-
----
-
-## 2. Tenant-personligheden (dialekten) er prop-threading, ikke et modul
-
-**Branch:** `refactor/tenant-dialect-module`
-**Prioritet:** Høj — flugter tættest med kerne-modellen "ét sprog, tre dialekter".
-
-**Filer:**
-- `src/themes/tenantThemes.ts` (`getTenantDesign`)
-- `src/blocks/RenderBlocks.tsx:41`, `app/(frontend)/[tenant]/[slug]/page.tsx`
-  (resolves 2. gang)
-- `src/heros/RenderHero.tsx`, `blocks/Content/Component.tsx`,
-  `blocks/MediaContent/Component.tsx`
-
-**Problem:** `getTenantDesign(tenant)` resolves uafhængigt mindst to gange pr. side.
-`design` prop-threades til *alle* blocks, men kun 2 af ~10 læser den. Personligheden
-lever tre steder på én gang: som CSS (`TenantTheme`), som return-værdi der threades,
-og som React-context (kun lys/mørk + header-tema). Der er ikke ét "dialekt"-koncept.
-
-**Løsning:** Gør tenant-dialekten (eyebrow/heroVariant/signature/tagline) til ét
-modul med én seam — resolvet én gang pr. request, læst af de komponenter der faktisk
-bruger den, i stedet for båret gennem props af dem der ikke gør.
-
-**Gevinst:**
-- **Locality:** "Hvad er dette køkkens dialekt?" besvares ét sted; ligeglade blocks
-  nævner den ikke i deres signatur.
-- **Leverage:** En ny dialekt-akse tilføjes ét sted.
-- **Test:** "smagssans → split-hero + sketch-signature" testes mod dialekt-modulet.
-
----
-
-## 3. Blocks genimplementerer deres skal; registrering har tre sandheder
-
-**Branch:** `refactor/block-registration-shell`
-**Prioritet:** Mellem — bred oprydning, høj berøringsflade.
-
-**Filer:**
-- `src/blocks/RenderBlocks.tsx:18-29` (dispatcher-map) og `:59` (`my-16`)
-- `src/collections/Pages/index.ts:82-93` (config-array)
-- `src/payload-types.ts` (genereret union)
-- Hver block der selv skriver `<div className="container">`
-
-**Problem:** (a) **Skallen gentages** — næsten hver block genimplementerer
-`<div className="container">`, og den ydre `my-16`-margin er hårdkodet i
-dispatcheren; en site-bred spacing-ændring kræver 7+ filer. (b) **Tre sandheder
-skal synkroniseres manuelt** for at tilføje en block: dispatcher-map, Payload-config,
-typer. Glemmer man dispatcheren, renderer blocken bare ikke — uden fejl (præcis det
-der er sket med Banner, der kun virker inde i RichText). Blocks er overvejende
-**shallow**; kun `ArchiveBlock` har rigtig logik.
-
-**Løsning:** Én block-registrering som er kilden til både editor-config og
-render-dispatch, plus en fælles block-skal (container/spacing/data-attribut) så
-blocks kun leverer deres indhold.
-
-**Gevinst:**
-- **Locality:** Spacing og skal ét sted; tilføj en block = én registrering.
-- **Leverage:** "Missing dispatcher"-fælden forsvinder.
-- **Test:** Den fælles skal testes én gang i stedet for pr. block.
-
----
-
-## 4. Hero-variant og header-tema koblet via context + effekt-i-render
-
-**Branch:** `refactor/hero-header-theme-seam`
-**Prioritet:** Lav — mindst i omfang, men fjerner en konkret bug-kilde.
-
-**Filer:**
-- `src/heros/HighImpact/index.tsx:40-133`
-- `src/providers/HeaderTheme/index.tsx`
-- `src/Header/Component.client.tsx:20`
-
-**Problem:** `HighImpactHero` vælger `SplitHero`/`OverlayHero` på `design.heroVariant`
-og signalerer samtidig headerens tema via `useHeaderTheme()` inde i et `useEffect`
-med utilstrækkelig dependency-array (maskeret af en ESLint-disable). Hero (i
-`<article>`) og header (i layout) sidder i hver sin del af træet og kommunikerer via
-en context der opdateres under render — skrøbeligt hvis hero-typen skifter.
-
-**Løsning:** Gør header/hero-tema-koordineringen til én eksplicit seam i stedet for
-en effekt-baseret sidekanal.
-
-**Gevinst:**
-- **Locality:** Tema-overgangen bor ét sted.
-- **Test:** Variant-valget kan testes uden at køre effekter.
-
----
-
-## Branches
-
-| Opgave | Branch |
+| Regel | Indhold |
 | --- | --- |
-| 1. Tenant-scoping seam | `refactor/tenant-data-access-seam` |
-| 2. Dialekt-modul | `refactor/tenant-dialect-module` |
-| 3. Block-registrering + skal | `refactor/block-registration-shell` |
-| 4. Hero/header-tema seam | `refactor/hero-header-theme-seam` |
+| `[data-theme='light'], [data-theme='dark']` | brandfarver, form, skala — **holder i begge tilstande** |
+| `[data-theme='light']` | de ambiente flader — **kun dagslys** |
+| `[data-theme='dark']` | eventuelle mørke overrides — skrives sidst og vinder |
 
-Alle branches er oprettet fra `main` @ `c5c95ac`.
+Det er dét, der gør, at en blok kan skrive `bg-primary` og få Fra Jordens
+terracotta det ene sted og Konsortiets blæk det andet, uden at kende nogen af
+dem. Familiens fælles udgangspunkt står i paletblokkene i
+`src/app/(frontend)/globals.css`; tenanten overskriver kun det, der bærer
+identitet.
+
+**Reglen der ikke er til forhandling:** flader er kun-lys, brand og form holder
+i begge. Lægger du en fladefarve i brand-gruppen, får du blege øer i mørk
+tilstand. Lægger du form eller skala blandt fladerne, forsvinder den efter
+mørkets frembrud — det var præcis fejlen med `radius`, hvor Fra Jordens
+bevidst skarpe `0.25rem` blev familiens `0.625rem` om natten.
+
+### 2. Skriften — `src/themes/fonts.ts`
+
+Hvert site peger `--font-sans` på sin egen font og kan have en separat
+overskriftsfont via `--font-heading`. Fra Jorden kører Playfair over Jost,
+Smagssans det samme snit over Mulish, Konsortiet Poppins til begge.
+
+Brug **ikke** `weight: [...]` på en variabel font. Det får `next/font` til at
+hente én statisk fil pr. vægt i stedet for én variabel fil — på Mulish kostede
+det 4,7 KB render-blokerende CSS, hvor tyve `@font-face`-regler pegede på fem
+filer. Poppins er reelt statisk, så dens vægtliste er korrekt.
+
+### 3. Dialekten — `src/themes/dialect.ts`
+
+Fem akser, der ikke er farver, men **valg**:
+
+| Akse | Hvad den styrer |
+| --- | --- |
+| `signature` | motivet: streg, bjælke eller skitse |
+| `eyebrow` | de små labels' form: versaler, kapitæler eller almindelig |
+| `heroVariant` | hvilken hero-komponent der renderes |
+| `chrome` | om header og footer er faste lyse flader |
+| `tagline` | sitets korte linje |
+
+Læses med `getDialect(tenantSlug)`. Grænsen mellem tema og dialekt er
+**værdier bliver CSS-variabler; opremsninger bliver i dialekten og læses i
+JSX**. Det er derfor `heroScrim` ikke længere er en dialekt-akse: det var en
+farve, der rejste som JSX-prop, og opskriften fandtes i tre kopier.
+
+### 4. Brand-assets — Payload
+
+Logo og favicon ligger i en `brand`-global, som redaktøren styrer
+(`src/themes/resolveTenantBrand.ts`). Farverne bliver i koden; billederne gør
+ikke.
+
+---
+
+## Hvordan en side bliver til
+
+1. `src/proxy.ts` slår værtsnavnet op og finder tenanten.
+2. Tenant-layoutet henter tema og skrift, sætter font-variablerne på en wrapper
+   og rendrer `TenantTheme`, som lægger `<style>`-tagget ud.
+3. Indholdet læses gennem **én seam**: `src/data/tenantContent.ts`. Hver
+   funktion kræver et `tenantSlug`, så ingen frontend-læsning kan glemme sin
+   scoping — lækagerisikoen ADR-0001 udpeger bor her og intet andet sted.
+4. `src/blocks/RenderBlocks.tsx` rendrer sidens blokke og giver hver enkelt
+   `tenantSlug`. Blokken bruger tokens til farve og form og kalder `getDialect`
+   kun, hvis den har brug for en personlighedsakse.
+
+---
+
+## Hvor retter man hvad
+
+| Du vil ændre | Du redigerer |
+| --- | --- |
+| En farve på ét site | `tenantThemes.ts` — det ene felt |
+| Alle sites' fælles udgangspunkt | paletblokkene i `globals.css` |
+| Overskriftsstørrelsen på ét site | `displayScale` — hele skalaen følger med |
+| Et sites motiv eller hero-type | dialekt-akserne i `tenantThemes.ts` |
+| Hvordan en blok ser ud **overalt** | blokkens komponent — aldrig per-tenant |
+| En ny farverolle | token i `@theme inline` + felt i `ThemeVars` + linje i `TenantTheme` |
+| En ny blok | `blockConfigs.ts` (config) + `RenderBlocks.tsx` (renderer) |
+
+`blockConfigs` og `RenderBlocks` er med vilje adskilt: configen bygges i Node
+til `generate:types` og migrationer, så en React-renderer i den graf trækker
+`.scss`- og browser-imports med og brækker builden. Rendererens map er typet
+mod den genererede blok-slug-union, så en blok uden renderer er en
+compileringsfejl, ikke en tom sektion.
+
+---
+
+## Fælder, der har kostet os noget
+
+**Sæt aldrig en forgrundsfarve, når fladen allerede har sat en.** Båndet
+bestemmer sin tekstfarve; overskriften arver. `SectionHeader` havde en
+`tone`-prop, der hardkodede `text-primary-foreground` — så da nøgletals-båndet
+fik en øko-flade, blev overskriften tegnet i brandfarvens forgrund, og tallene
+stod ~2,5:1 i mørk tilstand.
+
+**Tema-registret må ikke krydse klientgrænsen.** `getDialect` importerer hele
+registret, så en `'use client'`-komponent, der kalder den, sender alle tre
+sites' paletter til browseren. Slå den op på serveren og send akserne videre
+som props — det er sådan heroerne, headeren, ordningsvælgeren og
+`SectionHeader` gør det. *Stadig åbent:* `RichText` importerer `CallToAction`,
+som kalder `getDialect`, så registret (~1 KB brotli) følger med på de fleste
+sider ad den vej.
+
+**Nye tokens skal kendes af `cn()`.** `tailwind-merge` kender kun Tailwinds egne
+skalaer, så `cn('rounded-lg', 'rounded-band')` beholdt begge klasser, og
+kilderækkefølgen — ikke kalderen — bestemte hjørnet. Hver token i `@theme`, der
+deler property med en indbygget skala, skal registreres i
+`src/utilities/ui.ts`.
+
+**Håndskrevne utility-klasser sorterer efter de genererede.** `.container` var
+skrevet som en regel i `@layer utilities` og slog derfor `max-w-*` på samme
+element: `container max-w-3xl` rendrede i fuld bredde. Enkeltdeklarationer, der
+skal kunne overskrives, hører i `@utility`; kun sammensatte opskrifter, der
+*skal* slå utilities, står ulagrede — og så med en begrundelse i filen.
+
+**Roden er ikke bind-mountet.** `docker-compose.yml` mounter kun `./src` og
+`./scripts`. Ændringer i `tailwind.config.mjs`, `next.config.ts` eller
+`package.json` kræver et image-rebuild, ikke en genstart — ellers tester du den
+gamle konfiguration uden at vide det.
+
+---
+
+## Hvor systemet stadig er shallow
+
+Ærlige, kendte svagheder, som review har peget på og vi ikke har taget:
+
+- **Tilstands-politikken bor i tre arrays** i `TenantTheme` i stedet for på
+  feltet. Glemmer man at tilføje et nyt felt til et array, gør feltet
+  ingenting — uden fejl. En spec-tabel keyed på feltnavnet ville gøre det
+  umuligt.
+- **Bånd bygges i hånden fem steder** (`Stats`, `CallToAction`, `IconRow`,
+  `Testimonials`, `PlanPicker`), hver med sit eget valg af flade og forgrund.
+  Én `Band`-wrapper ville sætte parret ét sted og lade efterkommere arve.
+- **Signaturtabellen er keyed på placering**, ikke på de to ting der faktisk
+  varierer (bredde, og om mærket følger tekst- eller brandfarve). Derfor er
+  `pageHeader.block` det eneste `block`-mærke uden `rounded-full`, og
+  `heroEyebrow` blander `bg-current` og `bg-primary` i én kontekst.
+- **`opacity: 0`-værnet** skjuler dokumentet, indtil tema-scriptet stamper
+  `data-theme`. Det har nu et sikkerhedsnet efter 400 ms, men rodfixet er at
+  server-rendre `data-theme` fra en cookie, så der ikke er noget at skjule.
+- **Formateringsdrift** i omkring 40 filer; prettier er ikke håndhævet.
+
+---
+
+## Historik: de fire deepening-opgaver
+
+Dokumentet var oprindeligt en liste over fire arkitekturopgaver fra en
+gennemgang med `/improve-codebase-architecture`. **Alle fire er landet**, og
+det er dem, strukturen ovenfor beskriver:
+
+| Opgave | Landede som |
+| --- | --- |
+| 1. Tenant-scoping mangler en seam | `src/data/tenantContent.ts` + `tenantScope.ts` |
+| 2. Dialekten er prop-threading, ikke et modul | `src/themes/dialect.ts` (`getDialect`) |
+| 3. Blocks genimplementerer deres skal | `blockConfigs.ts`, `RenderBlocks.tsx`, `SignatureCard` |
+| 4. Hero-variant og header-tema koblet via effekt-i-render | `useHeaderThemeSync` |

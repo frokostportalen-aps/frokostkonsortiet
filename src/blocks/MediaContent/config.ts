@@ -33,6 +33,30 @@ export const MediaContent: Block = {
       ],
     },
     {
+      name: 'mediaRatio',
+      type: 'select',
+      defaultValue: 'half',
+      label: 'Billedets bredde',
+      admin: {
+        description:
+          'Halvdelen: billedet fylder sin halvdel af båndet fra kant til kant. En tredjedel: et smallere billede med luft omkring og teksten i de resterende to tredjedele – til portrætter og motiver, der ikke skal fylde halvdelen.',
+      },
+      options: [
+        { label: 'Halvdelen', value: 'half' },
+        { label: 'En tredjedel', value: 'oneThird' },
+      ],
+    },
+    {
+      name: 'textAlign',
+      type: 'select',
+      defaultValue: 'left',
+      label: 'Tekstjustering',
+      options: [
+        { label: 'Venstrestillet', value: 'left' },
+        { label: 'Centreret', value: 'center' },
+      ],
+    },
+    {
       name: 'richText',
       type: 'richText',
       editor: lexicalEditor({
