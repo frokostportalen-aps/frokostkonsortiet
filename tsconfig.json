@@ -39,6 +39,10 @@
   "include": [
     "**/*.ts",
     "**/*.tsx",
+    // TypeScript's wildcards skip dot-directories, so the Storybook config
+    // would go unchecked — including the decorator that themes every story.
+    ".storybook/**/*.ts",
+    ".storybook/**/*.tsx",
     ".next/types/**/*.ts",
     "redirects.js",
     "next-env.d.ts",
