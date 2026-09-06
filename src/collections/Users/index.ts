@@ -2,15 +2,18 @@ import type { CollectionConfig } from 'payload'
 
 import { authenticated } from '../../access/authenticated'
 import { isSuperAdmin } from '../../access/isSuperAdmin'
+import { selfOrSuperAdmin, superAdminOnly } from '../../access/selfOrSuperAdmin'
 
 export const Users: CollectionConfig = {
   slug: 'users',
   access: {
+    // Every logged-in user reaches the admin panel; what they see there is
+    // scoped per collection.
     admin: authenticated,
-    create: authenticated,
-    delete: authenticated,
-    read: authenticated,
-    update: authenticated,
+    create: superAdminOnly,
+    delete: superAdminOnly,
+    read: selfOrSuperAdmin,
+    update: selfOrSuperAdmin,
   },
   admin: {
     defaultColumns: ['name', 'email', 'roles'],
