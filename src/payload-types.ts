@@ -974,7 +974,7 @@ export interface TestimonialsBlock {
   heading?: string | null;
   intro?: string | null;
   /**
-   * Vises i et marquee-bånd, der ruller automatisk og holder pause, når man holder musen over.
+   * Layoutet følger sitets eget udtryk: enten et marquee-bånd, der ruller automatisk og holder pause, når man holder musen over, eller kort side om side, hvor pilene skubber båndet ét kort ad gangen. Begge gør sig bedst med tre eller flere udtalelser.
    */
   items?:
     | {

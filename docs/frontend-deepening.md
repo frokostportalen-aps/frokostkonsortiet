@@ -51,7 +51,7 @@ filer. Poppins er reelt statisk, så dens vægtliste er korrekt.
 
 ### 3. Dialekten — `src/themes/dialect.ts`
 
-Fem akser, der ikke er farver, men **valg**:
+Seks akser, der ikke er farver, men **valg**:
 
 | Akse | Hvad den styrer |
 | --- | --- |
@@ -59,6 +59,7 @@ Fem akser, der ikke er farver, men **valg**:
 | `eyebrow` | de små labels' form: versaler, kapitæler eller almindelig |
 | `heroVariant` | hvilken hero-komponent der renderes |
 | `chrome` | om header og footer er faste lyse flader |
+| `testimonials` | hvordan kundecitater præsenteres: rullende bånd eller kort med pile |
 | `tagline` | sitets korte linje |
 
 Læses med `getDialect(tenantSlug)`. Grænsen mellem tema og dialekt er
