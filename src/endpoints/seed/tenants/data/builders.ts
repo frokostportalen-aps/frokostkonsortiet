@@ -48,13 +48,19 @@ export const linkColumn = (size: Size, linkData: Record<string, unknown>, ...nod
   richText: richText(...nodes),
 })
 
-export const content = (columns: Column[], blockName = 'Indhold') => ({
+/** Columns of prose and cards. `background` puts the whole section on a photo. */
+export const content = (columns: Column[], blockName = 'Indhold', background?: string) => ({
   blockType: 'content',
   blockName,
   columns,
+  ...(background ? { background } : {}),
 })
 
 // ── media blocks ───────────────────────────────────────────────────────────—
+
+/** Presentation of a media+content band: how wide the image side is, and how
+ *  the copy is set. Defaults match the band's original look. */
+type MediaContentOpts = { ratio?: 'half' | 'oneThird'; align?: 'left' | 'center' }
 
 /** Image beside text (the image side alternates down a page via `position`). */
 export const mediaContent = (
@@ -63,11 +69,14 @@ export const mediaContent = (
   rt: RichText,
   links: LinkWrap[] = [],
   blockName = 'Billede + tekst',
+  { ratio = 'half', align = 'left' }: MediaContentOpts = {},
 ) => ({
   blockType: 'mediaContent',
   blockName,
   media,
   imagePosition: position,
+  mediaRatio: ratio,
+  textAlign: align,
   richText: rt,
   links,
 })
@@ -117,11 +126,13 @@ export const stats = (
   heading_?: string,
   intro?: string,
   blockName = 'Nøgletal',
+  tone: 'brand' | 'eco' | 'sand' = 'brand',
 ) => ({
   blockType: 'stats',
   blockName,
   ...(heading_ ? { heading: heading_ } : {}),
   ...(intro ? { intro } : {}),
+  tone,
   items,
 })
 
@@ -141,6 +152,7 @@ export type PriceMenuSection = {
 export const priceMenu = (
   opts: {
     heading?: string
+    eyebrow?: string
     intro?: string
     sections: PriceMenuSection[]
     note?: string
@@ -236,6 +248,22 @@ export const timeline = (
   ...(heading_ ? { heading: heading_ } : {}),
   ...(intro ? { intro } : {}),
   items,
+})
+
+/** A row of pictograms with a label under each ("hensyn vi tager"). */
+export const iconRow = (
+  opts: {
+    heading?: string
+    eyebrow?: string
+    intro?: string
+    items: { icon: string; label: string; note?: string }[]
+    note?: string
+  },
+  blockName = 'Ikonrække',
+) => ({
+  blockType: 'iconRow',
+  blockName,
+  ...opts,
 })
 
 /** FAQ block from plain question/answer strings. */
