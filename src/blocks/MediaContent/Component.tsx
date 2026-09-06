@@ -50,7 +50,15 @@ export const MediaContentBlock: React.FC<Props> = ({
         <div
           className={cn(
             'relative',
-            narrow ? 'aspect-[4/5] m-6 md:m-10 md:self-center' : 'min-h-[18rem] md:min-h-[26rem]',
+            // `self-center` is not a `md:` refinement — it's what stops the cell
+            // from collapsing. The band is `items-stretch`, and this cell's only
+            // content is the absolutely-positioned <picture>, so it contributes
+            // no in-flow size in either axis. Blink resolves the row from the
+            // aspect-ratio anyway; WebKit lets `stretch` win over the ratio and
+            // sizes the cell 0x0 — the picture vanished on iPhones while every
+            // other engine looked right. Opting out of `stretch` makes the ratio
+            // the definite size in both, at identical measurements.
+            narrow ? 'aspect-[4/5] m-6 md:m-10 self-center' : 'min-h-[18rem] md:min-h-[26rem]',
             imageRight && 'md:order-2',
           )}
         >
