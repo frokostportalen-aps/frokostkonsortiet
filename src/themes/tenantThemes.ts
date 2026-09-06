@@ -68,6 +68,17 @@ export type HeroVariant = 'split' | 'overlay' | 'wordmark'
  */
 export type Signature = 'rule' | 'block' | 'sketch'
 
+/**
+ * How a site presents its customer quotes. This is an identity choice, not a
+ * count — a site that has plenty of quotes may still want them read one at a
+ * time, and the block never infers the layout from `items.length`:
+ *   • `marquee`  – a band of cards that scrolls on its own: the references are
+ *                  a body of goodwill, and no single one is the point
+ *   • `carousel` – a rail of cards stepped by hand: the references are named
+ *                  individuals, and the site expects each to be read
+ */
+export type TestimonialsVariant = 'marquee' | 'carousel'
+
 export type ThemeVars = {
   primary?: string
   primaryForeground?: string
@@ -138,6 +149,7 @@ export type ThemeVars = {
   chrome?: Chrome
   heroVariant?: HeroVariant
   signature?: Signature
+  testimonials?: TestimonialsVariant
   /** The site's standing call-to-action, shown as a button in the header. */
   headerCta?: { label: string; url: string }
   /**
@@ -296,6 +308,9 @@ export const tenantThemes: Record<string, ThemeVars> = {
     chrome: 'brand',
     heroVariant: 'wordmark',
     signature: 'sketch',
+    // Referencerne er navngivne mennesker fra navngivne huse, og oplægget sætter
+    // dem én ad gangen med pile: læseren skal nå at læse hver enkelt færdig.
+    testimonials: 'carousel',
     // Tilbudsformularen bor på Frokostordning-siden — om-os findes ikke længere.
     headerCta: { label: 'Få et tilbud', url: '/frokost-ud-af-huset#tilbud' },
     // Warm olive-slate scrim so the hero photo reads earthy, not neutral black.

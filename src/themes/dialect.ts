@@ -1,5 +1,11 @@
 import { getTenantTheme } from './tenantThemes'
-import type { Chrome, EyebrowStyle, HeroVariant, Signature } from './tenantThemes'
+import type {
+  Chrome,
+  EyebrowStyle,
+  HeroVariant,
+  Signature,
+  TestimonialsVariant,
+} from './tenantThemes'
 
 /**
  * A site's **dialect** — the small set of personality axes that make one shared
@@ -18,10 +24,12 @@ export type Dialect = {
   chrome: Chrome
   heroVariant: HeroVariant
   signature: Signature
+  /** How customer quotes are presented — see `TestimonialsVariant`. */
+  testimonials: TestimonialsVariant
   tagline?: string
 }
 
-export type { Chrome, EyebrowStyle, HeroVariant, Signature }
+export type { Chrome, EyebrowStyle, HeroVariant, Signature, TestimonialsVariant }
 
 /** Family defaults, applied to any axis a site leaves unset. */
 const DIALECT_DEFAULTS: Dialect = {
@@ -29,6 +37,7 @@ const DIALECT_DEFAULTS: Dialect = {
   chrome: 'default',
   heroVariant: 'overlay',
   signature: 'rule',
+  testimonials: 'marquee',
 }
 
 /** The resolved dialect for a site, with family defaults filled in. */
@@ -40,6 +49,7 @@ export const getDialect = (slug?: string | null): Dialect => {
     chrome: theme.chrome ?? DIALECT_DEFAULTS.chrome,
     heroVariant: theme.heroVariant ?? DIALECT_DEFAULTS.heroVariant,
     signature: theme.signature ?? DIALECT_DEFAULTS.signature,
+    testimonials: theme.testimonials ?? DIALECT_DEFAULTS.testimonials,
     tagline: theme.tagline,
   }
 }
