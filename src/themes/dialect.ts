@@ -1,5 +1,5 @@
 import { getTenantTheme } from './tenantThemes'
-import type { EyebrowStyle, HeroVariant, Signature } from './tenantThemes'
+import type { Chrome, EyebrowStyle, HeroVariant, Signature } from './tenantThemes'
 
 /**
  * A site's **dialect** — the small set of personality axes that make one shared
@@ -14,23 +14,19 @@ import type { EyebrowStyle, HeroVariant, Signature } from './tenantThemes'
  */
 export type Dialect = {
   eyebrow: EyebrowStyle
+  /** How the header and footer are dressed — see `Chrome`. */
+  chrome: Chrome
   heroVariant: HeroVariant
   signature: Signature
   tagline?: string
-  /**
-   * Base colour for the overlay hero's readability scrim (bare oklch "L C H"
-   * channels). A colour value, but read in JSX like the rest of the dialect —
-   * it tints the hero photo toward the site's identity rather than being
-   * injected as a CSS variable.
-   */
-  heroScrim?: string
 }
 
-export type { EyebrowStyle, HeroVariant, Signature }
+export type { Chrome, EyebrowStyle, HeroVariant, Signature }
 
 /** Family defaults, applied to any axis a site leaves unset. */
 const DIALECT_DEFAULTS: Dialect = {
   eyebrow: 'uppercase',
+  chrome: 'default',
   heroVariant: 'overlay',
   signature: 'rule',
 }
@@ -41,9 +37,9 @@ export const getDialect = (slug?: string | null): Dialect => {
   if (!theme) return DIALECT_DEFAULTS
   return {
     eyebrow: theme.eyebrow ?? DIALECT_DEFAULTS.eyebrow,
+    chrome: theme.chrome ?? DIALECT_DEFAULTS.chrome,
     heroVariant: theme.heroVariant ?? DIALECT_DEFAULTS.heroVariant,
     signature: theme.signature ?? DIALECT_DEFAULTS.signature,
     tagline: theme.tagline,
-    heroScrim: theme.heroScrim,
   }
 }

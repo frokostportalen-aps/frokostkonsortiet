@@ -6,8 +6,14 @@ const config = {
         DEFAULT: {
           css: [
             {
-              '--tw-prose-body': 'var(--text)',
-              '--tw-prose-headings': 'var(--text)',
+              // Rich text inherits its colour from whatever surface it sits on,
+              // so the same block reads correctly on paper, on a tinted band and
+              // on a photo. Said out loud, because it used to rest on an
+              // accident: these pointed at `var(--text)`, a variable this
+              // project never defined, which made the declaration invalid and
+              // let inheritance through by luck.
+              '--tw-prose-body': 'inherit',
+              '--tw-prose-headings': 'inherit',
               h1: {
                 fontWeight: 'normal',
                 marginBottom: '0.25em',
