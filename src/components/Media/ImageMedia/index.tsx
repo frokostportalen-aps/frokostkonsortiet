@@ -84,7 +84,14 @@ export const ImageMedia: React.FC<MediaProps> = (props) => {
   const sizes = sizeFromProps ?? '100vw'
 
   return (
-    <picture className={cn(pictureClassName)}>
+    // `fill` positions the image against its nearest positioned ancestor, and
+    // this `<picture>` was static — so next/image warned on every filled image
+    // on every page ("parent element with invalid position"). The layout still
+    // worked, because a static element establishes no containing block and the
+    // image resolved against the caller's wrapper instead; but the warning was
+    // real noise, and it hid the ones that matter. Filling the wrapper here
+    // makes the chain explicit.
+    <picture className={cn(fill && 'absolute inset-0', pictureClassName)}>
       <NextImage
         alt={alt || ''}
         className={cn(imgClassName)}
