@@ -18,7 +18,7 @@ export const fraJorden: TenantDef = {
   domains: ['frajorden.localhost', 'frajorden.dk', 'new.frajorden.dk'],
   tagline: 'Fra jorden til jeres frokostbord',
   dir: folderOf(import.meta.url),
-  contactEmail: 'kontakt@frajorden.dk',
+  contactEmail: 'frokost@frajorden.dk',
   pages: [home, frokostUdAfHuset, faqPage],
   posts: [],
   menu,
