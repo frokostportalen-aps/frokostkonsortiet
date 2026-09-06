@@ -10,6 +10,7 @@ import {
   p,
   richText,
   stats,
+  testimonials,
 } from '../../builders'
 
 /**
@@ -131,13 +132,50 @@ export const home: PageFactory = ({ tenantID, img }) => ({
       [customLink('Se ugens menu', '/frokost-ud-af-huset', 'outline')],
       'Ugens menu',
     ),
-    cta(
-      richText(heading('h3', 'Vil I smage, før I beslutter jer?')),
+    // Kundecitater. ⚠️ KUN DET FØRSTE CITAT ER ÆGTE — Hanne Damgaard / Børns
+    // Vilkår, som det står i designoplægget. De tre næste er EKSEMPLER, skrevet
+    // for at karrusellen kan afprøves, og de skal skiftes ud med rigtige
+    // referencer inden siden går live: Audryns oplæg beder om 3–5 navngivne
+    // sjællandske referencer, og indtil de findes, står de her som eksempler
+    // (jf. den samme note i tenantens index.ts om ikke at lade vores eget
+    // udkast blive stående). Eksemplerne følger oplæggets tre toneregler —
+    // konkret frem for pæn, kundens egen stemme, ét budskab pr. citat — og hver
+    // af dem tager sit eget af de fire løfter, siden i øvrigt giver.
+    testimonials(
+      'Det siger vores kunder',
+      '',
       [
-        customLink('Få et tilbud', '/frokost-ud-af-huset#tilbud'),
-        customLink('Book en smagning', '/frokost-ud-af-huset#tilbud', 'outline'),
+        {
+          quote:
+            'Vi valgte at have frokostordningen hos Fra Jorden, fordi vi ønskede et mere økologisk fokus i hverdagen. Vi sætter stor pris på at køkkenet har fokus på sæsonens råvarer, deres fleksibilitet og den stabile samt pålidelige levering.',
+          author: 'Hanne Damgaard',
+          role: 'Børns Vilkår',
+        },
+        {
+          quote:
+            'Vi har tre kolleger med allergier, og for første gang skal de ikke spørge, om der er noget til dem. Portionerne står med navn på ved siden af buffeten hver dag, og det koster os ikke en krone ekstra.',
+          author: 'Line Aagaard',
+          role: 'Kontorleder, Advokathuset Roskilde',
+        },
+        {
+          quote:
+            'Halvdelen af huset er på kursus om torsdagen. Vi retter antallet i portalen dagen før og betaler kun for det, vi bestiller — det var det, der fik regnestykket til at hænge sammen hos os.',
+          author: 'Thomas Bech',
+          role: 'Økonomichef, Nordisk Ingeniørhus',
+        },
+        {
+          quote:
+            'Maden er god, men det er forudsigeligheden, der gør forskellen. Samme chauffør, samme kontaktperson, og buffeten står klar, inden vi går til frokost.',
+          author: 'Sofie Kjær',
+          role: 'Facility manager, Havneholmen',
+        },
       ],
+      'Kundecitater',
     ),
+    cta(richText(heading('h3', 'Vil I smage, før I beslutter jer?')), [
+      customLink('Få et tilbud', '/frokost-ud-af-huset#tilbud'),
+      customLink('Book en smagning', '/frokost-ud-af-huset#tilbud', 'outline'),
+    ]),
   ],
   meta: {
     title: 'Fra Jorden – frokost, som folk faktisk ser frem til',
