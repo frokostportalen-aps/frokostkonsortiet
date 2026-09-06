@@ -98,6 +98,7 @@ const preview: Preview = {
       storySort: {
         order: [
           'Introduktion',
+          'Designtokens',
           // Hero types in the order of Payload's own Type field.
           'Hero',
           ['High Impact', 'Medium Impact', 'Low Impact'],
