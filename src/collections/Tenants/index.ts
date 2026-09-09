@@ -10,6 +10,9 @@ import {
   revalidateTenantDomainsAfterDelete,
 } from './hooks/revalidateTenantDomains'
 
+/** A frokostportalen kitchen id is a GUID; a typo there means a silently empty menu. */
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+
 /**
  * A tenant is one site: the main "Frokost Konsortiet" plus each kitchen
  * (smagssans, frajorden, …). Every tenant-scoped document points at one of
@@ -52,6 +55,22 @@ export const Tenants: CollectionConfig = {
           required: true,
         },
       ],
+    },
+    {
+      name: 'kitchenId',
+      type: 'text',
+      label: 'Køkken-ID (frokostportalen)',
+      admin: {
+        description:
+          'Køkkenets id i frokostportalen, fx "f5d2e585-baff-4f7b-b464-08dddfc5c258". Sætter man det, kan sitet vise ugens menu direkte fra portalen. Hovedsitet har intet eget køkken og skal stå tomt.',
+      },
+      validate: (value: unknown) => {
+        if (value === null || value === undefined || value === '') return true
+        if (typeof value !== 'string' || !UUID.test(value.trim())) {
+          return 'Køkken-ID skal være et GUID fra frokostportalen (36 tegn med bindestreger).'
+        }
+        return true
+      },
     },
     {
       name: 'isMain',

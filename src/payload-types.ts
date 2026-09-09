@@ -260,6 +260,10 @@ export interface Tenant {
       }[]
     | null;
   /**
+   * Køkkenets id i frokostportalen, fx "f5d2e585-baff-4f7b-b464-08dddfc5c258". Sætter man det, kan sitet vise ugens menu direkte fra portalen. Hovedsitet har intet eget køkken og skal stå tomt.
+   */
+  kitchenId?: string | null;
+  /**
    * The main Frokost Konsortiet site. It acts as the fallback for unknown hosts and may aggregate content across all kitchens.
    */
   isMain?: boolean | null;
@@ -2134,6 +2138,7 @@ export interface TenantsSelect<T extends boolean = true> {
         domain?: T;
         id?: T;
       };
+  kitchenId?: T;
   isMain?: T;
   updatedAt?: T;
   createdAt?: T;

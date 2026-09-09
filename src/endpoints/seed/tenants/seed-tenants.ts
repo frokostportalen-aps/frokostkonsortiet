@@ -284,14 +284,14 @@ export async function seedTenants(payload: Payload, opts: SeedOptions = {}): Pro
       (await payload.create({
         collection: 'tenants',
         context: ctx,
-        data: { name: t.name, slug: t.slug, isMain: t.isMain, domains },
+        data: { name: t.name, slug: t.slug, isMain: t.isMain, domains, kitchenId: t.kitchenId },
       }))
     if (existingTenant.docs[0]) {
       await payload.update({
         collection: 'tenants',
         id: tenant.id,
         context: ctx,
-        data: { name: t.name, isMain: t.isMain, domains },
+        data: { name: t.name, isMain: t.isMain, domains, kitchenId: t.kitchenId },
       })
     }
     const tenantID = tenant.id as string

@@ -18,6 +18,7 @@ export const smagssans: TenantDef = {
   name: 'Smagssans',
   slug: 'smagssans',
   isMain: false,
+  kitchenId: 'f5d2e585-baff-4f7b-b464-08dddfc5c258',
   domains: ['smagssans.localhost', 'smagssans.dk', 'new.smagssans.dk'],
   tagline: 'Det handler om at være glad for mad',
   dir: folderOf(import.meta.url),
