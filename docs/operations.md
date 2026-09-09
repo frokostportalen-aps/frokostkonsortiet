@@ -69,6 +69,46 @@ super-admin exists and check how many pages/posts/media `--force` will delete.
 `--force` never touches `users` or `tenants`; it only wipes and rebuilds
 `pages`/`posts`/`media`. Redeploy afterwards (see above).
 
+## Ugens menu (frokostportalen)
+
+The "Ugens menu" block reads a kitchen's published week straight from
+frokostportalen's public endpoint — no login, no key:
+
+```
+GET https://backend.frokostportal.dk/api/public/menu?week=<1-53>&year=<ISO-år>&kitchenId=<GUID>&language=da
+```
+
+**It must be called server-to-server** — CORS blocks other origins, so the fetch
+lives in `src/data/weeklyMenu.ts` and never in a `'use client'` module.
+
+Which kitchen a site asks for comes from the tenant, not from the block:
+**Tenants → Køkken-ID**. Seeded from `kitchenId` in each tenant's `index.ts`, and
+editable by a super-admin without a deploy. Frokost Konsortiet (the portal) has
+no kitchen of its own and leaves it empty — the block then renders nothing at
+all rather than guessing at a kitchen.
+
+Two empty states, which mean different things:
+
+- **"Køkkenet har ikke lagt ugens menu op endnu"** — the API answered fine, the
+  week is simply empty. Normal for a kitchen that publishes late (Fra Jorden's
+  kitchen has published nothing at all so far). Nothing to fix on our side.
+- **"Menuen kan ikke hentes lige nu"** — the request itself failed. Check the
+  endpoint by hand with the URL above before looking at our code.
+
+The block fetches the current week plus the next one, and the visitor switches
+between them client-side — no search params, so the pages stay statically
+renderable.
+
+A menu correction upstream reaches the site **within ~20 minutes** without a
+deploy, and needs no action from us. That is two windows stacked: the fetch is
+cached for 10 minutes (`revalidate: 600`), and it is only ever called when the
+page itself regenerates, which its own ISR window (also 600 s) drives. The fetch
+is tagged `weekly-menu` and `weekly-menu-<kitchenId>` for a future on-demand
+invalidator — nothing busts those tags today, so don't count on them. Redeploy
+if a correction has to be live immediately.
+
+`FROKOSTPORTAL_MENU_URL` overrides the endpoint if it ever moves.
+
 ## Transactional mail (Resend)
 
 Mail — form notifications and "forgot password" — goes through
