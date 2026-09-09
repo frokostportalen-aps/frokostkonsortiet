@@ -16,6 +16,7 @@ import { Steps } from './Steps/config'
 import { Team } from './Team/config'
 import { Testimonials } from './Testimonials/config'
 import { Timeline } from './Timeline/config'
+import { WeeklyMenu } from './WeeklyMenu/config'
 
 /**
  * The layout blocks an editor can add to a page — the single list feeding
@@ -42,6 +43,7 @@ export const blockConfigs: Block[] = [
   Testimonials,
   Stats,
   PriceMenu,
+  WeeklyMenu,
   Steps,
   Team,
   PlanPicker,

@@ -214,6 +214,7 @@ export interface Page {
     | TestimonialsBlock
     | StatsBlock
     | PriceMenuBlock
+    | WeeklyMenuBlock
     | StepsBlock
     | TeamBlock
     | PlanPickerBlock
@@ -1067,6 +1068,41 @@ export interface PriceMenuBlock {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "WeeklyMenuBlock".
+ */
+export interface WeeklyMenuBlock {
+  heading?: string | null;
+  /**
+   * Kort linje under overskriften, sat i sitets versaler – fx "Her er 3 regnestykker". Til den halve overskrift, ikke til en sætning.
+   */
+  eyebrow?: string | null;
+  intro?: string | null;
+  /**
+   * Numre på retten og forklaringen nederst under dagen.
+   */
+  showAllergens?: boolean | null;
+  /**
+   * CO2e pr. kg på hver ret, som køkkenet har oplyst det.
+   */
+  showCarbon?: boolean | null;
+  /**
+   * Hvilke variationer retten dækker – fx "Vegansk", "Uden gris", "Halal". Kommer fra køkkenets egen mærkning i portalen.
+   */
+  showVariants?: boolean | null;
+  /**
+   * Fx "Menuen lægges en uge frem. Der kan forekomme ændringer."
+   */
+  note?: string | null;
+  /**
+   * Vises, hvis køkkenet endnu ikke har publiceret nogen uge. Står feltet tomt, bruges en standardtekst.
+   */
+  emptyMessage?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'weeklyMenu';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "StepsBlock".
  */
 export interface StepsBlock {
@@ -1619,6 +1655,7 @@ export interface PagesSelect<T extends boolean = true> {
         testimonials?: T | TestimonialsBlockSelect<T>;
         stats?: T | StatsBlockSelect<T>;
         priceMenu?: T | PriceMenuBlockSelect<T>;
+        weeklyMenu?: T | WeeklyMenuBlockSelect<T>;
         steps?: T | StepsBlockSelect<T>;
         team?: T | TeamBlockSelect<T>;
         planPicker?: T | PlanPickerBlockSelect<T>;
@@ -1852,6 +1889,22 @@ export interface PriceMenuBlockSelect<T extends boolean = true> {
         id?: T;
       };
   note?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "WeeklyMenuBlock_select".
+ */
+export interface WeeklyMenuBlockSelect<T extends boolean = true> {
+  heading?: T;
+  eyebrow?: T;
+  intro?: T;
+  showAllergens?: T;
+  showCarbon?: T;
+  showVariants?: T;
+  note?: T;
+  emptyMessage?: T;
   id?: T;
   blockName?: T;
 }
