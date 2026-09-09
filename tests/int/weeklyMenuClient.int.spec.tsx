@@ -63,6 +63,7 @@ const props = {
 }
 
 const panel = () => screen.getByRole('tabpanel')
+const pageTurn = (name: string) => screen.getByRole('button', { name }) as HTMLButtonElement
 
 afterEach(cleanup)
 
@@ -90,34 +91,24 @@ describe('WeeklyMenuClient', () => {
     render(<WeeklyMenuClient {...props} weeks={[week37]} today="2026-09-07" />)
     const tuesday = screen.getByRole('tab', { name: /Tirsdag/ })
     expect(tuesday.getAttribute('aria-selected')).toBe('true')
-    expect(tuesday.textContent).toContain('I dag')
+    expect(tuesday.textContent).toContain('i dag')
     const monday = screen.getByRole('tab', { name: /Mandag/ })
     expect(monday.getAttribute('aria-selected')).toBe('false')
     // …and the stale server date no longer claims to be today.
-    expect(monday.textContent).not.toContain('I dag')
+    expect(monday.textContent).not.toContain('i dag')
   })
 
   it('follows the browser into a week the server render did not open on', () => {
-    vi.useFakeTimers()
-    try {
-      vi.setSystemTime(new Date('2026-09-14T09:00:00.000Z')) // mandag i uge 38
-      render(<WeeklyMenuClient {...props} weeks={[week37, week38]} today="2026-09-08" />)
-      const weeks = screen.getByRole('tablist', { name: 'Vælg uge' })
-      expect(
-        within(weeks)
-          .getByRole('tab', { name: /Uge 38/ })
-          .getAttribute('aria-selected'),
-      ).toBe('true')
-      expect(within(panel()).getByText('Chicken Korma')).toBeTruthy()
-    } finally {
-      vi.useRealTimers()
-    }
+    vi.setSystemTime(new Date('2026-09-14T09:00:00.000Z')) // mandag i uge 38
+    render(<WeeklyMenuClient {...props} weeks={[week37, week38]} today="2026-09-08" />)
+    expect(screen.getByText('Uge 38')).toBeTruthy()
+    expect(within(panel()).getByText('Chicken Korma')).toBeTruthy()
   })
 
   it('marks today among the days', () => {
     render(<WeeklyMenuClient {...props} weeks={[week37]} />)
     const tuesday = screen.getByRole('tab', { name: /Tirsdag/ })
-    expect(tuesday.textContent).toContain('I dag')
+    expect(tuesday.textContent).toContain('i dag')
     expect(tuesday.getAttribute('aria-selected')).toBe('true')
   })
 
@@ -142,18 +133,23 @@ describe('WeeklyMenuClient', () => {
     expect(within(panel()).queryByText('Frikadeller med rodfrugter')).toBeNull()
   })
 
-  it('offers no week tabs when only one week is published', () => {
+  it('has nowhere to turn when only one week is published', () => {
     render(<WeeklyMenuClient {...props} weeks={[week37]} />)
-    expect(screen.queryByRole('tablist', { name: 'Vælg uge' })).toBeNull()
+    expect(pageTurn('Forrige uge').disabled).toBe(true)
+    expect(pageTurn('Næste uge').disabled).toBe(true)
   })
 
-  it('switches week and lands on that week’s first day', () => {
+  it('turns to the next week and lands on its first day', () => {
     render(<WeeklyMenuClient {...props} weeks={[week37, week38]} />)
-    const weeks = screen.getByRole('tablist', { name: 'Vælg uge' })
-    expect(within(weeks).getByRole('tab', { name: /Uge 37/ }).textContent).toContain('Denne uge')
+    expect(screen.getByText(/denne uge/)).toBeTruthy()
+    expect(pageTurn('Forrige uge').disabled).toBe(true)
 
-    fireEvent.click(within(weeks).getByRole('tab', { name: /Uge 38/ }))
+    fireEvent.click(pageTurn('Næste uge'))
     expect(within(panel()).getByText('Chicken Korma')).toBeTruthy()
+    expect(screen.getByText('Uge 38')).toBeTruthy()
+    // Turned forward, the way back opens up and the way on closes.
+    expect(pageTurn('Forrige uge').disabled).toBe(false)
+    expect(pageTurn('Næste uge').disabled).toBe(true)
   })
 
   it('says the week is not up yet instead of rendering an empty frame', () => {
@@ -170,7 +166,7 @@ describe('WeeklyMenuClient', () => {
     expect(screen.getByText(/kan ikke hentes lige nu/)).toBeTruthy()
   })
 
-  it('points both tab strips at the panel they actually drive', () => {
+  it('points the day rail at the panel it drives', () => {
     render(<WeeklyMenuClient {...props} weeks={[week37, week38]} />)
     const panelId = panel().id
     for (const tab of screen.getAllByRole('tab')) {

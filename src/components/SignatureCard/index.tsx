@@ -35,6 +35,10 @@ type Props = {
   /** Lift on hover/focus even when the card itself isn't a link (e.g. it holds
    *  its own CMSLink). */
   interactive?: boolean
+  /** Off for a card that carries the signature somewhere of its own — the
+   *  weekly menu marks the open day with it, and a second mark up in the
+   *  corner then reads as a stray line rather than a signature. */
+  mark?: boolean
   className?: string
   children: React.ReactNode
 }
@@ -44,6 +48,7 @@ export const SignatureCard: React.FC<Props> = ({
   href,
   newTab,
   interactive,
+  mark = true,
   className,
   children,
 }) => {
@@ -57,7 +62,7 @@ export const SignatureCard: React.FC<Props> = ({
 
   const inner = (
     <>
-      <Marker signature={signature} />
+      {mark && <Marker signature={signature} />}
       <div className="flex flex-1 flex-col">{children}</div>
     </>
   )

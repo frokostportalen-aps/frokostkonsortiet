@@ -18,7 +18,7 @@ const brandline = {
 }
 
 const rawMarkClass: Record<
-  'section' | 'pageHeader' | 'footer' | 'band' | 'card' | 'heroEyebrow' | 'ctaBand',
+  'section' | 'pageHeader' | 'footer' | 'band' | 'card' | 'menuDay' | 'heroEyebrow' | 'ctaBand',
   Partial<Record<Signature, string>>
 > = {
   /** The rule under section headings (Content block). */
@@ -44,6 +44,15 @@ const rawMarkClass: Record<
   card: {
     rule: 'h-px w-10 bg-primary',
     sketch: 'h-[3px] w-10 rounded-full bg-primary/80',
+  },
+  /** Under the selected day in the weekly menu's day rail. Narrower than the
+   *  section rule, because it underlines a single word rather than a heading —
+   *  and `block` gets a mark here even though it has none on a card: the rail
+   *  needs to say which day is open, and the card's left bar can't do that. */
+  menuDay: {
+    rule: 'h-px w-8 bg-primary',
+    block: 'h-1 w-8 rounded-full bg-primary',
+    sketch: 'h-[3px] w-7 rounded-full bg-primary/80',
   },
   /** Before the overlay hero's tagline (light-on-photo context). */
   heroEyebrow: {
