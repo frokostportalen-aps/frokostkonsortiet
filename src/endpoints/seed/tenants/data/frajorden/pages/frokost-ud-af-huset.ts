@@ -11,6 +11,7 @@ import {
   p,
   priceMenu,
   richText,
+  weeklyMenu,
 } from '../../builders'
 
 /**
@@ -148,12 +149,14 @@ export const frokostUdAfHuset: PageFactory = ({ tenantID, img, tilbudsFormID }) 
       },
       'Priseksempler',
     ),
-    // Modul: Menu eksempel — menuen ligger frit fremme, uden login.
+    // Modul: Menu eksempel — menuen ligger frit fremme, uden login. Teksten
+    // forklarer løftet; ugemenuen under den indfrier det med køkkenets egne
+    // retter, hentet fra frokostportalen.
     mediaContent(
       img('rodfrugternes-aarstid'),
       'left',
       richText(
-        heading('h2', 'Uge 28'),
+        heading('h2', 'Menuen ligger frit fremme'),
         p(
           'Menuen bliver lagt en uge frem og ligger frit på siden. I skal ikke logge ind eller skrive jer op til et nyhedsbrev for at se, hvad der bliver serveret. Hver ret står med allergener i parentes og CO2e pr. kg, så tallene kan gå direkte videre til jeres klimaregnskab.',
         ),
@@ -164,6 +167,13 @@ export const frokostUdAfHuset: PageFactory = ({ tenantID, img, tilbudsFormID }) 
       [],
       'Menu eksempel',
     ),
+    weeklyMenu({
+      heading: 'Ugens menu',
+      eyebrow: '– hver ret med allergener og klimatal',
+      note: 'Menuen lægges en uge frem. Ret til ændringer forbeholdes, hvis en råvare ikke lever op til vores krav den dag.',
+      emptyMessage:
+        'Ugens menu er ikke lagt op endnu. Den ligger klar en uge frem, så prøv igen om et par dage – eller ring, så læser vi den op.',
+    }),
     // Modul: Kostpræferencer, hensyn og allergier — seks navngivne hensyn som
     // ikonrække, og den praktiske forklaring i feltet under.
     iconRow(

@@ -10,6 +10,7 @@ import {
   mediaContent,
   p,
   richText,
+  weeklyMenu,
 } from '../../builders'
 
 export const menuvariationer: PageFactory = ({ tenantID, img }) => ({
@@ -66,6 +67,14 @@ export const menuvariationer: PageFactory = ({ tenantID, img }) => ({
       ],
       'Variationer',
     ),
+    // Variationerne står som en liste ovenfor; her står de i den mad, der
+    // faktisk bliver serveret i denne uge — køkkenets egen mærkning følger med
+    // hver ret.
+    weeklyMenu({
+      heading: 'Ugens menu',
+      eyebrow: '– og hvilke variationer hver ret dækker',
+      note: 'Menuen kommer direkte fra køkkenet og opdateres, når ugen bliver lagt op.',
+    }),
     cta(
       richText(
         heading('h3', 'Mangler I en variation?'),
