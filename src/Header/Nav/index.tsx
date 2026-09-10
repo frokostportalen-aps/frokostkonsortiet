@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 
 import type { Header as HeaderType } from '@/payload-types'
 
@@ -23,11 +23,11 @@ export const HeaderNav: React.FC<{
   cta?: { label: string; url: string }
 }> = ({ data, cta }) => {
   const navItems = data?.navItems || []
-  const [open, setOpen] = useState(false)
   const pathname = usePathname()
 
-  // Close the drawer after navigating.
-  useEffect(() => setOpen(false), [pathname])
+  // Every navigating element in the drawer is wrapped in `SheetClose`, so
+  // closing on navigation is Radix's job — this is only the trigger's own state.
+  const [open, setOpen] = useState(false)
 
   const isActive = (url?: string | null) =>
     !!url &&

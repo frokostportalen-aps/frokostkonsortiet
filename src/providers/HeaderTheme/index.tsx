@@ -2,30 +2,26 @@
 
 import type { Theme } from '@/providers/Theme/types'
 
-import React, { createContext, useCallback, use, useEffect, useState } from 'react'
-
-import canUseDOM from '@/utilities/canUseDOM'
+import React, { createContext, use, useEffect, useState } from 'react'
 
 export interface ContextType {
-  headerTheme?: Theme | null
+  headerTheme: Theme | null
   setHeaderTheme: (theme: Theme | null) => void
 }
 
 const initialContext: ContextType = {
-  headerTheme: undefined,
+  headerTheme: null,
   setHeaderTheme: () => null,
 }
 
 const HeaderThemeContext = createContext(initialContext)
 
 export const HeaderThemeProvider = ({ children }: { children: React.ReactNode }) => {
-  const [headerTheme, setThemeState] = useState<Theme | undefined | null>(
-    canUseDOM ? (document.documentElement.getAttribute('data-theme') as Theme) : undefined,
-  )
-
-  const setHeaderTheme = useCallback((themeToSet: Theme | null) => {
-    setThemeState(themeToSet)
-  }, [])
+  // Nothing is claimed until a hero (or a route) claims it. Seeding this from
+  // `<html data-theme>` (as the Payload template does) would make the very
+  // first client render disagree with the server's, which is what used to push
+  // the header into keeping a copy of this value in state.
+  const [headerTheme, setHeaderTheme] = useState<Theme | null>(null)
 
   return <HeaderThemeContext value={{ headerTheme, setHeaderTheme }}>{children}</HeaderThemeContext>
 }

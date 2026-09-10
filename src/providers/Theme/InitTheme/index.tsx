@@ -1,6 +1,6 @@
 import React from 'react'
 
-import { defaultTheme, themeLocalStorageKey } from '../ThemeSelector/types'
+import { defaultTheme, themeLocalStorageKey } from '../shared'
 
 /**
  * Stamps `data-theme` on `<html>` before the first paint, so a visitor who

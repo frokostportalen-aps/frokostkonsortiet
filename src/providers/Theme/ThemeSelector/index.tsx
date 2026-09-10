@@ -7,34 +7,24 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import React, { useState } from 'react'
+import React, { useSyncExternalStore } from 'react'
 
-import type { Theme } from './types'
-
-import { useTheme } from '..'
-import { themeLocalStorageKey } from './types'
+import { readPreference, subscribe, unknownOnServer, writePreference } from '../store'
+import { themeIsValid } from '../types'
 
 export const ThemeSelector: React.FC = () => {
-  const { setTheme } = useTheme()
-  const [value, setValue] = useState('')
+  // The stored choice, straight from the store: the select shows what is
+  // actually remembered — including a choice made in another tab — rather than
+  // a copy that has to be kept in step. Empty until the browser has answered,
+  // which is what the server rendered too.
+  const preference = useSyncExternalStore(subscribe, readPreference, unknownOnServer)
 
-  const onThemeChange = (themeToSet: Theme & 'auto') => {
-    if (themeToSet === 'auto') {
-      setTheme(null)
-      setValue('auto')
-    } else {
-      setTheme(themeToSet)
-      setValue(themeToSet)
-    }
-  }
-
-  React.useEffect(() => {
-    const preference = window.localStorage.getItem(themeLocalStorageKey)
-    setValue(preference ?? 'auto')
-  }, [])
+  // Anything that isn't a theme is "auto", which is what clearing the choice
+  // means to the store.
+  const onThemeChange = (value: string) => writePreference(themeIsValid(value) ? value : null)
 
   return (
-    <Select onValueChange={onThemeChange} value={value}>
+    <Select onValueChange={onThemeChange} value={preference ?? ''}>
       <SelectTrigger
         aria-label="Select a theme"
         className="w-auto bg-transparent gap-2 pl-0 md:pl-3 border-none"
