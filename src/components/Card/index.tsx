@@ -17,7 +17,7 @@ export const Card: React.FC<{
   showCategories?: boolean
   title?: string
 }> = (props) => {
-  const { card, link } = useClickableCard({})
+  const { cardRef, linkRef } = useClickableCard({})
   const { className, doc, relationTo, showCategories, title: titleFromProps } = props
 
   const { slug, categories, meta, title } = doc || {}
@@ -34,7 +34,7 @@ export const Card: React.FC<{
         'group relative flex h-full flex-col overflow-hidden rounded-lg border border-border bg-card transition duration-300 hover:-translate-y-1 hover:cursor-pointer hover:shadow-lg',
         className,
       )}
-      ref={card.ref}
+      ref={cardRef}
     >
       {/* A fixed 3:2 frame keeps rows level regardless of the photo's own
           ratio; the slow zoom rewards the hover without shouting. */}
@@ -77,7 +77,7 @@ export const Card: React.FC<{
           <h3 className="text-lg font-semibold leading-snug transition-colors group-hover:text-primary">
             {/* Stretched link: the whole card is one semantic click target, so
                 middle-click/long-press work everywhere the hover promises. */}
-            <Link href={href} ref={link.ref} className="after:absolute after:inset-0">
+            <Link href={href} ref={linkRef} className="after:absolute after:inset-0">
               {titleToUse}
             </Link>
           </h3>

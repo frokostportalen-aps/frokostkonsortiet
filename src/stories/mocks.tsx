@@ -72,11 +72,15 @@ export const cta = (label: string, appearance: 'default' | 'outline' = 'default'
  * resolve their own dialect (hero variant, eyebrow style, signature) follow the
  * site you have selected instead of falling back to the family default.
  */
-export const withTenant =
-  <P extends { tenantSlug?: string }>(Block: React.ComponentType<P>) =>
-  (args: P, { globals }: { globals: { tenant?: string } }) => (
+export const withTenant = <P extends { tenantSlug?: string }>(
+  Block: React.ComponentType<P>,
+) => {
+  const WithTenant = (args: P, { globals }: { globals: { tenant?: string } }) => (
     <Block {...args} tenantSlug={globals.tenant} />
   )
+  WithTenant.displayName = 'withTenant'
+  return WithTenant
+}
 
 /**
  * The standing "Få et tilbud" form, in the shape a populated page query hands

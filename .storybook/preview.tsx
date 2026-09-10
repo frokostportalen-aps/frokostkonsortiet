@@ -20,6 +20,19 @@ const TENANTS = [
 ] as const
 
 /**
+ * The palette keys off `data-theme` on the document element, same as the site
+ * sets it. A component and not the decorator body, because only a component may
+ * call hooks — Storybook renders the decorator as one, but its name says
+ * otherwise.
+ */
+const ThemeMode: React.FC<{ mode: 'light' | 'dark' }> = ({ mode }) => {
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', mode)
+  }, [mode])
+  return null
+}
+
+/**
  * Wraps every story exactly the way `app/(frontend)/[tenant]/layout.tsx` wraps a
  * page: the real `TenantTheme` injecting the real CSS variables, and the real
  * next/font classNames. Nothing about the look is mocked, so what a block does
@@ -30,12 +43,6 @@ const withTenantTheme: Decorator = (Story, context) => {
   const mode = context.globals.mode as 'light' | 'dark'
   const font = getTenantFont(tenant)
 
-  // The palette keys off `data-theme` on the document element, same as the
-  // site's theme provider sets it.
-  useEffect(() => {
-    document.documentElement.setAttribute('data-theme', mode)
-  }, [mode])
-
   const fontStyle = {
     ...(font ? { '--font-sans': font.sansVar, fontFamily: 'var(--font-sans)' } : {}),
     ...(font?.headingVar ? { '--font-heading': font.headingVar } : {}),
@@ -45,6 +52,7 @@ const withTenantTheme: Decorator = (Story, context) => {
 
   return (
     <div className={`${fontClassName} bg-background text-foreground`} style={fontStyle}>
+      <ThemeMode mode={mode} />
       <TenantTheme theme={getTenantTheme(tenant)} />
       <Story />
     </div>

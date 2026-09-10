@@ -4,13 +4,10 @@ import type { RefObject } from 'react'
 import { useRouter } from 'next/navigation'
 import { useCallback, useEffect, useRef } from 'react'
 
+/** The refs, flat: a ref object passed straight to `ref=`, as every reader expects. */
 type UseClickableCardType<T extends HTMLElement> = {
-  card: {
-    ref: RefObject<T | null>
-  }
-  link: {
-    ref: RefObject<HTMLAnchorElement | null>
-  }
+  cardRef: RefObject<T | null>
+  linkRef: RefObject<HTMLAnchorElement | null>
 }
 
 interface Props {
@@ -49,8 +46,7 @@ function useClickableCard<T extends HTMLElement>({
         }
       }
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [router, card, link, timeDown],
+    [],
   )
 
   const handleMouseUp = useCallback(
@@ -71,8 +67,8 @@ function useClickableCard<T extends HTMLElement>({
         }
       }
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [router, card, link, timeDown],
+    // Refs are stable and never belong in a dependency array.
+    [external, newTab, router, scroll],
   )
 
   useEffect(() => {
@@ -92,17 +88,9 @@ function useClickableCard<T extends HTMLElement>({
     return () => {
       abortController.abort()
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [card, link, router])
+  }, [handleMouseDown, handleMouseUp])
 
-  return {
-    card: {
-      ref: card,
-    },
-    link: {
-      ref: link,
-    },
-  }
+  return { cardRef: card, linkRef: link }
 }
 
 export default useClickableCard
