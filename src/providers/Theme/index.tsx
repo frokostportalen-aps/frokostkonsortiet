@@ -1,57 +1,21 @@
 'use client'
 
-import React, { createContext, useCallback, use, useEffect, useState } from 'react'
+import React, { useEffect } from 'react'
 
-import type { Theme, ThemeContextType } from './types'
+import { syncDocumentTheme } from './store'
 
-import canUseDOM from '@/utilities/canUseDOM'
-import { defaultTheme, getImplicitPreference, themeLocalStorageKey } from './shared'
-import { themeIsValid } from './types'
-
-const initialContext: ThemeContextType = {
-  setTheme: () => null,
-  theme: undefined,
-}
-
-const ThemeContext = createContext(initialContext)
-
+/**
+ * Keeps the document dressed in the theme the store holds.
+ *
+ * There is no context here on purpose: the theme is one value per tab, so the
+ * store in `./store` is the seam — components that need it read it there
+ * (`ThemeSelector` does), and nothing has to be threaded through a provider.
+ * What still needs a mounted component is the subscription: a choice made in
+ * another tab, or the OS flipping while the choice is `auto`, has to repaint
+ * without a click.
+ */
 export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
-  const [theme, setThemeState] = useState<Theme | undefined>(
-    canUseDOM ? (document.documentElement.getAttribute('data-theme') as Theme) : undefined,
-  )
+  useEffect(syncDocumentTheme, [])
 
-  const setTheme = useCallback((themeToSet: Theme | null) => {
-    if (themeToSet === null) {
-      window.localStorage.removeItem(themeLocalStorageKey)
-      const implicitPreference = getImplicitPreference()
-      document.documentElement.setAttribute('data-theme', implicitPreference || '')
-      if (implicitPreference) setThemeState(implicitPreference)
-    } else {
-      setThemeState(themeToSet)
-      window.localStorage.setItem(themeLocalStorageKey, themeToSet)
-      document.documentElement.setAttribute('data-theme', themeToSet)
-    }
-  }, [])
-
-  useEffect(() => {
-    let themeToSet: Theme = defaultTheme
-    const preference = window.localStorage.getItem(themeLocalStorageKey)
-
-    if (themeIsValid(preference)) {
-      themeToSet = preference
-    } else {
-      const implicitPreference = getImplicitPreference()
-
-      if (implicitPreference) {
-        themeToSet = implicitPreference
-      }
-    }
-
-    document.documentElement.setAttribute('data-theme', themeToSet)
-    setThemeState(themeToSet)
-  }, [])
-
-  return <ThemeContext value={{ setTheme, theme }}>{children}</ThemeContext>
+  return children
 }
-
-export const useTheme = (): ThemeContextType => use(ThemeContext)

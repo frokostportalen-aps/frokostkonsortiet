@@ -1,17 +1,9 @@
-import type { Theme } from './types'
+/**
+ * The two facts both readers of the theme need: the blocking script in
+ * `./InitTheme` (a server component, so it can't import the client-only store)
+ * and `./store`. Nothing here touches `window`, so either side may import it.
+ */
 
 export const themeLocalStorageKey = 'payload-theme'
 
 export const defaultTheme = 'light'
-
-export const getImplicitPreference = (): Theme | null => {
-  const mediaQuery = '(prefers-color-scheme: dark)'
-  const mql = window.matchMedia(mediaQuery)
-  const hasImplicitPreference = typeof mql.matches === 'boolean'
-
-  if (hasImplicitPreference) {
-    return mql.matches ? 'dark' : 'light'
-  }
-
-  return null
-}
