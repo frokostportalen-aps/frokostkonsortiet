@@ -1,14 +1,16 @@
 'use client'
-import { useHeaderTheme } from '@/providers/HeaderTheme'
-import React, { useEffect } from 'react'
+import React from 'react'
 
+import { useHeaderThemeSync } from '@/providers/HeaderTheme'
+
+/**
+ * Claims the header's theme for as long as this route is mounted — there is no
+ * hero here to claim it instead. The hook owns the release, so leaving the
+ * route hands the header back to the ambient theme without anyone else having
+ * to reset it.
+ */
 const PageClient: React.FC = () => {
-  /* Force the header to be dark mode while we have an image behind it */
-  const { setHeaderTheme } = useHeaderTheme()
-
-  useEffect(() => {
-    setHeaderTheme('light')
-  }, [setHeaderTheme])
+  useHeaderThemeSync('light')
   return <React.Fragment />
 }
 
