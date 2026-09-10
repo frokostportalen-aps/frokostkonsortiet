@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useEffect, useId, useRef, useState } from 'react'
+import React, { useId, useRef, useState, useSyncExternalStore } from 'react'
 
 import type { WeeklyMenuBlock as WeeklyMenuBlockProps } from '@/payload-types'
 import type { MenuDay, WeeklyMenu } from '@/data/weeklyMenu'
@@ -38,6 +38,12 @@ const shortWeekday = (weekday: string): string => weekday.slice(0, 3).toLowerCas
 
 const DEFAULT_EMPTY = 'Køkkenet har ikke lagt ugens menu op endnu. Prøv igen om et par dage.'
 const UNAVAILABLE = 'Menuen kan ikke hentes lige nu. Prøv igen om et øjeblik.'
+
+/**
+ * `useSyncExternalStore` wants a subscribe function; the date has nothing to
+ * notify us about within a page view, so this registers nothing.
+ */
+const dateNeverNotifies = () => () => {}
 
 /**
  * Where to open: today's tab whenever the kitchen has published today, else the
@@ -282,21 +288,19 @@ export const WeeklyMenuClient: React.FC<Props> = ({
   // `serverToday` is the date the page was *rendered*, and the page is cached:
   // with a 10-minute ISR window (longer while a stale copy is served) a visitor
   // can meet HTML generated yesterday, which would open on yesterday's tab and
-  // mark it "i dag". So the server's date is only the first paint — the browser
-  // corrects it below, and everything that depends on "today" reads this state.
-  const [today, setToday] = useState(serverToday)
-  const [selected, setSelected] = useState(() => opening(weeks, serverToday))
+  // mark it "i dag".
+  //
+  // The browser's own date is therefore read as the external fact it is: the
+  // server's value is what hydration matches against, and the real one arrives
+  // right after, without a state copy being corrected from an effect. (The
+  // visitor may sit in another timezone; the menu is Danish either way.)
+  const today = useSyncExternalStore(dateNeverNotifies, todayIsoInCopenhagen, () => serverToday)
 
-  // Runs once on mount, before anyone can have clicked: `weeks` and
-  // `serverToday` come from the server render and don't change afterwards, so a
-  // later re-render never yanks the visitor back to today's tab.
-  useEffect(() => {
-    // The visitor may sit in another timezone; the menu is Danish either way.
-    const now = todayIsoInCopenhagen()
-    if (now === serverToday) return
-    setToday(now)
-    setSelected(opening(weeks, now))
-  }, [serverToday, weeks])
+  // Only the visitor's own choice lives in state. Until they pick something the
+  // open tab is derived from `today`, so correcting the date corrects the tab
+  // with it — and once they have clicked, nothing yanks them back.
+  const [chosen, setChosen] = useState<{ week: number; day: number } | null>(null)
+  const selected = chosen ?? opening(weeks, today)
 
   const week = weeks[selected.week] ?? weeks[0]
   const day = week?.days[selected.day] ?? week?.days[0]
@@ -341,7 +345,7 @@ export const WeeklyMenuClient: React.FC<Props> = ({
       : shortDate(week.days[0].date)
 
   // Turning to another week is turning the card over, not pressing a tab.
-  const turn = (delta: number) => setSelected({ week: selected.week + delta, day: 0 })
+  const turn = (delta: number) => setChosen({ week: selected.week + delta, day: 0 })
   const hasPrevious = selected.week > 0
   const hasNext = selected.week < weeks.length - 1
 
@@ -372,7 +376,7 @@ export const WeeklyMenuClient: React.FC<Props> = ({
           days={week.days}
           today={today}
           selected={selected.day}
-          onSelect={(index) => setSelected((prev) => ({ ...prev, day: index }))}
+          onSelect={(index) => setChosen({ week: selected.week, day: index })}
           idBase={idBase}
           panelId={`${idBase}-panel`}
           signature={signature}
