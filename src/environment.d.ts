@@ -21,6 +21,10 @@ declare global {
       // "Frokost Konsortiet <no-reply@frokostkonsortiet.dk>".
       EMAIL_DEFAULT_FROM_ADDRESS: string
       EMAIL_DEFAULT_FROM_NAME: string
+      // Optional: the frokostportalen menu endpoint, if it ever moves. Defaults
+      // to https://backend.frokostportal.dk/api/public/menu — see
+      // src/data/weeklyMenu.ts.
+      FROKOSTPORTAL_MENU_URL: string
       // Optional: redirect every outgoing mail here instead of the real
       // recipient. For staging/testing only — never set it in production.
       EMAIL_OVERRIDE_RECIPIENT: string

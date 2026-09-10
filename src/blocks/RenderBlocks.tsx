@@ -18,6 +18,7 @@ import { StepsBlock } from '@/blocks/Steps/Component'
 import { TeamBlock } from '@/blocks/Team/Component'
 import { TestimonialsBlock } from '@/blocks/Testimonials/Component'
 import { TimelineBlock } from '@/blocks/Timeline/Component'
+import { WeeklyMenuBlock } from '@/blocks/WeeklyMenu/Component'
 
 /** Every block type an editor can add (derived from the generated layout union). */
 type BlockType = NonNullable<Page['layout']>[number]['blockType']
@@ -46,6 +47,7 @@ const blockComponents: Record<BlockType, BlockRenderer> = {
   team: TeamBlock,
   testimonials: TestimonialsBlock,
   timeline: TimelineBlock,
+  weeklyMenu: WeeklyMenuBlock,
 }
 
 export const RenderBlocks: React.FC<{

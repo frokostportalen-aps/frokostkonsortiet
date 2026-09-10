@@ -19,6 +19,11 @@ export type TenantMeta = {
   domains: string[]
   /** Short one-liner used when other sites list this tenant (e.g. the Partnere page). */
   tagline: string
+  /**
+   * The kitchen's id in frokostportalen, which the "Ugens menu" block reads its
+   * week from. The main portal has no kitchen of its own and leaves it unset.
+   */
+  kitchenId?: string
 }
 
 /**

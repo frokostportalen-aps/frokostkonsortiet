@@ -164,6 +164,28 @@ export const priceMenu = (
   ...opts,
 })
 
+/**
+ * Ugens menu, hentet live fra frokostportalen. Retterne står ikke her — de
+ * kommer fra tenantens eget `kitchenId`, så blokken har kun rammen.
+ */
+export const weeklyMenu = (
+  opts: {
+    heading?: string
+    eyebrow?: string
+    intro?: string
+    note?: string
+    emptyMessage?: string
+    showAllergens?: boolean
+    showCarbon?: boolean
+    showVariants?: boolean
+  } = {},
+  blockName = 'Ugens menu',
+) => ({
+  blockType: 'weeklyMenu',
+  blockName,
+  ...opts,
+})
+
 /** Embedded form (plugin-form-builder) with an optional intro heading. */
 export const formBlock = (formID: string, intro?: RichText, blockName = 'Formular') => ({
   blockType: 'formBlock',
