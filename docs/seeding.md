@@ -76,7 +76,10 @@ app's media volume: `docker compose exec app pnpm seed:tenants`.
 - **Additive** (default): pages/posts are upserted on `(tenant, slug)` and media
   on filename. Existing documents — including editor edits — are never touched.
 - **`--force`** (alias `--reset`): wipes each tenant's `posts`/`pages`/`media`
-  and rebuilds them from the seed. It never touches `users` or `tenants`.
+  and rebuilds them from the seed. The `header`/`footer`/`brand` globals are
+  rebuilt too — recreated rather than updated, so a field the seed data does
+  not mention cannot survive the reset. Any orphaned version rows are swept at
+  the end (see below). It never touches `users` or `tenants`.
   Against production it additionally requires **`--yes`** (the guard treats any
   non-local `DATABASE_URL` host as production — see `scripts/seedTarget.ts`).
 
@@ -108,3 +111,23 @@ pnpm prune:media:prod -- --apply --yes # delete against prod (deliberate)
 
 It is safe by design: a media is an orphan only if its id appears in **no** other
 document (it scans every collection for referenced ObjectIds).
+
+## Clean up orphaned versions
+
+A `--force` reseed already clears these, so this is not a step anyone has to
+remember. The script is the read-only way to ask the question: it lists rows in
+`_<collection>_versions` whose **parent document no longer exists** — left behind
+when a draft-enabled page or post is removed outside Payload's own delete path
+(straight in MongoDB, say).
+
+```
+pnpm prune:versions                       # dry run — lists orphans, deletes nothing
+pnpm prune:versions -- --apply            # delete (local)
+pnpm prune:versions:prod -- --apply --yes # delete against prod (deliberate)
+```
+
+Payload's own delete cascades to versions, and a `--force` reseed sweeps what
+is left, so a healthy database reports nothing. Rows turning up here mean a
+document was removed without going through Payload — worth knowing about,
+even though orphans are invisible in the admin panel and harm nothing on their
+own.

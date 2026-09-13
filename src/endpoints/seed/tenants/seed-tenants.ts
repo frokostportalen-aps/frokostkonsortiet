@@ -9,6 +9,7 @@ import { heading, p as para, richText } from './lexical'
 import { NEED_OPTIONS, QUOTE_FORM_FIELDS } from '../../../blocks/PlanPicker/options'
 import type { Form } from '../../../payload-types'
 import { pickLinkDomain, urlForTenantDomain } from '../../../utilities/tenantDomains'
+import { deleteOrphanVersions, findOrphanVersions, summariseOrphans } from '../orphanVersions'
 
 /** One entry in a form's notification-email list. */
 type FormEmail = NonNullable<Form['emails']>[number]
@@ -512,6 +513,20 @@ export async function seedTenants(payload: Payload, opts: SeedOptions = {}): Pro
     )
   }
 
+  // The wipe above cascades to versions, so this normally finds nothing. It is
+  // here for rows a delete never reached — a document removed straight in the
+  // database — which would otherwise be the one thing to outlive a reset.
+  // Once at the end, not per tenant: an orphan has no live parent, so it has no
+  // tenant either.
+  if (force) {
+    const orphans = await findOrphanVersions(payload)
+    if (orphans.length) {
+      await deleteOrphanVersions(payload, orphans)
+      const summary = summariseOrphans(orphans).join(', ')
+      payload.logger.info(`✓ Ryddede ${orphans.length} forældreløse versioner: ${summary}`)
+    }
+  }
+
   return { revalidate, revalidateTags }
 }
 
@@ -537,13 +552,11 @@ async function upsertTenantGlobal(
   })
   if (existing.docs[0]) {
     if (!force) return false
-    await payload.update({
-      collection,
-      id: existing.docs[0].id,
-      context: ctx,
-      data: data as never,
-    })
-    return true
+    // Delete and recreate: an update merges, so a field the seed data does not
+    // mention would keep an editor’s value and survive the reset in silence.
+    // These globals are addressed by tenant slug and never by id (getGlobals),
+    // so nothing can be left pointing at the old row.
+    await payload.delete({ collection, id: existing.docs[0].id, context: ctx })
   }
   await payload.create({
     collection,

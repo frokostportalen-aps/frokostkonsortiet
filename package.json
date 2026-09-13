@@ -22,6 +22,8 @@
     "seed:tenants:prod": "cross-env NODE_OPTIONS=--no-deprecation DOTENV_CONFIG_PATH=.env.production tsx scripts/seed-tenants.ts",
     "prune:media": "cross-env NODE_OPTIONS=--no-deprecation tsx scripts/prune-media.ts",
     "prune:media:prod": "cross-env NODE_OPTIONS=--no-deprecation DOTENV_CONFIG_PATH=.env.production tsx scripts/prune-media.ts",
+    "prune:versions": "cross-env NODE_OPTIONS=--no-deprecation tsx scripts/prune-versions.ts",
+    "prune:versions:prod": "cross-env NODE_OPTIONS=--no-deprecation DOTENV_CONFIG_PATH=.env.production tsx scripts/prune-versions.ts",
     "start": "cross-env NODE_OPTIONS=--no-deprecation next start",
     "storybook": "storybook dev -p 6006",
     "build:storybook": "storybook build",
