@@ -26,7 +26,7 @@ type LowImpactHeroType =
  */
 export const LowImpactHero: React.FC<LowImpactHeroType> = ({ children, richText, dialect }) => {
   return (
-    <div className="container pt-30 md:pt-36">
+    <div className="container pt-8 md:pt-10">
       <div className="hero-entrance max-w-[52rem]">
         {dialect?.tagline && (
           <Eyebrow style={dialect.eyebrow} withRule className="mb-5">
