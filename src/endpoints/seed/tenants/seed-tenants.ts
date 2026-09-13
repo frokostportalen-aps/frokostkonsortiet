@@ -9,6 +9,11 @@ import { heading, p as para, richText } from './lexical'
 import { NEED_OPTIONS, QUOTE_FORM_FIELDS } from '../../../blocks/PlanPicker/options'
 import type { Form } from '../../../payload-types'
 import { pickLinkDomain, urlForTenantDomain } from '../../../utilities/tenantDomains'
+import {
+  countBySlug,
+  deleteOrphanVersions,
+  findOrphanVersions,
+} from '../../../utilities/orphanVersions'
 
 /** One entry in a form's notification-email list. */
 type FormEmail = NonNullable<Form['emails']>[number]
@@ -510,6 +515,24 @@ export async function seedTenants(payload: Payload, opts: SeedOptions = {}): Pro
     payload.logger.info(
       `✓ ${t.slug}: +${newPosts}/${t.posts.length} indlæg, +${newPages}/${t.pages.length} sider → ${t.domains.join(', ')}`,
     )
+  }
+
+  // A reset promises the seed state, so it has to account for rows that belong
+  // to no document any more. Payload cascades versions on delete, so this
+  // normally finds nothing — but a page removed outside that path (straight in
+  // the database, say) leaves versions behind, and they would otherwise be the
+  // one thing to survive a wipe. Runs once at the end rather than per tenant:
+  // an orphan has no live parent, so it has no tenant to belong to either.
+  if (force) {
+    const orphans = await findOrphanVersions(payload)
+    if (orphans.length) {
+      await deleteOrphanVersions(payload, orphans)
+      const summary = [...countBySlug(orphans)]
+        .sort()
+        .map(([key, count]) => `${key} (${count})`)
+        .join(', ')
+      payload.logger.info(`✓ Ryddede ${orphans.length} forældreløse versioner: ${summary}`)
+    }
   }
 
   return { revalidate, revalidateTags }

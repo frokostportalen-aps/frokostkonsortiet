@@ -2,87 +2,36 @@ import 'dotenv/config'
 import { getPayload } from 'payload'
 import config from '../src/payload.config'
 
+import {
+  countBySlug,
+  deleteOrphanVersions,
+  findOrphanVersions,
+} from '../src/utilities/orphanVersions'
 import { isProduction, targetLabel } from './seedTarget'
 
 /**
- * Delete version documents whose parent no longer exists — rows left behind in
- * `_<collection>_versions` when a draft-enabled document is removed outside the
- * normal delete path (a manual removal straight in MongoDB, or a delete from a
- * Payload version that did not cascade).
+ * Report (and optionally delete) version rows whose parent document is gone.
  *
  *   pnpm prune:versions                        # dry run — lists orphans, deletes nothing
  *   pnpm prune:versions -- --apply             # actually delete (local)
  *   pnpm prune:versions:prod -- --apply --yes  # delete against prod (deliberate)
  *
- * Orphans are invisible in the admin panel, since nothing links to a version
- * whose document is gone, so this is housekeeping rather than a fix for
- * anything users can see. It matters when handing a site over: a reset seed is
- * supposed to leave exactly the seed state, and these rows survive it.
- *
- * Safe by design: a version is an orphan only when its `parent` is missing from
- * the live collection. Payload's own delete already cascades, so a healthy
- * database reports nothing — finding rows here means something bypassed it.
+ * A `--force` reseed already clears these, so this is not a step anyone has to
+ * remember. It earns its place as the read-only way to ask the question: a
+ * healthy database reports nothing, and rows turning up here mean something
+ * removed a document outside Payload's own delete path — worth knowing about
+ * rather than only worth cleaning up.
  */
 const args = process.argv.slice(2)
 const apply = args.includes('--apply')
 const confirmed = args.includes('--yes')
-
-type Orphan = { collection: string; id: string; parent: string; slug: string }
 
 const run = async () => {
   const payload = await getPayload({ config })
   const prod = isProduction()
   payload.logger.info(`Prune versions → ${targetLabel()}${prod ? ' (PRODUKTION)' : ''}`)
 
-  // Only collections that actually keep versions have a versions table.
-  const versioned = Object.values(payload.collections)
-    .filter((c) => Boolean(c.config.versions))
-    .map((c) => c.config.slug)
-
-  const orphans: Orphan[] = []
-
-  for (const collection of versioned) {
-    // 1. Every id that still exists in the collection itself.
-    const live = new Set<string>()
-    let page = 1
-    for (;;) {
-      const res = await payload.find({
-        collection: collection as never,
-        depth: 0,
-        limit: 200,
-        page,
-        pagination: true,
-      })
-      for (const doc of res.docs) live.add(String((doc as { id: unknown }).id))
-      if (!res.hasNextPage) break
-      page++
-    }
-
-    // 2. Any version pointing at an id that is no longer there.
-    page = 1
-    for (;;) {
-      const res = await payload.findVersions({
-        collection: collection as never,
-        depth: 0,
-        limit: 200,
-        page,
-        pagination: true,
-      })
-      for (const version of res.docs) {
-        const parent = version.parent ? String(version.parent) : ''
-        if (!parent || !live.has(parent)) {
-          orphans.push({
-            collection,
-            id: String(version.id),
-            parent: parent || '(ingen)',
-            slug: String((version.version as { slug?: unknown })?.slug ?? '(uden slug)'),
-          })
-        }
-      }
-      if (!res.hasNextPage) break
-      page++
-    }
-  }
+  const orphans = await findOrphanVersions(payload)
 
   if (!orphans.length) {
     payload.logger.info('Ingen forældreløse versioner fundet.')
@@ -91,13 +40,8 @@ const run = async () => {
 
   payload.logger.info(`Fandt ${orphans.length} forældreløse versioner:`)
   // Grouped by slug: one deleted page typically leaves a draft and a published
-  // row behind, and listing them separately says less than the count does.
-  const bySlug = new Map<string, number>()
-  for (const o of orphans) {
-    const key = `${o.collection}/${o.slug}`
-    bySlug.set(key, (bySlug.get(key) ?? 0) + 1)
-  }
-  for (const [key, count] of [...bySlug].sort()) {
+  // row behind, and listing those separately says less than the count does.
+  for (const [key, count] of [...countBySlug(orphans)].sort()) {
     payload.logger.info(`  - ${key} (${count})`)
   }
 
@@ -110,14 +54,7 @@ const run = async () => {
     process.exit(1)
   }
 
-  for (const collection of versioned) {
-    const ids = orphans.filter((o) => o.collection === collection).map((o) => o.id)
-    if (!ids.length) continue
-    await payload.db.deleteVersions({
-      collection: collection as never,
-      where: { id: { in: ids } },
-    })
-  }
+  await deleteOrphanVersions(payload, orphans)
   payload.logger.info(`\n✓ Slettede ${orphans.length} forældreløse versioner.`)
   process.exit(0)
 }
