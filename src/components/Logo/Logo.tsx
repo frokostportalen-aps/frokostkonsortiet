@@ -6,6 +6,14 @@ import type { TenantLogo } from '@/themes/tenantThemes'
 
 interface Props {
   className?: string
+  /**
+   * Rendered height in px, when a slot needs another size than the registry's
+   * own — the printed menu sheet wants a letterhead, not a nav-bar mark. Given
+   * here rather than as a class, because the height is also what `next/image`
+   * is asked to optimise for: a class could only fight the inline style with
+   * `!important`, and would leave the image requested at the wrong size.
+   */
+  height?: number
   loading?: 'lazy' | 'eager'
   priority?: 'auto' | 'high' | 'low'
   /**
@@ -21,7 +29,13 @@ const DEFAULT_LOGO_HEIGHT = 34
 const imgClass = 'w-auto max-w-[12rem] object-contain'
 
 export const Logo = (props: Props) => {
-  const { loading: loadingFromProps, priority: priorityFromProps, className, logo } = props
+  const {
+    loading: loadingFromProps,
+    priority: priorityFromProps,
+    className,
+    logo,
+    height: heightFromProps,
+  } = props
 
   const loading = loadingFromProps || 'lazy'
   const priority = priorityFromProps || 'low'
@@ -31,7 +45,10 @@ export const Logo = (props: Props) => {
   const text = logo.text || 'Logo'
   const wordmark = (visibility?: string) => (
     <span
-      className={clsx('text-2xl font-semibold leading-none tracking-tight', visibility, className)}
+      className={clsx('font-semibold leading-none tracking-tight', visibility, className)}
+      // Scaled from the same height the image branch uses, so a tenant without
+      // an uploaded logo isn't left with a nav-sized word on the print sheet.
+      style={{ fontSize: (props.height ?? DEFAULT_LOGO_HEIGHT) * 0.7 }}
     >
       {text}
     </span>
@@ -44,7 +61,7 @@ export const Logo = (props: Props) => {
   // shipping a 1200px original for a 56px slot: it optimizes to the size asked
   // for, in a modern format. `sizes` is a fixed px value because the logo never
   // reflows.
-  const height = logo.displayHeight ?? DEFAULT_LOGO_HEIGHT
+  const height = heightFromProps ?? logo.displayHeight ?? DEFAULT_LOGO_HEIGHT
   const ratio = (logo.width || 193) / (logo.height || DEFAULT_LOGO_HEIGHT)
   const shared = {
     alt: text,
