@@ -19,7 +19,7 @@ export const ugensMenu: PageFactory = ({ tenantID, img }) => ({
     richText(
       heading('h1', 'Ugens menu'),
       p(
-        'Hvad der står på bordet i denne uge – ret for ret, med allergener og klimatal. Menuen kommer direkte fra køkkenet, så den her side er altid den samme som sedlen ved buffeten.',
+        'Hvad der står på bordet i denne uge – ret for ret, med allergener og klimatal. Menuen hentes direkte fra køkkenet, så siden er opdateret, så snart ugen er lagt op.',
       ),
     ),
   ),
