@@ -301,7 +301,7 @@ export const tenantThemes: Record<string, ThemeVars> = {
     // A round badge with type around its edge: it needs the height to be read.
     logo: { text: 'Fra Jorden', displayHeight: 56 },
     faviconFamily: 'serif',
-    tagline: 'Økologisk · fra jorden til bordet',
+    tagline: 'Fra jorden til bordet',
     eyebrow: 'uppercase',
     // The round logo is drawn for light backgrounds, so header and footer stay
     // light in both modes — and the header is opaque, so nothing tucks under it.
