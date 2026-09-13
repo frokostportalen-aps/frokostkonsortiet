@@ -15,7 +15,7 @@ import {
 } from '../../builders'
 
 export const frokostUdAfHuset: PageFactory = ({ tenantID, img }) => ({
-  title: 'Frokost ud af huset',
+  title: 'Frokostordning',
   slug: 'frokost-ud-af-huset',
   _status: 'published',
   tenant: tenantID,
