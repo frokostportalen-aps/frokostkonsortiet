@@ -167,6 +167,10 @@ export const priceMenu = (
 /**
  * Ugens menu, hentet live fra frokostportalen. Retterne står ikke her — de
  * kommer fra tenantens eget `kitchenId`, så blokken har kun rammen.
+ *
+ * Vil en side ikke have blokkens egen overskrift — fx fordi siden allerede
+ * hedder "Ugens menu" — så send en tom streng frem for at udelade feltet:
+ * Payload falder tilbage på feltets `defaultValue`, når værdien er undefined.
  */
 export const weeklyMenu = (
   opts: {

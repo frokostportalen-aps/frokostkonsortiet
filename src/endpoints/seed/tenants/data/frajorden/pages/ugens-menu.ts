@@ -25,9 +25,7 @@ export const ugensMenu: PageFactory = ({ tenantID, img }) => ({
   ),
   layout: [
     // Hero'en siger allerede "Ugens menu", så blokken får ingen egen overskrift
-    // her — to identiske titler under hinanden læser som en fejl. Tomme
-    // strenge og ikke udeladte felter, så Payload ikke falder tilbage på
-    // feltets defaultValue.
+    // her — to identiske titler under hinanden læser som en fejl.
     weeklyMenu({
       heading: '',
       eyebrow: '',

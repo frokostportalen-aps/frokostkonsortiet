@@ -1,6 +1,14 @@
 'use client'
 
-import React, { useId, useRef, useState, useSyncExternalStore } from 'react'
+import React, {
+  useCallback,
+  useEffect,
+  useId,
+  useRef,
+  useState,
+  useSyncExternalStore,
+} from 'react'
+import { flushSync } from 'react-dom'
 import { ChevronLeft, ChevronRight, Printer } from 'lucide-react'
 
 import type { WeeklyMenuBlock as WeeklyMenuBlockProps } from '@/payload-types'
@@ -28,8 +36,9 @@ type Props = Omit<WeeklyMenuBlockProps, 'blockType'> & {
    *  and the hydration agree on which day is "i dag". */
   today: string
   /** The site's logo. It is the card's letterhead — which matters most on
-   *  paper, where the page's own header isn't there to say whose menu this is. */
-  logo?: TenantLogo
+   *  paper, where the page's own header isn't there to say whose menu this is.
+   *  Always present: `resolveTenantBrand` falls back to a wordmark. */
+  logo: TenantLogo
 }
 
 /** "2026-09-07" → "7/9" — locale-free, so server and client always agree. */
@@ -312,8 +321,42 @@ export const WeeklyMenuClient: React.FC<Props> = ({
   const [chosen, setChosen] = useState<{ week: number; day: number } | null>(null)
   const selected = chosen ?? opening(weeks, today)
 
+  /**
+   * The printed sheet exists only while it is being printed. Rendering every
+   * day up front cost half the page's DOM nodes for output a small minority
+   * asks for — and it made a plain Ctrl+P on the two sales pages that carry
+   * this block silently print the menu instead of the page. Now the button is
+   * the only thing that asks for the sheet: it commits the markup, prints, and
+   * takes it down again.
+   */
+  const [printing, setPrinting] = useState(false)
+  const print = useCallback(() => {
+    // `flushSync` so the sheet is in the document before the browser takes its
+    // snapshot; the teardown waits for `afterprint`, because `print()` returns
+    // immediately in some browsers and taking the markup away mid-dialog would
+    // print a blank page.
+    flushSync(() => setPrinting(true))
+    window.print()
+  }, [])
+
+  useEffect(() => {
+    if (!printing) return
+    const done = () => setPrinting(false)
+    window.addEventListener('afterprint', done)
+    return () => window.removeEventListener('afterprint', done)
+  }, [printing])
+
   const week = weeks[selected.week] ?? weeks[0]
   const day = week?.days[selected.day] ?? week?.days[0]
+
+  // The editor's three toggles, resolved once: both the screen panel and the
+  // printed sheet render the same dishes, and shouldn't be able to disagree
+  // about which columns of them are on.
+  const show = {
+    showAllergens: showAllergens !== false,
+    showCarbon: showCarbon !== false,
+    showVariants: showVariants !== false,
+  }
 
   // The block's frame, shared by the populated and the empty state so a change
   // to the section framing lands in one place.
@@ -325,9 +368,11 @@ export const WeeklyMenuClient: React.FC<Props> = ({
         intro={intro}
         eyebrowStyle={eyebrowStyle}
       />
-      {/* `data-print-menu` is what the print stylesheet hangs on: on a page that
-          has a menu card, printing gives the card and nothing else. */}
-      <div className="mx-auto max-w-[46rem]" data-print-menu>
+      {/* `data-print-menu` is what the print stylesheet hangs on, and it is
+          here only while the card is printing — so the rule blanks the page
+          around the sheet for the print button, and never for someone who
+          simply pressed Ctrl+P on a page that happens to carry a menu. */}
+      <div className="mx-auto max-w-[46rem]" data-print-menu={printing ? '' : undefined}>
         <SignatureCard
           signature={signature}
           mark={false}
@@ -392,10 +437,6 @@ export const WeeklyMenuClient: React.FC<Props> = ({
           is; on a printed sheet on a canteen wall it does not, which is the
           whole reason the name is here rather than a day heading repeating what
           the rail below already says. */}
-      {/* The card's head, all on one line: the kitchen's mark, the week with its
-          page turns, and the print button. It wraps only where it has to — on a
-          phone the week drops to a line of its own rather than squeezing the
-          logo. */}
       {/* Three columns with equal flanks, so the week sits on the card's own
           axis whatever the logo's width — `justify-between` would only centre
           it in the space left over, which put it off-axis on the site with the
@@ -403,9 +444,7 @@ export const WeeklyMenuClient: React.FC<Props> = ({
           letting the logo widen its own column. */}
       <div className="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-x-1.5 print:hidden sm:gap-x-4">
         <div className="justify-self-start">
-          {logo ? (
-            <Logo logo={logo} className="h-12! max-w-26! w-auto sm:h-14! sm:max-w-56!" />
-          ) : null}
+          <Logo logo={logo} height={48} className="max-w-26! sm:h-14! sm:max-w-56!" />
         </div>
 
         <div className="flex items-center justify-center gap-1 sm:gap-2">
@@ -428,7 +467,7 @@ export const WeeklyMenuClient: React.FC<Props> = ({
         </div>
 
         <div className="justify-self-end">
-          <PrintButton />
+          <PrintButton onPrint={print} />
         </div>
       </div>
 
@@ -469,12 +508,7 @@ export const WeeklyMenuClient: React.FC<Props> = ({
       >
         {/* No day heading here: the rail above already says which day is open,
             and "Mandag / 14. september" over "MAN 14/9" is the same fact twice. */}
-        <DayPanel
-          day={day}
-          showAllergens={showAllergens !== false}
-          showCarbon={showCarbon !== false}
-          showVariants={showVariants !== false}
-        />
+        <DayPanel day={day} {...show} />
       </div>
 
       {/* On paper it is one sheet per day: they go up side by side on a canteen
@@ -482,13 +516,17 @@ export const WeeklyMenuClient: React.FC<Props> = ({
           whose kitchen and which week it is — the controls above are the
           screen's, and don't print. */}
       <div className="hidden print:block">
-        {week.days.map((printDay, index) => (
+        {printing &&
+          week.days.map((printDay, index) => (
           <section
             key={printDay.date}
-            className={cn(index > 0 && 'break-before-page')}
+            className={index > 0 ? 'break-before-page' : undefined}
           >
             <div className="mb-8 flex items-center justify-between gap-4 border-b border-border pb-4">
-              {logo ? <Logo logo={logo} className="h-24! max-w-80! w-auto" /> : <span />}
+              {/* Eager: the sheet is built the moment the button is pressed, and a
+                  lazy image inside a `display:none` subtree would still be
+                  loading when the browser takes its print snapshot. */}
+              <Logo logo={logo} height={96} loading="eager" priority="high" className="max-w-80!" />
               <p className="text-sm text-muted-foreground">
                 Uge {week.week} · {span}
               </p>
@@ -499,12 +537,7 @@ export const WeeklyMenuClient: React.FC<Props> = ({
                 {printDay.dayLabel}
               </span>
             </p>
-            <DayPanel
-              day={printDay}
-              showAllergens={showAllergens !== false}
-              showCarbon={showCarbon !== false}
-              showVariants={showVariants !== false}
-            />
+            <DayPanel day={printDay} {...show} />
           </section>
         ))}
       </div>
@@ -513,20 +546,25 @@ export const WeeklyMenuClient: React.FC<Props> = ({
 }
 
 /**
- * Print the menu. Customers put the week up in their own canteen, so this is a
- * real use rather than a browser affordance — the print stylesheet in
- * globals.css drops everything but this card.
+ * The card's own round controls — the page turns and the print button — share
+ * their shape, so the ring and the hit area are stated once.
  */
-const PrintButton: React.FC = () => (
+const cardControl =
+  'flex size-9 shrink-0 select-none items-center justify-center rounded-full transition-colors sm:size-10 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ring/20'
+
+/**
+ * Print the menu. Customers put the week up in their own canteen, so this is a
+ * real use rather than a browser affordance: it is also what asks the card to
+ * build its printed sheet in the first place.
+ */
+const PrintButton: React.FC<{ onPrint: () => void }> = ({ onPrint }) => (
   <button
     type="button"
-    onClick={() => window.print()}
+    onClick={onPrint}
     className={cn(
-      'flex size-9 shrink-0 cursor-pointer select-none items-center justify-center rounded-full sm:size-10',
-      'border border-border text-muted-foreground transition-colors',
+      cardControl,
+      'cursor-pointer border border-border text-muted-foreground',
       'hover:border-primary hover:text-primary',
-      'focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ring/20',
-      'print:hidden',
     )}
   >
     <Printer aria-hidden className="size-4" />
@@ -534,8 +572,8 @@ const PrintButton: React.FC = () => (
   </button>
 )
 
-/** A quiet page-turn beside the dateline. Disabled at the ends, honestly: there
- *  is no week beyond the ones the kitchen published. */
+/** A quiet page-turn beside the dateline and the day rail. Disabled at the
+ *  ends, honestly: there is nothing beyond what the kitchen published. */
 const PageTurn: React.FC<{
   direction: 'previous' | 'next'
   disabled: boolean
@@ -548,13 +586,10 @@ const PageTurn: React.FC<{
     disabled={disabled}
     aria-label={label}
     className={cn(
-      // A real target rather than a typographic mark — the hit area stays square
-      // and generous — but with no standing border: the chevron at full text
+      // No standing border, unlike the print button: the chevron at full text
       // colour already reads as a control, and a ring around each of the four
       // arrows fought the card's quiet. The surface appears under the cursor.
-      'flex size-8 shrink-0 select-none items-center justify-center rounded-full sm:size-10',
-      'transition-colors focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ring/20',
-      'print:hidden',
+      cardControl,
       disabled
         ? 'cursor-default text-muted-foreground/25'
         : 'cursor-pointer text-foreground hover:bg-foreground/5 hover:text-primary',

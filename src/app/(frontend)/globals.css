@@ -684,31 +684,37 @@ html[data-motion] [data-reveal='in'] .signature-mark {
    den kun gælder sider der faktisk har et menukort: alle andre sider printer
    som de plejer. `visibility` frem for `display`, fordi kortet skal beholde
    sin plads i dokumentet mens alt omkring det forsvinder. */
+/* Arkformatet kan ikke bindes til en selector, så det gælder ethvert print i
+   appen. Det er kun *udblændingen* nedenfor der er bundet til menukortet. */
 @page {
   size: A4 portrait;
   margin: 14mm;
 }
 
 @media print {
+  /* Kun den første regel rækker uden for kortet og har brug for guarden; de
+     øvrige kan pr. definition kun ramme et dokument der har et menukort. */
   body:has([data-print-menu]) * {
     visibility: hidden;
   }
 
+  /* Guarden gentages her, og det er ikke for scopets skyld: uden den vejer
+     reglen (0,1,0) mindre end udblændingen ovenfor (0,1,1), og hele arket ville
+     printe blankt. Den skal vinde, ikke bare ramme. */
   body:has([data-print-menu]) [data-print-menu],
   body:has([data-print-menu]) [data-print-menu] * {
     visibility: visible;
   }
 
-  body:has([data-print-menu]) [data-print-menu] {
+  [data-print-menu] {
     position: absolute;
     inset: 0 0 auto 0;
-    margin: 0;
     max-width: none;
   }
 
   /* Kortets flade og ramme er skærmens måde at samle arket på. På papir er
      arket allerede et ark — og en farvet flade koster blæk uden at sige noget. */
-  body:has([data-print-menu]) [data-print-menu] > * {
+  [data-print-menu] > * {
     border: 0;
     box-shadow: none;
     background: transparent;

@@ -37,7 +37,7 @@ const mediaUrl = (value: Media | string | null | undefined): string | undefined 
  * uploaded anything.
  *
  * Wrapped in React cache() so the layout's metadata, the header and the footer
- * share one resolution per request instead of three.
+ * share one resolution per request instead of four.
  */
 export const resolveTenantBrand = cache(async (tenantSlug: string): Promise<TenantBrand> => {
   const [brand, tenant] = await Promise.all([

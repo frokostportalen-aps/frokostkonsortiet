@@ -60,6 +60,10 @@ const props = {
   today: '2026-09-08',
   signature: 'rule' as const,
   eyebrowStyle: 'uppercase' as const,
+  // The card's letterhead. A wordmark rather than an upload, so the tests need
+  // no image fixture — `resolveTenantBrand` falls back to exactly this shape
+  // for a tenant that hasn't uploaded one.
+  logo: { text: 'Testkøkkenet' },
 }
 
 const panel = () => screen.getByRole('tabpanel')

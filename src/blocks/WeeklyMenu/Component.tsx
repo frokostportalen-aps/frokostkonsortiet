@@ -36,13 +36,15 @@ export const WeeklyMenuBlock: React.FC<Props> = async ({
 }) => {
   if (!tenantSlug) return null
 
-  const menu = await getWeeklyMenuForTenant(tenantSlug)
+  // Independent lookups — run them concurrently, as the header does. The brand
+  // is normally already resolved for this request (the layout, header and
+  // footer share the same cached call), so this usually costs nothing at all.
+  const [menu, { logo }] = await Promise.all([
+    getWeeklyMenuForTenant(tenantSlug),
+    resolveTenantBrand(tenantSlug),
+  ])
 
   if (!menu) return null
-
-  // The card's letterhead — the site's own logo, resolved the same way the
-  // header and footer resolve theirs, so the three can't drift apart.
-  const { logo } = await resolveTenantBrand(tenantSlug)
 
   const { signature, eyebrow: eyebrowStyle } = getDialect(tenantSlug)
 
