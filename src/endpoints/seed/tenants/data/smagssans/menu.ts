@@ -10,6 +10,7 @@ export const menu: NavFactory = ({ tenants, siteUrl }) => {
         subItems: [
           { link: { type: 'custom', label: 'Frokostordning', url: '/frokost-ud-af-huset' } },
           { link: { type: 'custom', label: 'Kantineordning', url: '/kantine' } },
+          { link: { type: 'custom', label: 'Ugens menu', url: '/ugens-menu' } },
           { link: { type: 'custom', label: 'Menuvariationer', url: '/menuvariationer' } },
         ],
       },
@@ -29,6 +30,7 @@ export const menu: NavFactory = ({ tenants, siteUrl }) => {
     ],
     footer: [
       { link: { type: 'custom', label: main.name, url: siteUrl(main.slug) } },
+      { link: { type: 'custom', label: 'Ugens menu', url: '/ugens-menu' } },
       { link: { type: 'custom', label: 'Om os', url: '/om-os' } },
       { link: { type: 'custom', label: 'FAQ', url: '/faq' } },
       { link: { type: 'custom', label: 'Kundelogin', url: 'https://min.frokostportal.dk', newTab: true } },

@@ -10,6 +10,7 @@ import { catering } from './pages/catering'
 import { moedeforplejning } from './pages/moedeforplejning'
 import { frugtordning } from './pages/frugtordning'
 import { menuvariationer } from './pages/menuvariationer'
+import { ugensMenu } from './pages/ugens-menu'
 import { baeredygtighed } from './pages/baeredygtighed'
 import { kundeportal } from './pages/kundeportal'
 import { faqPage } from './pages/faq'
@@ -23,7 +24,7 @@ export const smagssans: TenantDef = {
   tagline: 'Det handler om at være glad for mad',
   dir: folderOf(import.meta.url),
   contactEmail: 'kontakt@smagssans.dk',
-  pages: [home, omOs, frokostUdAfHuset, kantine, menuvariationer, catering, moedeforplejning, frugtordning, baeredygtighed, kundeportal, faqPage],
+  pages: [home, omOs, frokostUdAfHuset, kantine, ugensMenu, menuvariationer, catering, moedeforplejning, frugtordning, baeredygtighed, kundeportal, faqPage],
   posts,
   menu,
 }
