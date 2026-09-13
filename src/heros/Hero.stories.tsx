@@ -4,6 +4,7 @@ import type React from 'react'
 
 import { RenderHero } from '@/heros/RenderHero'
 import { getDialect } from '@/themes/dialect'
+import { getTenantTheme } from '@/themes/tenantThemes'
 import { cta, heading, p, photos, richText } from '@/stories/mocks'
 
 /**
@@ -92,6 +93,7 @@ export const HighImpact: Story = {
         type="highImpact"
         {...FORSIDER[tenant]}
         dialect={getDialect(tenant)}
+        tagline={getTenantTheme(tenant)?.tagline}
       />
     )
   },
@@ -107,6 +109,7 @@ export const MediumImpact: Story = {
       richText={richText(heading('h1', 'Om os'), p('Tre køkkener, én målsætning.')) as HeroArgs['richText']}
       links={[]}
       dialect={getDialect(globals.tenant as string)}
+      tagline={getTenantTheme(globals.tenant as string)?.tagline}
     />
   ),
 }
@@ -120,6 +123,7 @@ export const LowImpact: Story = {
       richText={richText(heading('h1', 'Kontakt'), p('Vi svarer inden for én hverdag.')) as HeroArgs['richText']}
       links={[]}
       dialect={getDialect(globals.tenant as string)}
+      tagline={getTenantTheme(globals.tenant as string)?.tagline}
     />
   ),
 }

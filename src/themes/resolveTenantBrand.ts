@@ -6,7 +6,7 @@ import type { TenantLogo } from './tenantThemes'
 import { getCachedGlobal } from '@/utilities/getGlobals'
 import { getMediaUrl } from '@/utilities/getMediaUrl'
 import { getTenantBySlug } from '@/utilities/getTenant'
-import { getTenantLogo } from './tenantThemes'
+import { getTenantLogo, getTenantTheme } from './tenantThemes'
 import { getTenantFavicon } from './favicon'
 
 export type TenantBrand = {
@@ -14,6 +14,8 @@ export type TenantBrand = {
   logo: TenantLogo
   /** A favicon URL (uploaded image or the generated letter-mark data URI). */
   favicon: string | null
+  /** The standing line the heroes carry above their headings, if the site has one. */
+  tagline?: string
 }
 
 /** A populated upload field → its cache-busted media URL (or undefined). */
@@ -32,6 +34,10 @@ const mediaUrl = (value: Media | string | null | undefined): string | undefined 
  *
  *   favicon → uploaded image
  *           → the generated letter-mark from the theme colours
+ *
+ *   tagline → the editor's own line
+ *           → the theme registry's, so a site that has never been edited still
+ *             speaks in its own voice
  *
  * So a site always has something to show, whether or not its editors have
  * uploaded anything.
@@ -76,6 +82,7 @@ export const resolveTenantBrand = cache(async (tenantSlug: string): Promise<Tena
       { ...registry, ...(srcDark ? { srcDark } : {}), text }
 
   const favicon = mediaUrl(brand?.favicon) ?? getTenantFavicon(tenantSlug)
+  const tagline = brand?.tagline?.trim() || getTenantTheme(tenantSlug)?.tagline
 
-  return { logo, favicon }
+  return { logo, favicon, tagline }
 })

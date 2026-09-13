@@ -14,7 +14,14 @@ import { HeroLinks, HeroPhoto } from './shared'
  * scrim, so the header keeps the ambient theme — used by sites whose voice is
  * typographic rather than photographic.
  */
-export const SplitHero: React.FC<HeroProps> = ({ links, media, mediaFit, richText, dialect }) => {
+export const SplitHero: React.FC<HeroProps> = ({
+  links,
+  media,
+  mediaFit,
+  richText,
+  dialect,
+  tagline,
+}) => {
   // No scrim: the header keeps the ambient theme over an editorial split.
   useHeaderThemeSync(null)
 
@@ -27,9 +34,9 @@ export const SplitHero: React.FC<HeroProps> = ({ links, media, mediaFit, richTex
     <div className="container pb-8 md:pb-16">
       <div className="grid items-center gap-10 md:grid-cols-2 md:gap-12 lg:gap-16">
         <div className="hero-entrance max-w-xl">
-          {dialect?.tagline && (
+          {tagline && dialect && (
             <Eyebrow style={dialect.eyebrow} withRule className="mb-6">
-              {dialect.tagline}
+              {tagline}
             </Eyebrow>
           )}
           {richText && (

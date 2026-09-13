@@ -3,20 +3,33 @@ import React from 'react'
 import type { CallToActionBlock as CTABlockProps } from '@/payload-types'
 
 import { getDialect } from '@/themes/dialect'
+import { getTenantTheme } from '@/themes/tenantThemes'
 import RichText from '@/components/RichText'
 import { CMSLink } from '@/components/Link'
 import { Eyebrow } from '@/components/Eyebrow'
 import { signatureMarkClass } from '@/components/SignatureMark'
 
-type Props = CTABlockProps & { tenantSlug?: string }
+type Props = CTABlockProps & {
+  tenantSlug?: string
+  /** The site's standing line, resolved server-side (editor's, else the theme's). */
+  siteTagline?: string
+}
 
 /**
  * The closing statement band: the tenant's primary colour at full strength, so
  * the page ends on brand instead of fading out. Buttons are forced to the
  * light `secondary` treatment for contrast against the dark panel.
  */
-export const CallToActionBlock: React.FC<Props> = ({ links, richText, tenantSlug }) => {
-  const { tagline, eyebrow, signature } = getDialect(tenantSlug)
+export const CallToActionBlock: React.FC<Props> = ({
+  links,
+  richText,
+  tenantSlug,
+  siteTagline,
+}) => {
+  const { eyebrow, signature } = getDialect(tenantSlug)
+  // Rendered outside a page — in Storybook — there is nobody to resolve the
+  // line, so the registry's stands in rather than the band losing its eyebrow.
+  const tagline = siteTagline ?? getTenantTheme(tenantSlug)?.tagline
   return (
     <div className="container">
       {/* The inner padding follows the site's text inset, so the band's copy

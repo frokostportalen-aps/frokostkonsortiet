@@ -16,6 +16,8 @@ const heroes = {
 type RenderHeroProps = Page['hero'] & {
   heroTheme?: 'light' | 'dark'
   dialect?: Dialect
+  /** The site's standing line, resolved from the CMS by the page. */
+  tagline?: string
 }
 
 export const RenderHero: React.FC<RenderHeroProps> = (props) => {

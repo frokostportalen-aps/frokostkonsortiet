@@ -12,11 +12,13 @@ type LowImpactHeroType =
       children?: React.ReactNode
       richText?: never
       dialect?: Dialect
+      tagline?: string
     }
   | (Omit<Page['hero'], 'richText'> & {
       children?: never
       richText?: Page['hero']['richText']
       dialect?: Dialect
+      tagline?: string
     })
 
 /**
@@ -24,13 +26,18 @@ type LowImpactHeroType =
  * the tenant's signature mark — so content pages open in the site's own voice
  * instead of a bare CMS h1.
  */
-export const LowImpactHero: React.FC<LowImpactHeroType> = ({ children, richText, dialect }) => {
+export const LowImpactHero: React.FC<LowImpactHeroType> = ({
+  children,
+  richText,
+  dialect,
+  tagline,
+}) => {
   return (
     <div className="container pt-8 md:pt-10">
       <div className="hero-entrance max-w-[52rem]">
-        {dialect?.tagline && (
+        {tagline && dialect && (
           <Eyebrow style={dialect.eyebrow} withRule className="mb-5">
-            {dialect.tagline}
+            {tagline}
           </Eyebrow>
         )}
         {children ||

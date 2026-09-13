@@ -8,9 +8,10 @@ import { getDialect } from '@/themes/dialect'
  * The family defaults, pinned here on purpose: changing one is a design
  * decision about how every site reads on an axis it leaves unset, and should
  * have to be stated twice. (`tsc` is what catches an axis with no default at
- * all — `DIALECT_DEFAULTS` has to satisfy `Dialect`.)
+ * all — `DIALECT_DEFAULTS` has to satisfy `Dialect`.) The site's standing line
+ * is not here: it is copy, and lives in the CMS.
  */
-const FAMILY_DEFAULTS: Omit<Dialect, 'tagline'> = {
+const FAMILY_DEFAULTS: Dialect = {
   eyebrow: 'uppercase',
   chrome: 'default',
   heroVariant: 'overlay',
@@ -26,7 +27,6 @@ describe('getDialect', () => {
       eyebrow: 'smallcaps',
       heroVariant: 'split',
       signature: 'rule',
-      tagline: 'Siden 1980 · sæsonens køkken',
       // Smagssans says nothing about either, so the family answers.
       chrome: FAMILY_DEFAULTS.chrome,
       testimonials: FAMILY_DEFAULTS.testimonials,

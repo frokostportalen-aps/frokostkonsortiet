@@ -20,6 +20,7 @@ export const OverlayHero: React.FC<HeroProps> = ({
   richText,
   heroTheme = 'dark',
   dialect,
+  tagline,
 }) => {
   // Brand chrome makes the header an opaque light surface: it neither floats
   // over the photo nor takes the hero's theme, so tucking under it would only
@@ -70,11 +71,11 @@ export const OverlayHero: React.FC<HeroProps> = ({
         }`}
       >
         <div className="hero-entrance max-w-[40rem] md:text-center">
-          {dialect?.tagline && (
+          {tagline && dialect && (
             <p className="mb-5 flex items-center gap-3 text-xs font-semibold uppercase tracking-caps text-primary md:justify-center">
               <span aria-hidden className={signatureMarkClass.heroEyebrow[dialect.signature]} />
               <span className={dark ? 'text-white/90' : 'text-foreground/80'}>
-                {dialect.tagline}
+                {tagline}
               </span>
             </p>
           )}

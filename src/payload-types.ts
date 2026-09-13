@@ -1322,6 +1322,10 @@ export interface Brand {
    * Fanebladsikon. Brug en kvadratisk PNG/SVG. Uden favicon genereres et bogstavmærke ud fra temaets farver.
    */
   favicon?: (string | null) | Media;
+  /**
+   * Den korte linje over overskriften på sitets sider – fx "Siden 1980 · sæsonens køkken". Står feltet tomt, bruges sitets standardlinje fra temaet.
+   */
+  tagline?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -2267,6 +2271,7 @@ export interface BrandSelect<T extends boolean = true> {
   logo?: T;
   logoDark?: T;
   favicon?: T;
+  tagline?: T;
   updatedAt?: T;
   createdAt?: T;
 }

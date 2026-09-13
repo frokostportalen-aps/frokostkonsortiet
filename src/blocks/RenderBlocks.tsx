@@ -53,8 +53,12 @@ const blockComponents: Record<BlockType, BlockRenderer> = {
 export const RenderBlocks: React.FC<{
   blocks: Page['layout'][0][]
   tenantSlug?: string
+  /** The site's standing line, resolved once by the page. Named apart from any
+   *  block's own fields: injected props are spread after the block's data, so a
+   *  plain `tagline` would silently win over one. */
+  siteTagline?: string
 }> = (props) => {
-  const { blocks, tenantSlug } = props
+  const { blocks, tenantSlug, siteTagline } = props
 
   const hasBlocks = blocks && Array.isArray(blocks) && blocks.length > 0
 
@@ -69,13 +73,18 @@ export const RenderBlocks: React.FC<{
             // single shared call site can't satisfy every block's prop type, so
             // widen here rather than scatter @ts-expect-error directives.
             const Block = blockComponents[blockType] as React.FC<
-              Record<string, unknown> & { tenantSlug?: string }
+              Record<string, unknown> & { tenantSlug?: string; siteTagline?: string }
             >
 
             if (Block) {
               return (
                 <div className="my-16 md:my-24" data-block-type={blockType} data-reveal="" key={index}>
-                  <Block {...block} tenantSlug={tenantSlug} disableInnerContainer />
+                  <Block
+                    {...block}
+                    tenantSlug={tenantSlug}
+                    siteTagline={siteTagline}
+                    disableInnerContainer
+                  />
                 </div>
               )
             }

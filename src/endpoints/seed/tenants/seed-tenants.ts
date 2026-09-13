@@ -9,6 +9,7 @@ import { heading, p as para, richText } from './lexical'
 import { NEED_OPTIONS, QUOTE_FORM_FIELDS } from '../../../blocks/PlanPicker/options'
 import type { Form } from '../../../payload-types'
 import { pickLinkDomain, urlForTenantDomain } from '../../../utilities/tenantDomains'
+import { getTenantTheme } from '../../../themes/tenantThemes'
 
 /** One entry in a form's notification-email list. */
 type FormEmail = NonNullable<Form['emails']>[number]
@@ -479,6 +480,10 @@ export async function seedTenants(payload: Payload, opts: SeedOptions = {}): Pro
         logo: images['logo'] ?? null,
         logoDark: images['logo-dark'] ?? null,
         favicon: images['favicon'] ?? null,
+        // Written like the assets above, so `--force` means one thing for the
+        // whole global: an editor's line is restored to the site's own, not
+        // silently kept while their logo is replaced.
+        tagline: getTenantTheme(t.slug)?.tagline ?? null,
       },
     } as const
     for (const collection of ['header', 'footer', 'brand'] as const) {

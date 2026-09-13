@@ -17,6 +17,11 @@ import type {
  * The dialect is deliberately separate from the CSS/colour theme in
  * `tenantThemes.ts`: colours are injected as CSS variables, whereas the dialect
  * is read in JSX to pick markers, hero layout and eyebrow casing.
+ *
+ * Every axis here is a design switch the system owns. The site's standing line
+ * is *copy* and lives in the CMS instead (Brand → Slogan, resolved by
+ * `resolveTenantBrand`) — it was an axis once, and a stale default left on this
+ * object would have been read by the next component that wanted it.
  */
 export type Dialect = {
   eyebrow: EyebrowStyle
@@ -26,7 +31,6 @@ export type Dialect = {
   signature: Signature
   /** How customer quotes are presented — see `TestimonialsVariant`. */
   testimonials: TestimonialsVariant
-  tagline?: string
 }
 
 export type { Chrome, EyebrowStyle, HeroVariant, Signature, TestimonialsVariant }
@@ -50,6 +54,5 @@ export const getDialect = (slug?: string | null): Dialect => {
     heroVariant: theme.heroVariant ?? DIALECT_DEFAULTS.heroVariant,
     signature: theme.signature ?? DIALECT_DEFAULTS.signature,
     testimonials: theme.testimonials ?? DIALECT_DEFAULTS.testimonials,
-    tagline: theme.tagline,
   }
 }
