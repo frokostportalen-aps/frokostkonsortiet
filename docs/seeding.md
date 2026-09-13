@@ -108,3 +108,22 @@ pnpm prune:media:prod -- --apply --yes # delete against prod (deliberate)
 
 It is safe by design: a media is an orphan only if its id appears in **no** other
 document (it scans every collection for referenced ObjectIds).
+
+## Clean up orphaned versions
+
+`prune-versions` deletes rows in `_<collection>_versions` whose **parent
+document no longer exists** — left behind when a draft-enabled page or post is
+removed outside Payload's own delete path (straight in MongoDB, say).
+
+```
+pnpm prune:versions                       # dry run — lists orphans, deletes nothing
+pnpm prune:versions -- --apply            # delete (local)
+pnpm prune:versions:prod -- --apply --yes # delete against prod (deliberate)
+```
+
+Orphans are invisible in the admin panel, so this is housekeeping rather than a
+fix for anything an editor can see. It matters at handover: a `--force` reseed
+is meant to leave exactly the seed state, and these rows survive it.
+
+Payload's own delete cascades to versions, so a healthy database reports
+nothing. Rows turning up here mean something bypassed it.
