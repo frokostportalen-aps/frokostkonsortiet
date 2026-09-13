@@ -1,0 +1,13 @@
+# pnpm 12 no longer reads the "pnpm" field in package.json — settings live here.
+# https://pnpm.io/settings
+#
+# These packages compile or download native binaries in a postinstall script.
+# pnpm blocks such scripts by default (supply-chain protection), so each one we
+# actually need has to be allowed explicitly. sharp is listed even though it
+# currently ships prebuilt binaries for our platforms: if a future release or a
+# new target architecture falls back to building from source, an unlisted sharp
+# would silently skip its build and break Payload's image processing in prod.
+allowBuilds:
+  esbuild: true
+  sharp: true
+  unrs-resolver: true
