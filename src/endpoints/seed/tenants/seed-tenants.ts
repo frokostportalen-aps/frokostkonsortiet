@@ -474,7 +474,13 @@ export async function seedTenants(payload: Payload, opts: SeedOptions = {}): Pro
     // favicon then falls back to the generated letter-mark.
     const { header, footer } = t.menu(pageCtx)
     const globals = {
-      header: { navItems: header },
+      header: {
+        navItems: header,
+        // Written like the navigation above, so `--force` resets the whole
+        // global rather than half of it.
+        ctaLabel: getTenantTheme(t.slug)?.headerCta?.label ?? null,
+        ctaUrl: getTenantTheme(t.slug)?.headerCta?.url ?? null,
+      },
       footer: { navItems: footer },
       brand: {
         logo: images['logo'] ?? null,

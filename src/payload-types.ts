@@ -1270,6 +1270,14 @@ export interface Header {
         id?: string | null;
       }[]
     | null;
+  /**
+   * Teksten på sitets faste knap i menulinjen – fx "Få et tilbud". Står feltet tomt, bruges sitets standardknap.
+   */
+  ctaLabel?: string | null;
+  /**
+   * Hvor knappen fører hen, fx "/kontakt" eller "/om-os#tilbud".
+   */
+  ctaUrl?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -2236,6 +2244,8 @@ export interface HeaderSelect<T extends boolean = true> {
             };
         id?: T;
       };
+  ctaLabel?: T;
+  ctaUrl?: T;
   updatedAt?: T;
   createdAt?: T;
 }

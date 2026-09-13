@@ -14,8 +14,14 @@ export async function Header({ tenantSlug }: { tenantSlug: string }) {
     resolveTenantBrand(tenantSlug),
   ])
 
-  // Resolved server-side so the theme registry stays out of the client bundle.
-  const cta = getTenantTheme(tenantSlug)?.headerCta
+  // The editor's button (Header → Knap i menuen), falling back to the site's own
+  // from the registry. Resolved server-side either way, so the theme registry
+  // stays out of the client bundle.
+  const registryCta = getTenantTheme(tenantSlug)?.headerCta
+  const cta =
+    headerData?.ctaLabel && headerData?.ctaUrl
+      ? { label: headerData.ctaLabel, url: headerData.ctaUrl }
+      : registryCta
   const brandChrome = getDialect(tenantSlug).chrome === 'brand'
 
   return (
