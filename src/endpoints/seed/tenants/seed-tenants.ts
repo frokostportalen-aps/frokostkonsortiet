@@ -537,13 +537,14 @@ async function upsertTenantGlobal(
   })
   if (existing.docs[0]) {
     if (!force) return false
-    await payload.update({
-      collection,
-      id: existing.docs[0].id,
-      context: ctx,
-      data: data as never,
-    })
-    return true
+    // Delete and recreate rather than update. These globals are addressed by
+    // tenant and never by id (see getGlobals / resolveTenantBrand), so nothing
+    // can orphan — unlike `forms`, whose id the pages point at. Recreating is
+    // what makes a reset land on exactly the seed state: an update merges, so a
+    // field the seed data happens not to mention would keep the editors value
+    // and survive the reset in silence. It also leaves the document with fresh
+    // timestamps, so createdAt reads as when the site was last reset.
+    await payload.delete({ collection, id: existing.docs[0].id, context: ctx })
   }
   await payload.create({
     collection,
