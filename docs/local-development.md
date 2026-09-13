@@ -140,7 +140,7 @@ tenant in the *Tenants* collection) — changes take effect without a restart.
 ## Troubleshooting
 
 **`ERR_PNPM_UNSUPPORTED_ENGINE` / pnpm version mismatch.** Run `corepack enable`
-so the pinned `packageManager` version (pnpm 10.x) is used instead of a globally
+so the pinned `packageManager` version (pnpm 12.x) is used instead of a globally
 installed newer one.
 
 **`ERR_PNPM_ENOMEM` during install in Docker.** Caused by installing into a bind

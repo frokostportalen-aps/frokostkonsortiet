@@ -1,3 +1,5 @@
+'use client'
+
 import type { ButtonProps } from '@/components/ui/button'
 
 import { buttonVariants } from '@/components/ui/button'

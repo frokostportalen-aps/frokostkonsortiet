@@ -1,0 +1,23 @@
+# pnpm 12 no longer reads the "pnpm" field in package.json, nor the pnpm
+# settings that used to live in .npmrc — they all live here.
+# https://pnpm.io/settings
+
+# These packages compile or download native binaries in a postinstall script.
+# pnpm blocks such scripts by default (supply-chain protection), so each one we
+# actually need has to be allowed explicitly. sharp is listed even though it
+# currently ships prebuilt binaries for our platforms: if a future release or a
+# new target architecture falls back to building from source, an unlisted sharp
+# would silently skip its build and break Payload's image processing in prod.
+#
+# Note: `pnpm --ignore-workspace install` ignores this file, and therefore these
+# permissions. That is why no script passes that flag.
+allowBuilds:
+  esbuild: true
+  sharp: true
+  unrs-resolver: true
+
+# `prebuild` is the guard that stops a stripped admin import map from shipping
+# (scripts/assert-importmap.mjs — a blank prod admin), and `postbuild` builds the
+# sitemap. true is already the default; stated so a change of default cannot
+# quietly drop either one.
+enablePrePostScripts: true
