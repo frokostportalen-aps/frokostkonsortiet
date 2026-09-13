@@ -76,7 +76,10 @@ app's media volume: `docker compose exec app pnpm seed:tenants`.
 - **Additive** (default): pages/posts are upserted on `(tenant, slug)` and media
   on filename. Existing documents — including editor edits — are never touched.
 - **`--force`** (alias `--reset`): wipes each tenant's `posts`/`pages`/`media`
-  and rebuilds them from the seed. It never touches `users` or `tenants`.
+  and rebuilds them from the seed. The `header`/`footer`/`brand` globals are
+  rebuilt too — recreated rather than updated, so a field the seed data does
+  not mention cannot survive the reset. Any orphaned version rows are swept at
+  the end (see below). It never touches `users` or `tenants`.
   Against production it additionally requires **`--yes`** (the guard treats any
   non-local `DATABASE_URL` host as production — see `scripts/seedTarget.ts`).
 
@@ -123,8 +126,8 @@ pnpm prune:versions -- --apply            # delete (local)
 pnpm prune:versions:prod -- --apply --yes # delete against prod (deliberate)
 ```
 
-Orphans are invisible in the admin panel, so this is housekeeping rather than a
-fix for anything an editor can see.
-
-Payload's own delete cascades to versions, so a healthy database reports
-nothing. Rows turning up here mean something bypassed it.
+Payload's own delete cascades to versions, and a `--force` reseed sweeps what
+is left, so a healthy database reports nothing. Rows turning up here mean a
+document was removed without going through Payload — worth knowing about,
+even though orphans are invisible in the admin panel and harm nothing on their
+own.

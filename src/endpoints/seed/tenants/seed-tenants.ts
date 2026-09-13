@@ -9,11 +9,7 @@ import { heading, p as para, richText } from './lexical'
 import { NEED_OPTIONS, QUOTE_FORM_FIELDS } from '../../../blocks/PlanPicker/options'
 import type { Form } from '../../../payload-types'
 import { pickLinkDomain, urlForTenantDomain } from '../../../utilities/tenantDomains'
-import {
-  countBySlug,
-  deleteOrphanVersions,
-  findOrphanVersions,
-} from '../../../utilities/orphanVersions'
+import { deleteOrphanVersions, findOrphanVersions, summariseOrphans } from '../orphanVersions'
 
 /** One entry in a form's notification-email list. */
 type FormEmail = NonNullable<Form['emails']>[number]
@@ -517,20 +513,16 @@ export async function seedTenants(payload: Payload, opts: SeedOptions = {}): Pro
     )
   }
 
-  // A reset promises the seed state, so it has to account for rows that belong
-  // to no document any more. Payload cascades versions on delete, so this
-  // normally finds nothing — but a page removed outside that path (straight in
-  // the database, say) leaves versions behind, and they would otherwise be the
-  // one thing to survive a wipe. Runs once at the end rather than per tenant:
-  // an orphan has no live parent, so it has no tenant to belong to either.
+  // The wipe above cascades to versions, so this normally finds nothing. It is
+  // here for rows a delete never reached — a document removed straight in the
+  // database — which would otherwise be the one thing to outlive a reset.
+  // Once at the end, not per tenant: an orphan has no live parent, so it has no
+  // tenant either.
   if (force) {
     const orphans = await findOrphanVersions(payload)
     if (orphans.length) {
       await deleteOrphanVersions(payload, orphans)
-      const summary = [...countBySlug(orphans)]
-        .sort()
-        .map(([key, count]) => `${key} (${count})`)
-        .join(', ')
+      const summary = summariseOrphans(orphans).join(', ')
       payload.logger.info(`✓ Ryddede ${orphans.length} forældreløse versioner: ${summary}`)
     }
   }
@@ -560,13 +552,10 @@ async function upsertTenantGlobal(
   })
   if (existing.docs[0]) {
     if (!force) return false
-    // Delete and recreate rather than update. These globals are addressed by
-    // tenant and never by id (see getGlobals / resolveTenantBrand), so nothing
-    // can orphan — unlike `forms`, whose id the pages point at. Recreating is
-    // what makes a reset land on exactly the seed state: an update merges, so a
-    // field the seed data happens not to mention would keep the editors value
-    // and survive the reset in silence. It also leaves the document with fresh
-    // timestamps, so createdAt reads as when the site was last reset.
+    // Delete and recreate: an update merges, so a field the seed data does not
+    // mention would keep an editor’s value and survive the reset in silence.
+    // These globals are addressed by tenant slug and never by id (getGlobals),
+    // so nothing can be left pointing at the old row.
     await payload.delete({ collection, id: existing.docs[0].id, context: ctx })
   }
   await payload.create({

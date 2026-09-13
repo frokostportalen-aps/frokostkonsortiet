@@ -3,10 +3,10 @@ import { getPayload } from 'payload'
 import config from '../src/payload.config'
 
 import {
-  countBySlug,
   deleteOrphanVersions,
   findOrphanVersions,
-} from '../src/utilities/orphanVersions'
+  summariseOrphans,
+} from '../src/endpoints/seed/orphanVersions'
 import { isProduction, targetLabel } from './seedTarget'
 
 /**
@@ -16,11 +16,9 @@ import { isProduction, targetLabel } from './seedTarget'
  *   pnpm prune:versions -- --apply             # actually delete (local)
  *   pnpm prune:versions:prod -- --apply --yes  # delete against prod (deliberate)
  *
- * A `--force` reseed already clears these, so this is not a step anyone has to
- * remember. It earns its place as the read-only way to ask the question: a
- * healthy database reports nothing, and rows turning up here mean something
- * removed a document outside Payload's own delete path — worth knowing about
- * rather than only worth cleaning up.
+ * A `--force` reseed clears these on its own, so this is not a step anyone has
+ * to remember. It earns its place as the read-only way to ask the question —
+ * see `docs/seeding.md` for what an answer other than "none" means.
  */
 const args = process.argv.slice(2)
 const apply = args.includes('--apply')
@@ -39,11 +37,7 @@ const run = async () => {
   }
 
   payload.logger.info(`Fandt ${orphans.length} forældreløse versioner:`)
-  // Grouped by slug: one deleted page typically leaves a draft and a published
-  // row behind, and listing those separately says less than the count does.
-  for (const [key, count] of [...countBySlug(orphans)].sort()) {
-    payload.logger.info(`  - ${key} (${count})`)
-  }
+  for (const line of summariseOrphans(orphans)) payload.logger.info(`  - ${line}`)
 
   if (!apply) {
     payload.logger.info('\nTØR kørsel — intet slettet. Kør med --apply for at slette.')
