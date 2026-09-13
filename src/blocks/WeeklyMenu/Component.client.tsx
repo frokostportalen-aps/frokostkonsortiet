@@ -35,9 +35,8 @@ type Props = Omit<WeeklyMenuBlockProps, 'blockType'> & {
   /** Today's date in Danish time, resolved on the server so the first paint
    *  and the hydration agree on which day is "i dag". */
   today: string
-  /** The site's logo. It is the card's letterhead — which matters most on
-   *  paper, where the page's own header isn't there to say whose menu this is.
-   *  Always present: `resolveTenantBrand` falls back to a wordmark. */
+  /** The card's letterhead, which matters most on paper — the page's own header
+   *  isn't there to say whose menu this is. */
   logo: TenantLogo
 }
 
@@ -167,9 +166,7 @@ const DayRail: React.FC<{
               className={cn(
                 'mt-1 transition-opacity',
                 signatureMarkClass.menuDay[signature],
-                // Et strejf af mærket på hover, så rækken svarer igen inden
-                // klikket — men svagt nok til at den åbne dag stadig er den,
-                // der bærer det.
+                // A hint on hover; the open day carries the mark at full strength.
                 !isSelected && 'invisible opacity-40 group-hover/day:visible',
               )}
             />
@@ -321,20 +318,12 @@ export const WeeklyMenuClient: React.FC<Props> = ({
   const [chosen, setChosen] = useState<{ week: number; day: number } | null>(null)
   const selected = chosen ?? opening(weeks, today)
 
-  /**
-   * The printed sheet exists only while it is being printed. Rendering every
-   * day up front cost half the page's DOM nodes for output a small minority
-   * asks for — and it made a plain Ctrl+P on the two sales pages that carry
-   * this block silently print the menu instead of the page. Now the button is
-   * the only thing that asks for the sheet: it commits the markup, prints, and
-   * takes it down again.
-   */
+  /** The printed sheet exists only while the button is printing it. */
   const [printing, setPrinting] = useState(false)
   const print = useCallback(() => {
-    // `flushSync` so the sheet is in the document before the browser takes its
-    // snapshot; the teardown waits for `afterprint`, because `print()` returns
-    // immediately in some browsers and taking the markup away mid-dialog would
-    // print a blank page.
+    // `flushSync` so the sheet is in the document before the browser's
+    // snapshot; the teardown waits for `afterprint`, since `print()` returns
+    // immediately in some browsers.
     flushSync(() => setPrinting(true))
     window.print()
   }, [])
@@ -349,9 +338,6 @@ export const WeeklyMenuClient: React.FC<Props> = ({
   const week = weeks[selected.week] ?? weeks[0]
   const day = week?.days[selected.day] ?? week?.days[0]
 
-  // The editor's three toggles, resolved once: both the screen panel and the
-  // printed sheet render the same dishes, and shouldn't be able to disagree
-  // about which columns of them are on.
   const show = {
     showAllergens: showAllergens !== false,
     showCarbon: showCarbon !== false,
@@ -368,10 +354,8 @@ export const WeeklyMenuClient: React.FC<Props> = ({
         intro={intro}
         eyebrowStyle={eyebrowStyle}
       />
-      {/* `data-print-menu` is what the print stylesheet hangs on, and it is
-          here only while the card is printing — so the rule blanks the page
-          around the sheet for the print button, and never for someone who
-          simply pressed Ctrl+P on a page that happens to carry a menu. */}
+      {/* The print stylesheet hangs on this attribute, so it is here only while
+          the button is printing — plain Ctrl+P then prints the page as usual. */}
       <div className="mx-auto max-w-[46rem]" data-print-menu={printing ? '' : undefined}>
         <SignatureCard
           signature={signature}
@@ -411,9 +395,8 @@ export const WeeklyMenuClient: React.FC<Props> = ({
   const hasNext = selected.week < weeks.length - 1
 
   /**
-   * One day forward or back, rolling into the neighbouring week at either end.
-   * Returns `null` when there is nowhere to go, so the button's disabled state
-   * and its action are decided by the same piece of code.
+   * One day forward or back. `null` when there is nowhere to go, so a button's
+   * disabled state and its action are decided by the same piece of code.
    */
   const dayStep = (delta: number): { week: number; day: number } | null => {
     const next = selected.day + delta
@@ -433,10 +416,6 @@ export const WeeklyMenuClient: React.FC<Props> = ({
 
   return frame(
     <>
-      {/* The letterhead. On screen the site's logo already says whose menu this
-          is; on a printed sheet on a canteen wall it does not, which is the
-          whole reason the name is here rather than a day heading repeating what
-          the rail below already says. */}
       {/* Three columns with equal flanks, so the week sits on the card's own
           axis whatever the logo's width — `justify-between` would only centre
           it in the space left over, which put it off-axis on the site with the
@@ -472,9 +451,8 @@ export const WeeklyMenuClient: React.FC<Props> = ({
       </div>
 
       <div className="mt-8 flex items-center justify-center gap-1 print:hidden">
-        {/* Days can be stepped as well as picked. The arrows roll into the
-            neighbouring week at either end, because "next day" is what a reader
-            means by it — the week turns above are for jumping, not stepping. */}
+        {/* The arrows roll into the neighbouring week at either end, because
+            "next day" is what a reader means by it. */}
         <PageTurn
           direction="previous"
           disabled={!hasPreviousDay}
@@ -501,8 +479,7 @@ export const WeeklyMenuClient: React.FC<Props> = ({
         role="tabpanel"
         id={`${idBase}-panel`}
         aria-labelledby={`${idBase}-tab-${selected.day}`}
-        // Fokuserbart, så en tastaturbruger kan scrolle dagens retter igennem —
-        // og så markeret som sådan, i stedet for browserens egen streg.
+        // Focusable, so a keyboard reader can scroll the day's dishes.
         tabIndex={0}
         className="mt-8 rounded-sm focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ring/20 print:hidden"
       >
@@ -511,10 +488,8 @@ export const WeeklyMenuClient: React.FC<Props> = ({
         <DayPanel day={day} {...show} />
       </div>
 
-      {/* On paper it is one sheet per day: they go up side by side on a canteen
-          wall, or a new one each morning. Each sheet therefore says for itself
-          whose kitchen and which week it is — the controls above are the
-          screen's, and don't print. */}
+      {/* One sheet per day: they hang side by side on a canteen wall, so each
+          says for itself whose kitchen and which week it is. */}
       <div className="hidden print:block">
         {printing &&
           week.days.map((printDay, index) => (
@@ -523,9 +498,8 @@ export const WeeklyMenuClient: React.FC<Props> = ({
             className={index > 0 ? 'break-before-page' : undefined}
           >
             <div className="mb-8 flex items-center justify-between gap-4 border-b border-border pb-4">
-              {/* Eager: the sheet is built the moment the button is pressed, and a
-                  lazy image inside a `display:none` subtree would still be
-                  loading when the browser takes its print snapshot. */}
+              {/* Eager: a lazy image inside a `display:none` subtree would still
+                  be loading when the browser takes its print snapshot. */}
               <Logo logo={logo} height={96} loading="eager" priority="high" className="max-w-80!" />
               <p className="text-sm text-muted-foreground">
                 Uge {week.week} · {span}
@@ -545,17 +519,13 @@ export const WeeklyMenuClient: React.FC<Props> = ({
   )
 }
 
-/**
- * The card's own round controls — the page turns and the print button — share
- * their shape, so the ring and the hit area are stated once.
- */
+/** Shape shared by the card's round controls, so the ring is stated once. */
 const cardControl =
   'flex size-9 shrink-0 select-none items-center justify-center rounded-full transition-colors sm:size-10 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ring/20'
 
 /**
- * Print the menu. Customers put the week up in their own canteen, so this is a
- * real use rather than a browser affordance: it is also what asks the card to
- * build its printed sheet in the first place.
+ * Print the menu — customers put the week up in their own canteen. It is also
+ * what asks the card to build its sheet in the first place.
  */
 const PrintButton: React.FC<{ onPrint: () => void }> = ({ onPrint }) => (
   <button
@@ -586,9 +556,8 @@ const PageTurn: React.FC<{
     disabled={disabled}
     aria-label={label}
     className={cn(
-      // No standing border, unlike the print button: the chevron at full text
-      // colour already reads as a control, and a ring around each of the four
-      // arrows fought the card's quiet. The surface appears under the cursor.
+      // No standing border, unlike the print button: four ringed arrows fought
+      // the card's quiet. The surface appears under the cursor instead.
       cardControl,
       disabled
         ? 'cursor-default text-muted-foreground/25'

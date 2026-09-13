@@ -165,12 +165,12 @@ export const priceMenu = (
 })
 
 /**
- * Ugens menu, hentet live fra frokostportalen. Retterne står ikke her — de
- * kommer fra tenantens eget `kitchenId`, så blokken har kun rammen.
+ * Ugens menu, read live from frokostportalen. The dishes are not written here —
+ * they come from the tenant's own `kitchenId`, so the block is only the frame.
  *
- * Vil en side ikke have blokkens egen overskrift — fx fordi siden allerede
- * hedder "Ugens menu" — så send en tom streng frem for at udelade feltet:
- * Payload falder tilbage på feltets `defaultValue`, når værdien er undefined.
+ * A page that wants no heading of its own — because the page is already called
+ * "Ugens menu" — passes an empty string rather than omitting the field: Payload
+ * falls back to the field's `defaultValue` when the value is undefined.
  */
 export const weeklyMenu = (
   opts: {

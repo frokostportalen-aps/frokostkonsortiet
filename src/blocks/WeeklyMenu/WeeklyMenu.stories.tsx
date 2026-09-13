@@ -99,18 +99,16 @@ const week38: WeeklyMenu = {
 type Args = React.ComponentProps<typeof WeeklyMenuClient>
 
 /**
- * What a story itself supplies. The three the preview resolves from the
- * toolbar's site are left out, so the stories can be typed rather than cast —
- * the `as never` that used to stand here is exactly what let a missing `logo`
- * through the typechecker and blow up in the rendered story instead.
+ * What a story itself supplies: the three the preview resolves from the
+ * toolbar's site are left out, so the stories can be typed rather than cast.
  */
 type StoryArgs = Omit<Args, 'signature' | 'eyebrowStyle' | 'logo'>
 
 /** Resolves dialect and mark from the toolbar's site, as the server half does. */
 const Preview = (args: StoryArgs, { globals }: { globals: { tenant?: string } }) => {
   const { signature, eyebrow } = getDialect(globals.tenant)
-  // The registry's own wordmark: Storybook has no uploaded media, and a
-  // wordmark is what `resolveTenantBrand` falls back to for a site without one.
+  // The registry's own wordmark: Storybook has no uploaded media, and that is
+  // what `resolveTenantBrand` falls back to for a site without one.
   const logo = getTenantLogo(globals.tenant) ?? { text: 'Køkkenet' }
   return (
     <WeeklyMenuClient {...args} logo={logo} signature={signature} eyebrowStyle={eyebrow} />
@@ -119,10 +117,8 @@ const Preview = (args: StoryArgs, { globals }: { globals: { tenant?: string } })
 
 const meta = {
   title: 'Blokke/Ugens menu',
-  // Kun til dokumentations-tabellen. Casten er smal og bevidst: `Preview`
-  // leverer de tre props der er trukket ud af `StoryArgs`, så en story hverken
-  // kan eller skal sætte dem — men `component` ville ellers binde args-typen
-  // til komponentens fulde props og tvinge en cast ud på hver enkelt story.
+  // For the docs table only; the cast keeps the args type on `StoryArgs`
+  // rather than pushing a cast out onto every story.
   component: WeeklyMenuClient as unknown as React.ComponentType<StoryArgs>,
   parameters: {
     docs: {
