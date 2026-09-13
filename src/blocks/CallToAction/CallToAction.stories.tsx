@@ -15,6 +15,8 @@ const meta = {
     },
   },
   render: withTenant(CallToActionBlock),
+  // The line comes from the CMS in the app; a story carries its own.
+  args: { siteTagline: 'Siden 1980 · sæsonens køkken' },
 } satisfies Meta<typeof CallToActionBlock>
 
 export default meta

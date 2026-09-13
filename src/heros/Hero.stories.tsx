@@ -4,7 +4,12 @@ import type React from 'react'
 
 import { RenderHero } from '@/heros/RenderHero'
 import { getDialect } from '@/themes/dialect'
-import { getTenantTheme } from '@/themes/tenantThemes'
+
+/**
+ * The site's standing line lives in the CMS, which Storybook has no access to,
+ * so the stories carry their own — a fixture, like the copy in them already is.
+ */
+const STANDING_LINE = 'Siden 1980 · sæsonens køkken'
 import { cta, heading, p, photos, richText } from '@/stories/mocks'
 
 /**
@@ -93,7 +98,7 @@ export const HighImpact: Story = {
         type="highImpact"
         {...FORSIDER[tenant]}
         dialect={getDialect(tenant)}
-        tagline={getTenantTheme(tenant)?.tagline}
+        tagline={STANDING_LINE}
       />
     )
   },
@@ -109,7 +114,7 @@ export const MediumImpact: Story = {
       richText={richText(heading('h1', 'Om os'), p('Tre køkkener, én målsætning.')) as HeroArgs['richText']}
       links={[]}
       dialect={getDialect(globals.tenant as string)}
-      tagline={getTenantTheme(globals.tenant as string)?.tagline}
+      tagline={STANDING_LINE}
     />
   ),
 }
@@ -123,7 +128,7 @@ export const LowImpact: Story = {
       richText={richText(heading('h1', 'Kontakt'), p('Vi svarer inden for én hverdag.')) as HeroArgs['richText']}
       links={[]}
       dialect={getDialect(globals.tenant as string)}
-      tagline={getTenantTheme(globals.tenant as string)?.tagline}
+      tagline={STANDING_LINE}
     />
   ),
 }

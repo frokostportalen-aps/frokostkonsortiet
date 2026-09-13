@@ -9,7 +9,6 @@ import { heading, p as para, richText } from './lexical'
 import { NEED_OPTIONS, QUOTE_FORM_FIELDS } from '../../../blocks/PlanPicker/options'
 import type { Form } from '../../../payload-types'
 import { pickLinkDomain, urlForTenantDomain } from '../../../utilities/tenantDomains'
-import { getTenantTheme } from '../../../themes/tenantThemes'
 
 /** One entry in a form's notification-email list. */
 type FormEmail = NonNullable<Form['emails']>[number]
@@ -258,7 +257,7 @@ export async function seedTenants(payload: Payload, opts: SeedOptions = {}): Pro
     slug: t.slug,
     isMain: t.isMain,
     domains: t.domains,
-    tagline: t.tagline,
+    listingLine: t.listingLine,
   }))
   // Absolute URL to another tenant's site (env-aware), for cross-site links.
   const tenantBySlug = new Map(TENANTS.map((t) => [t.slug, t]))
@@ -478,8 +477,8 @@ export async function seedTenants(payload: Payload, opts: SeedOptions = {}): Pro
         navItems: header,
         // Written like the navigation above, so `--force` resets the whole
         // global rather than half of it.
-        ctaLabel: getTenantTheme(t.slug)?.headerCta?.label ?? null,
-        ctaUrl: getTenantTheme(t.slug)?.headerCta?.url ?? null,
+        ctaLabel: t.headerCta?.label ?? null,
+        ctaUrl: t.headerCta?.url ?? null,
       },
       footer: { navItems: footer },
       brand: {
@@ -489,7 +488,7 @@ export async function seedTenants(payload: Payload, opts: SeedOptions = {}): Pro
         // Written like the assets above, so `--force` means one thing for the
         // whole global: an editor's line is restored to the site's own, not
         // silently kept while their logo is replaced.
-        tagline: getTenantTheme(t.slug)?.tagline ?? null,
+        tagline: t.tagline,
       },
     } as const
     for (const collection of ['header', 'footer', 'brand'] as const) {

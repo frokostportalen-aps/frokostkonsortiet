@@ -14,14 +14,12 @@ export async function Header({ tenantSlug }: { tenantSlug: string }) {
     resolveTenantBrand(tenantSlug),
   ])
 
-  // The editor's button (Header → Knap i menuen), falling back to the site's own
-  // from the registry. Resolved server-side either way, so the theme registry
-  // stays out of the client bundle.
-  const registryCta = getTenantTheme(tenantSlug)?.headerCta
+  // Both halves or nothing: a label with no destination is a button that goes
+  // nowhere. The CMS owns this outright — an empty pair means no button.
   const cta =
     headerData?.ctaLabel && headerData?.ctaUrl
       ? { label: headerData.ctaLabel, url: headerData.ctaUrl }
-      : registryCta
+      : undefined
   const brandChrome = getDialect(tenantSlug).chrome === 'brand'
 
   return (

@@ -3,7 +3,6 @@ import React from 'react'
 import type { CallToActionBlock as CTABlockProps } from '@/payload-types'
 
 import { getDialect } from '@/themes/dialect'
-import { getTenantTheme } from '@/themes/tenantThemes'
 import RichText from '@/components/RichText'
 import { CMSLink } from '@/components/Link'
 import { Eyebrow } from '@/components/Eyebrow'
@@ -24,12 +23,9 @@ export const CallToActionBlock: React.FC<Props> = ({
   links,
   richText,
   tenantSlug,
-  siteTagline,
+  siteTagline: tagline,
 }) => {
   const { eyebrow, signature } = getDialect(tenantSlug)
-  // Rendered outside a page — in Storybook — there is nobody to resolve the
-  // line, so the registry's stands in rather than the band losing its eyebrow.
-  const tagline = siteTagline ?? getTenantTheme(tenantSlug)?.tagline
   return (
     <div className="container">
       {/* The inner padding follows the site's text inset, so the band's copy

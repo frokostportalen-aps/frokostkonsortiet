@@ -17,8 +17,8 @@ export type TenantMeta = {
   /** The main Frokost Konsortiet site (fallback for unknown hosts). */
   isMain: boolean
   domains: string[]
-  /** Short one-liner used when other sites list this tenant (e.g. the Partnere page). */
-  tagline: string
+  /** Short one-liner used when *other* sites list this tenant (the Partnere page). */
+  listingLine: string
   /**
    * The kitchen's id in frokostportalen, which the "Ugens menu" block reads its
    * week from. The main portal has no kitchen of its own and leaves it unset.
@@ -51,6 +51,18 @@ export type NavItem = Record<string, unknown>
 export type NavFactory = (ctx: PageContext) => { header: NavItem[]; footer: NavItem[] }
 
 export type TenantDef = TenantMeta & {
+  /**
+   * The site's own standing line, shown above headings in the heroes, the CTA
+   * band and the footer. Seeded into `brand.tagline`, which is where it lives
+   * from then on — the CMS owns it, and an editor emptying the field means the
+   * site shows no line.
+   */
+  tagline: string
+  /**
+   * The site's standing call-to-action, seeded into the header global. Owned by
+   * the CMS from then on, like the navigation beside it.
+   */
+  headerCta?: { label: string; url: string }
   /** This tenant's folder; the engine reads `images/` from here. */
   dir: string
   /**

@@ -6,7 +6,7 @@ import type { TenantLogo } from './tenantThemes'
 import { getCachedGlobal } from '@/utilities/getGlobals'
 import { getMediaUrl } from '@/utilities/getMediaUrl'
 import { getTenantBySlug } from '@/utilities/getTenant'
-import { getTenantLogo, getTenantTheme } from './tenantThemes'
+import { getTenantLogo } from './tenantThemes'
 import { getTenantFavicon } from './favicon'
 
 export type TenantBrand = {
@@ -35,9 +35,8 @@ const mediaUrl = (value: Media | string | null | undefined): string | undefined 
  *   favicon → uploaded image
  *           → the generated letter-mark from the theme colours
  *
- *   tagline → the editor's own line
- *           → the theme registry's, so a site that has never been edited still
- *             speaks in its own voice
+ * The tagline has no such chain: the CMS owns it outright. A site whose editors
+ * have emptied the field shows no line, which is what they asked for.
  *
  * So a site always has something to show, whether or not its editors have
  * uploaded anything.
@@ -82,7 +81,7 @@ export const resolveTenantBrand = cache(async (tenantSlug: string): Promise<Tena
       { ...registry, ...(srcDark ? { srcDark } : {}), text }
 
   const favicon = mediaUrl(brand?.favicon) ?? getTenantFavicon(tenantSlug)
-  const tagline = brand?.tagline?.trim() || getTenantTheme(tenantSlug)?.tagline
+  const tagline = brand?.tagline?.trim() || undefined
 
   return { logo, favicon, tagline }
 })
