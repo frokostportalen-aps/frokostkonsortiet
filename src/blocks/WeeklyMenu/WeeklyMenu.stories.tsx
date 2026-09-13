@@ -5,6 +5,7 @@ import React from 'react'
 import type { MenuDay, WeeklyMenu } from '@/data/weeklyMenu'
 
 import { getDialect } from '@/themes/dialect'
+import { getTenantLogo } from '@/themes/tenantThemes'
 import { WeeklyMenuClient } from './Component.client'
 
 /**
@@ -97,15 +98,28 @@ const week38: WeeklyMenu = {
 
 type Args = React.ComponentProps<typeof WeeklyMenuClient>
 
-/** Resolves the dialect from the toolbar's site, the way the server half does. */
-const Preview = (args: Args, { globals }: { globals: { tenant?: string } }) => {
+/**
+ * What a story itself supplies: the three the preview resolves from the
+ * toolbar's site are left out, so the stories can be typed rather than cast.
+ */
+type StoryArgs = Omit<Args, 'signature' | 'eyebrowStyle' | 'logo'>
+
+/** Resolves dialect and mark from the toolbar's site, as the server half does. */
+const Preview = (args: StoryArgs, { globals }: { globals: { tenant?: string } }) => {
   const { signature, eyebrow } = getDialect(globals.tenant)
-  return <WeeklyMenuClient {...args} signature={signature} eyebrowStyle={eyebrow} />
+  // The registry's own wordmark: Storybook has no uploaded media, and that is
+  // what `resolveTenantBrand` falls back to for a site without one.
+  const logo = getTenantLogo(globals.tenant) ?? { text: 'Køkkenet' }
+  return (
+    <WeeklyMenuClient {...args} logo={logo} signature={signature} eyebrowStyle={eyebrow} />
+  )
 }
 
 const meta = {
   title: 'Blokke/Ugens menu',
-  component: WeeklyMenuClient,
+  // For the docs table only; the cast keeps the args type on `StoryArgs`
+  // rather than pushing a cast out onto every story.
+  component: WeeklyMenuClient as unknown as React.ComponentType<StoryArgs>,
   parameters: {
     docs: {
       description: {
@@ -115,7 +129,7 @@ const meta = {
     },
   },
   render: Preview,
-} satisfies Meta<typeof WeeklyMenuClient>
+} satisfies Meta<StoryArgs>
 
 export default meta
 type Story = StoryObj<typeof meta>
@@ -130,16 +144,16 @@ const base = {
   showCarbon: true,
   showVariants: true,
   today: '2026-09-08',
-} satisfies Partial<Args>
+} satisfies Partial<StoryArgs>
 
 /** Den uge, der er i gang – tirsdag åbner, fordi det er "i dag". */
 export const DenneUge: Story = {
-  args: { ...base, weeks: [week37] } as never,
+  args: { ...base, weeks: [week37] },
 }
 
 /** Køkkenet har lagt næste uge op, så der er to faner at vælge mellem. */
 export const ToUger: Story = {
-  args: { ...base, weeks: [week37, week38] } as never,
+  args: { ...base, weeks: [week37, week38] },
 }
 
 /** Køkkenet har ikke lagt ugen op endnu – blokken siger det frem for at stå tom. */
@@ -148,7 +162,7 @@ export const IkkeLagtOp: Story = {
     ...base,
     weeks: [],
     emptyMessage: 'Ugens menu er ikke lagt op endnu. Prøv igen om et par dage.',
-  } as never,
+  },
 }
 
 /** Uden allergener og klimatal – for et køkken, der ikke oplyser dem. */
@@ -159,5 +173,5 @@ export const KunRetter: Story = {
     showAllergens: false,
     showCarbon: false,
     showVariants: false,
-  } as never,
+  },
 }

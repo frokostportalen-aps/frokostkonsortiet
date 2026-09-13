@@ -677,3 +677,43 @@ html[data-motion] [data-reveal] .signature-mark {
 html[data-motion] [data-reveal='in'] .signature-mark {
   animation: signature-draw 0.7s var(--ease-settle) 350ms both;
 }
+
+/* ── Print: the weekly menu ──────────────────────────────────────────────—
+   Customers print the week and put it up in their own canteen, so the button
+   should give the sheet — not the site around it. `data-print-menu` is set only
+   while printing, so everything else prints as usual. `visibility` rather than
+   `display`, which would collapse the card's ancestors. */
+/* The sheet size can't be bound to a selector, so it applies to every print in
+   the app. Only the blanking below is scoped to the menu card. */
+@page {
+  size: A4 portrait;
+  margin: 14mm;
+}
+
+@media print {
+  body:has([data-print-menu]) * {
+    visibility: hidden;
+  }
+
+  /* The guard is not redundant: without it this rule weighs (0,1,0) against
+     the blanking rule's (0,1,1), and the whole sheet prints blank. */
+  body:has([data-print-menu]) [data-print-menu],
+  body:has([data-print-menu]) [data-print-menu] * {
+    visibility: visible;
+  }
+
+  [data-print-menu] {
+    position: absolute;
+    inset: 0 0 auto 0;
+    max-width: none;
+  }
+
+  /* The card's surface and border are how the screen gathers the sheet. On
+     paper it is already a sheet, and a tint costs ink without saying anything. */
+  [data-print-menu] > * {
+    border: 0;
+    box-shadow: none;
+    background: transparent;
+    padding: 0;
+  }
+}

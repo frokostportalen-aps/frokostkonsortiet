@@ -3,6 +3,7 @@ import React from 'react'
 import type { WeeklyMenuBlock as WeeklyMenuBlockProps } from '@/payload-types'
 
 import { getWeeklyMenuForTenant } from '@/data/weeklyMenu'
+import { resolveTenantBrand } from '@/themes/resolveTenantBrand'
 import { todayIsoInCopenhagen } from '@/utilities/isoWeek'
 import { getDialect } from '@/themes/dialect'
 import { WeeklyMenuClient } from './Component.client'
@@ -33,7 +34,14 @@ export const WeeklyMenuBlock: React.FC<Props> = async ({
   showCarbon,
   showVariants,
 }) => {
-  const menu = tenantSlug ? await getWeeklyMenuForTenant(tenantSlug) : null
+  if (!tenantSlug) return null
+
+  // Independent lookups — run them concurrently, as the header does. The brand
+  // is normally already resolved for this request, so it usually costs nothing.
+  const [menu, { logo }] = await Promise.all([
+    getWeeklyMenuForTenant(tenantSlug),
+    resolveTenantBrand(tenantSlug),
+  ])
 
   if (!menu) return null
 
@@ -54,6 +62,7 @@ export const WeeklyMenuBlock: React.FC<Props> = async ({
       today={todayIsoInCopenhagen()}
       signature={signature}
       eyebrowStyle={eyebrowStyle}
+      logo={logo}
     />
   )
 }

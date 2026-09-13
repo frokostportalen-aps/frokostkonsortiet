@@ -1,13 +1,24 @@
 'use client'
 
-import React, { useId, useRef, useState, useSyncExternalStore } from 'react'
+import React, {
+  useCallback,
+  useEffect,
+  useId,
+  useRef,
+  useState,
+  useSyncExternalStore,
+} from 'react'
+import { flushSync } from 'react-dom'
+import { ChevronLeft, ChevronRight, Printer } from 'lucide-react'
 
 import type { WeeklyMenuBlock as WeeklyMenuBlockProps } from '@/payload-types'
 import type { MenuDay, WeeklyMenu } from '@/data/weeklyMenu'
 import type { Dialect } from '@/themes/dialect'
+import type { TenantLogo } from '@/themes/tenantThemes'
 
 import { isoWeekOf, todayIsoInCopenhagen } from '@/utilities/isoWeek'
 import { SectionHeader } from '@/components/SectionHeader'
+import { Logo } from '@/components/Logo/Logo'
 import { SignatureCard } from '@/components/SignatureCard'
 import { signatureMarkClass } from '@/components/SignatureMark'
 import { cn } from '@/utilities/ui'
@@ -24,6 +35,9 @@ type Props = Omit<WeeklyMenuBlockProps, 'blockType'> & {
   /** Today's date in Danish time, resolved on the server so the first paint
    *  and the hydration agree on which day is "i dag". */
   today: string
+  /** The card's letterhead, which matters most on paper — the page's own header
+   *  isn't there to say whose menu this is. */
+  logo: TenantLogo
 }
 
 /** "2026-09-07" → "7/9" — locale-free, so server and client always agree. */
@@ -89,7 +103,7 @@ const DayRail: React.FC<{
     <div
       role="tablist"
       aria-label={`Vælg dag i ${weekLabel}`}
-      className="-mx-2 flex flex-wrap items-end justify-center gap-x-1 gap-y-2 px-2"
+      className="flex items-end justify-center gap-x-0.5 sm:gap-x-1"
       onKeyDown={(event) => {
         if (event.key === 'ArrowRight') move(selected + 1)
         else if (event.key === 'ArrowLeft') move(selected - 1)
@@ -117,7 +131,7 @@ const DayRail: React.FC<{
             aria-label={`${day.weekday} ${day.dayLabel}`}
             onClick={() => onSelect(index)}
             className={cn(
-              'group/day flex min-w-16 flex-col items-center gap-0.5 rounded-sm px-2 py-1',
+              'group/day flex min-w-11 cursor-pointer select-none flex-col items-center gap-1 rounded-sm px-1.5 py-1.5 sm:min-w-18 sm:px-2',
               'transition-colors focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ring/20',
               isSelected ? 'text-foreground' : 'text-muted-foreground hover:text-foreground',
             )}
@@ -128,19 +142,19 @@ const DayRail: React.FC<{
             <span
               aria-hidden
               className={cn(
-                'text-sm leading-none tracking-smallcaps',
+                'text-base leading-none tracking-smallcaps',
                 isSelected ? 'font-heading font-semibold uppercase' : 'lowercase',
               )}
             >
               {shortWeekday(day.weekday)}
             </span>
-            <span aria-hidden className="text-[11px] leading-none opacity-70">
+            <span aria-hidden className="text-xs leading-none opacity-70">
               {shortDate(day.date)}
             </span>
             {day.date === today && (
               <span
                 aria-hidden
-                className="text-[10px] uppercase leading-none tracking-smallcaps text-primary"
+                className="text-[11px] uppercase leading-none tracking-smallcaps text-primary"
               >
                 i dag
               </span>
@@ -150,9 +164,10 @@ const DayRail: React.FC<{
             <span
               aria-hidden
               className={cn(
-                'mt-1',
+                'mt-1 transition-opacity',
                 signatureMarkClass.menuDay[signature],
-                !isSelected && 'invisible',
+                // A hint on hover; the open day carries the mark at full strength.
+                !isSelected && 'invisible opacity-40 group-hover/day:visible',
               )}
             />
           </button>
@@ -185,7 +200,7 @@ const Dish: React.FC<{
 
   return (
     <li>
-      <p className="font-semibold leading-snug">
+      <p className="text-lg font-semibold leading-snug">
         {dish.title}
         {allergens.length > 0 && (
           <>
@@ -202,10 +217,10 @@ const Dish: React.FC<{
         )}
       </p>
       {dish.subTitle && (
-        <p className="mt-1 text-sm leading-relaxed text-muted-foreground">{dish.subTitle}</p>
+        <p className="mt-1 text-base leading-relaxed text-muted-foreground">{dish.subTitle}</p>
       )}
       {(variants.length > 0 || carbon !== null) && (
-        <p className="mt-1 text-xs text-muted-foreground">
+        <p className="mt-1 text-sm text-muted-foreground">
           {variants.join(' · ')}
           {variants.length > 0 && carbon !== null && <span aria-hidden> · </span>}
           {carbon !== null && (
@@ -229,7 +244,7 @@ const DayPanel: React.FC<{
     <div className="flex flex-col gap-8">
       {day.categories.map((category) => (
         <section key={category.title}>
-          <h3 className="text-xs font-semibold uppercase tracking-eyebrow text-primary">
+          <h3 className="text-sm font-semibold uppercase tracking-eyebrow text-primary">
             {category.title}
           </h3>
           <ul className="mt-3 flex flex-col gap-4">
@@ -248,7 +263,7 @@ const DayPanel: React.FC<{
     </div>
 
     {showAllergens && day.allergens.length > 0 && (
-      <p className="mt-8 border-t border-border pt-4 text-xs leading-relaxed text-muted-foreground">
+      <p className="mt-8 border-t border-border pt-4 text-sm leading-relaxed text-muted-foreground">
         <span className="font-semibold">Allergener: </span>
         {day.allergens.map((allergen) => `${allergen.code}. ${allergen.name}`).join(' · ')}
       </p>
@@ -282,6 +297,7 @@ export const WeeklyMenuClient: React.FC<Props> = ({
   today: serverToday,
   signature,
   eyebrowStyle,
+  logo,
 }) => {
   const idBase = useId()
 
@@ -302,8 +318,31 @@ export const WeeklyMenuClient: React.FC<Props> = ({
   const [chosen, setChosen] = useState<{ week: number; day: number } | null>(null)
   const selected = chosen ?? opening(weeks, today)
 
+  /** The printed sheet exists only while the button is printing it. */
+  const [printing, setPrinting] = useState(false)
+  const print = useCallback(() => {
+    // `flushSync` so the sheet is in the document before the browser's
+    // snapshot; the teardown waits for `afterprint`, since `print()` returns
+    // immediately in some browsers.
+    flushSync(() => setPrinting(true))
+    window.print()
+  }, [])
+
+  useEffect(() => {
+    if (!printing) return
+    const done = () => setPrinting(false)
+    window.addEventListener('afterprint', done)
+    return () => window.removeEventListener('afterprint', done)
+  }, [printing])
+
   const week = weeks[selected.week] ?? weeks[0]
   const day = week?.days[selected.day] ?? week?.days[0]
+
+  const show = {
+    showAllergens: showAllergens !== false,
+    showCarbon: showCarbon !== false,
+    showVariants: showVariants !== false,
+  }
 
   // The block's frame, shared by the populated and the empty state so a change
   // to the section framing lands in one place.
@@ -315,11 +354,17 @@ export const WeeklyMenuClient: React.FC<Props> = ({
         intro={intro}
         eyebrowStyle={eyebrowStyle}
       />
-      <div className="mx-auto max-w-[46rem]">
-        <SignatureCard signature={signature} mark={false} className="px-6 py-8 md:px-10 md:py-10">
+      {/* The print stylesheet hangs on this attribute, so it is here only while
+          the button is printing — plain Ctrl+P then prints the page as usual. */}
+      <div className="mx-auto max-w-[46rem]" data-print-menu={printing ? '' : undefined}>
+        <SignatureCard
+          signature={signature}
+          mark={false}
+          className="px-3 py-6 sm:px-6 sm:py-8 md:px-10 md:py-10"
+        >
           {children}
         </SignatureCard>
-        {note && <p className="mt-6 text-center text-sm text-muted-foreground">{note}</p>}
+        {note && <p className="mt-6 text-center text-base text-muted-foreground">{note}</p>}
       </div>
     </div>
   )
@@ -349,29 +394,71 @@ export const WeeklyMenuClient: React.FC<Props> = ({
   const hasPrevious = selected.week > 0
   const hasNext = selected.week < weeks.length - 1
 
+  /**
+   * One day forward or back. `null` when there is nowhere to go, so a button's
+   * disabled state and its action are decided by the same piece of code.
+   */
+  const dayStep = (delta: number): { week: number; day: number } | null => {
+    const next = selected.day + delta
+    if (next >= 0 && next < week.days.length) return { week: selected.week, day: next }
+    const overWeek = selected.week + delta
+    const neighbour = weeks[overWeek]
+    if (!neighbour?.days.length) return null
+    return { week: overWeek, day: delta > 0 ? 0 : neighbour.days.length - 1 }
+  }
+
+  const hasPreviousDay = dayStep(-1) !== null
+  const hasNextDay = dayStep(1) !== null
+  const stepDay = (delta: number) => () => {
+    const to = dayStep(delta)
+    if (to) setChosen(to)
+  }
+
   return frame(
     <>
-      {/* The dateline: which week this sheet is, with the page turns beside it. */}
-      <div className="flex items-center justify-center gap-2">
-        <PageTurn
-          direction="previous"
-          disabled={!hasPrevious}
-          onClick={() => turn(-1)}
-          label="Forrige uge"
-        />
-        <p className="min-w-40 text-center">
-          <span className="font-heading text-lg font-semibold uppercase tracking-smallcaps">
-            Uge {week.week}
-          </span>
-          <span className="block text-xs text-muted-foreground">
-            {span}
-            {isCurrentWeek && <span className="text-primary"> · denne uge</span>}
-          </span>
-        </p>
-        <PageTurn direction="next" disabled={!hasNext} onClick={() => turn(1)} label="Næste uge" />
+      {/* Three columns with equal flanks, so the week sits on the card's own
+          axis whatever the logo's width — `justify-between` would only centre
+          it in the space left over, which put it off-axis on the site with the
+          wide wordmark. `minmax(0, …)` keeps the flanks equal instead of
+          letting the logo widen its own column. */}
+      <div className="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-x-1.5 print:hidden sm:gap-x-4">
+        <div className="justify-self-start">
+          <Logo logo={logo} height={48} className="max-w-26! sm:h-14! sm:max-w-56!" />
+        </div>
+
+        <div className="flex items-center justify-center gap-1 sm:gap-2">
+          <PageTurn
+            direction="previous"
+            disabled={!hasPrevious}
+            onClick={() => turn(-1)}
+            label="Forrige uge"
+          />
+          <p className="min-w-16 text-center sm:min-w-40">
+            <span className="font-heading text-lg font-semibold uppercase tracking-smallcaps">
+              Uge {week.week}
+            </span>
+            <span className="block text-sm text-muted-foreground">
+              {span}
+              {isCurrentWeek && <span className="text-primary"> · denne uge</span>}
+            </span>
+          </p>
+          <PageTurn direction="next" disabled={!hasNext} onClick={() => turn(1)} label="Næste uge" />
+        </div>
+
+        <div className="justify-self-end">
+          <PrintButton onPrint={print} />
+        </div>
       </div>
 
-      <div className="mt-6">
+      <div className="mt-8 flex items-center justify-center gap-1 print:hidden">
+        {/* The arrows roll into the neighbouring week at either end, because
+            "next day" is what a reader means by it. */}
+        <PageTurn
+          direction="previous"
+          disabled={!hasPreviousDay}
+          onClick={stepDay(-1)}
+          label="Forrige dag"
+        />
         <DayRail
           days={week.days}
           today={today}
@@ -382,39 +469,81 @@ export const WeeklyMenuClient: React.FC<Props> = ({
           signature={signature}
           weekLabel={weekLabel}
         />
+        <PageTurn direction="next" disabled={!hasNextDay} onClick={stepDay(1)} label="Næste dag" />
       </div>
 
       {/* The rule that separates the card's head from the menu itself. */}
-      <hr className="mt-4 border-t border-border" />
+      <hr className="mt-4 border-t border-border print:hidden" />
 
       <div
         role="tabpanel"
         id={`${idBase}-panel`}
         aria-labelledby={`${idBase}-tab-${selected.day}`}
+        // Focusable, so a keyboard reader can scroll the day's dishes.
         tabIndex={0}
-        className="mt-8"
+        className="mt-8 rounded-sm focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ring/20 print:hidden"
       >
-        {/* Day over date, stacked: the weekday is what the reader came for,
-            the date confirms it. */}
-        <p className="mb-6 text-center font-heading text-2xl font-semibold leading-tight tracking-tight">
-          {day.weekday}
-          <span className="mt-1 block text-sm font-normal tracking-normal text-muted-foreground">
-            {day.dayLabel}
-          </span>
-        </p>
-        <DayPanel
-          day={day}
-          showAllergens={showAllergens !== false}
-          showCarbon={showCarbon !== false}
-          showVariants={showVariants !== false}
-        />
+        {/* No day heading here: the rail above already says which day is open,
+            and "Mandag / 14. september" over "MAN 14/9" is the same fact twice. */}
+        <DayPanel day={day} {...show} />
+      </div>
+
+      {/* One sheet per day: they hang side by side on a canteen wall, so each
+          says for itself whose kitchen and which week it is. */}
+      <div className="hidden print:block">
+        {printing &&
+          week.days.map((printDay, index) => (
+          <section
+            key={printDay.date}
+            className={index > 0 ? 'break-before-page' : undefined}
+          >
+            <div className="mb-8 flex items-center justify-between gap-4 border-b border-border pb-4">
+              {/* Eager: a lazy image inside a `display:none` subtree would still
+                  be loading when the browser takes its print snapshot. */}
+              <Logo logo={logo} height={96} loading="eager" priority="high" className="max-w-80!" />
+              <p className="text-sm text-muted-foreground">
+                Uge {week.week} · {span}
+              </p>
+            </div>
+            <p className="mb-6 font-heading text-3xl font-semibold leading-tight">
+              {printDay.weekday}
+              <span className="ml-3 text-lg font-normal text-muted-foreground">
+                {printDay.dayLabel}
+              </span>
+            </p>
+            <DayPanel day={printDay} {...show} />
+          </section>
+        ))}
       </div>
     </>,
   )
 }
 
-/** A quiet page-turn beside the dateline. Disabled at the ends, honestly: there
- *  is no week beyond the ones the kitchen published. */
+/** Shape shared by the card's round controls, so the ring is stated once. */
+const cardControl =
+  'flex size-9 shrink-0 select-none items-center justify-center rounded-full transition-colors sm:size-10 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ring/20'
+
+/**
+ * Print the menu — customers put the week up in their own canteen. It is also
+ * what asks the card to build its sheet in the first place.
+ */
+const PrintButton: React.FC<{ onPrint: () => void }> = ({ onPrint }) => (
+  <button
+    type="button"
+    onClick={onPrint}
+    className={cn(
+      cardControl,
+      'cursor-pointer border border-border text-muted-foreground',
+      'hover:border-primary hover:text-primary',
+    )}
+  >
+    <Printer aria-hidden className="size-4" />
+    <span className="sr-only">Print ugens menu</span>
+  </button>
+)
+
+/** A quiet page-turn beside the dateline and the day rail. Disabled at the
+ *  ends, honestly: there is nothing beyond what the kitchen published. */
 const PageTurn: React.FC<{
   direction: 'previous' | 'next'
   disabled: boolean
@@ -427,11 +556,18 @@ const PageTurn: React.FC<{
     disabled={disabled}
     aria-label={label}
     className={cn(
-      'rounded-sm px-2 py-1 text-lg leading-none text-muted-foreground transition-colors',
-      'focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ring/20',
-      disabled ? 'cursor-default opacity-25' : 'hover:text-primary',
+      // No standing border, unlike the print button: four ringed arrows fought
+      // the card's quiet. The surface appears under the cursor instead.
+      cardControl,
+      disabled
+        ? 'cursor-default text-muted-foreground/25'
+        : 'cursor-pointer text-foreground hover:bg-foreground/5 hover:text-primary',
     )}
   >
-    <span aria-hidden>{direction === 'previous' ? '‹' : '›'}</span>
+    {direction === 'previous' ? (
+      <ChevronLeft aria-hidden className="size-4" />
+    ) : (
+      <ChevronRight aria-hidden className="size-4" />
+    )}
   </button>
 )
