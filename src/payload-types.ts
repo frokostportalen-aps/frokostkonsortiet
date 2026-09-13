@@ -1169,7 +1169,7 @@ export interface PlanPickerBlock {
          */
         priceLabel?: string | null;
         /**
-         * Hvor "Læs mere"-knappen fører hen, fx "/frokost-ud-af-huset".
+         * Hvor "Læs mere"-knappen fører hen, fx "/frokostordning".
          */
         url: string;
         id?: string | null;

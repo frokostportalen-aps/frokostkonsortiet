@@ -79,7 +79,7 @@ export const PlanPicker: Block = {
           required: true,
           label: 'Link',
           admin: {
-            description: 'Hvor "Læs mere"-knappen fører hen, fx "/frokost-ud-af-huset".',
+            description: 'Hvor "Læs mere"-knappen fører hen, fx "/frokostordning".',
           },
         },
       ],

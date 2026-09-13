@@ -2,7 +2,7 @@ import type { TenantDef } from '../types'
 import { folderOf } from '../dir'
 import { menu } from './menu'
 import { home } from './pages/home'
-import { frokostUdAfHuset } from './pages/frokost-ud-af-huset'
+import { frokostordning } from './pages/frokostordning'
 import { ugensMenu } from './pages/ugens-menu'
 import { faqPage } from './pages/faq'
 
@@ -21,10 +21,10 @@ export const fraJorden: TenantDef = {
   domains: ['frajorden.localhost', 'frajorden.dk', 'new.frajorden.dk'],
   listingLine: 'Fra jorden til jeres frokostbord',
   tagline: 'Fra jorden til bordet',
-  headerCta: { label: 'Få et tilbud', url: '/frokost-ud-af-huset#tilbud' },
+  headerCta: { label: 'Få et tilbud', url: '/frokostordning#tilbud' },
   dir: folderOf(import.meta.url),
   contactEmail: 'frokost@frajorden.dk',
-  pages: [home, frokostUdAfHuset, ugensMenu, faqPage],
+  pages: [home, frokostordning, ugensMenu, faqPage],
   posts: [],
   menu,
 }

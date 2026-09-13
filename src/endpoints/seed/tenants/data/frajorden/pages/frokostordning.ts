@@ -21,9 +21,9 @@ import {
  * question: numbers where the input gives numbers, no sentence repeated
  * anywhere else on the site.
  */
-export const frokostUdAfHuset: PageFactory = ({ tenantID, img, tilbudsFormID }) => ({
+export const frokostordning: PageFactory = ({ tenantID, img, tilbudsFormID }) => ({
   title: 'Frokostordning',
-  slug: 'frokost-ud-af-huset',
+  slug: 'frokostordning',
   _status: 'published',
   tenant: tenantID,
   // Samme brand-lockup som forsiden — layoutet viser fanen med den samme hero —
@@ -31,7 +31,7 @@ export const frokostUdAfHuset: PageFactory = ({ tenantID, img, tilbudsFormID }) 
   // brandmærket (en paragraf), og sidens navn står som h1 på linjen under, så
   // siden har sit eget emne i sin vigtigste overskrift.
   hero: hero.high(
-    img('frokost-ud-af-huset'),
+    img('frokostordning'),
     richText(p('Fra jorden'), heading('h1', 'Frokostordning')),
   ),
   layout: [
@@ -268,6 +268,6 @@ export const frokostUdAfHuset: PageFactory = ({ tenantID, img, tilbudsFormID }) 
     title: 'Frokostordning',
     description:
       'Frokost lavet fra bunden samme morgen og stillet frem inden kl. 11.30. 67 kr. pr. kuvert, minimum 15 medarbejdere – levering, opstilling og afhentning inkluderet.',
-    image: img('frokost-ud-af-huset'),
+    image: img('frokostordning'),
   },
 })

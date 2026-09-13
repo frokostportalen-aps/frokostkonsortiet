@@ -56,7 +56,7 @@ export const ugensMenu: PageFactory = ({ tenantID, img }) => ({
           'Vi kommer gerne forbi med frokost til hele huset en dag, I vælger, så I kan smage maden, før I beslutter jer.',
         ),
       ),
-      [customLink('Se frokostordningen', '/frokost-ud-af-huset'), customLink('Spørgsmål og svar', '/faq', 'outline')],
+      [customLink('Se frokostordningen', '/frokostordning'), customLink('Spørgsmål og svar', '/faq', 'outline')],
     ),
   ],
   meta: {

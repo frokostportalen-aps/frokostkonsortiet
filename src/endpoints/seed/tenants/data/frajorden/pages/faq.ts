@@ -59,8 +59,8 @@ export const faqPage: PageFactory = ({ tenantID, img }) => ({
         p('Skriv jeres spørgsmål i formularen, så svarer vi samme hverdag.'),
       ),
       [
-        customLink('Få et tilbud', '/frokost-ud-af-huset#tilbud'),
-        customLink('Se frokostordningen', '/frokost-ud-af-huset', 'outline'),
+        customLink('Få et tilbud', '/frokostordning#tilbud'),
+        customLink('Se frokostordningen', '/frokostordning', 'outline'),
       ],
     ),
   ],

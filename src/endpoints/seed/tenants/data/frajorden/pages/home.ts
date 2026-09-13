@@ -129,7 +129,7 @@ export const home: PageFactory = ({ tenantID, img }) => ({
           'Ingen login, ingen mailkorrespondance. Klik dig gennem ugen og se præcis, hvad der bliver serveret – inklusive allergener og klimaaftryk pr. kilo.',
         ),
       ),
-      [customLink('Se ugens menu', '/frokost-ud-af-huset', 'outline')],
+      [customLink('Se ugens menu', '/ugens-menu', 'outline')],
       'Ugens menu',
     ),
     // Kundecitater. ⚠️ KUN DET FØRSTE CITAT ER ÆGTE — Hanne Damgaard / Børns
@@ -173,8 +173,8 @@ export const home: PageFactory = ({ tenantID, img }) => ({
       'Kundecitater',
     ),
     cta(richText(heading('h3', 'Vil I smage, før I beslutter jer?')), [
-      customLink('Få et tilbud', '/frokost-ud-af-huset#tilbud'),
-      customLink('Book en smagning', '/frokost-ud-af-huset#tilbud', 'outline'),
+      customLink('Få et tilbud', '/frokostordning#tilbud'),
+      customLink('Book en smagning', '/frokostordning#tilbud', 'outline'),
     ]),
   ],
   meta: {
