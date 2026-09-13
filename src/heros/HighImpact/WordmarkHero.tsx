@@ -26,7 +26,7 @@ import { HeroLinks, HeroPhoto } from './shared'
  * first paragraph the subline (falling back to the site's tagline). It wants a
  * *short* headline — the brand name, not a sentence.
  */
-export const WordmarkHero: React.FC<HeroProps> = ({ links, media, richText, dialect }) => {
+export const WordmarkHero: React.FC<HeroProps> = ({ links, media, richText, tagline }) => {
   // A banner, not an overlay: the header keeps the ambient theme above it.
   useHeaderThemeSync(null)
 
@@ -34,7 +34,7 @@ export const WordmarkHero: React.FC<HeroProps> = ({ links, media, richText, dial
   // heading — a front page leads with the brand name, a section page with its
   // own subject. See `heroLockup`.
   const { wordmark, subline: sublineText, headingIsSubline } = heroLockup(richText)
-  const subline = sublineText || dialect?.tagline || ''
+  const subline = sublineText || tagline || ''
 
   // The tag follows the content, not the size: on a page whose subject is the
   // small line, that line is the h1 and the lockup above it is a brand mark.

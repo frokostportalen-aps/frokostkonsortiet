@@ -51,7 +51,7 @@ export const partnere: PageFactory = ({ tenantID, img, tenants, siteUrl }) => {
               'oneThird',
               { type: 'custom', appearance: 'default', label: `Besøg ${k.name}`, url: siteUrl(k.slug), newTab: false },
               heading('h3', k.name),
-              p(k.tagline),
+              p(k.listingLine),
             ),
           ),
         ],

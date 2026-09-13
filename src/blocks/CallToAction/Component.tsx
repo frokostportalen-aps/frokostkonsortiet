@@ -8,15 +8,24 @@ import { CMSLink } from '@/components/Link'
 import { Eyebrow } from '@/components/Eyebrow'
 import { signatureMarkClass } from '@/components/SignatureMark'
 
-type Props = CTABlockProps & { tenantSlug?: string }
+type Props = CTABlockProps & {
+  tenantSlug?: string
+  /** The site's standing line, resolved server-side (editor's, else the theme's). */
+  siteTagline?: string
+}
 
 /**
  * The closing statement band: the tenant's primary colour at full strength, so
  * the page ends on brand instead of fading out. Buttons are forced to the
  * light `secondary` treatment for contrast against the dark panel.
  */
-export const CallToActionBlock: React.FC<Props> = ({ links, richText, tenantSlug }) => {
-  const { tagline, eyebrow, signature } = getDialect(tenantSlug)
+export const CallToActionBlock: React.FC<Props> = ({
+  links,
+  richText,
+  tenantSlug,
+  siteTagline: tagline,
+}) => {
+  const { eyebrow, signature } = getDialect(tenantSlug)
   return (
     <div className="container">
       {/* The inner padding follows the site's text inset, so the band's copy

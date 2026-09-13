@@ -57,9 +57,10 @@ export async function Footer({ tenantSlug }: { tenantSlug: string }) {
           <Link href="/">
             <Logo logo={brand.logo} />
           </Link>
-          {dialect.tagline && (
+          {/* The editor's line (Brand → Slogan), falling back to the registry's. */}
+          {brand.tagline && (
             <p className="max-w-xs text-sm leading-relaxed text-muted-foreground">
-              {dialect.tagline}
+              {brand.tagline}
             </p>
           )}
           <span aria-hidden className={`block ${signatureMarkClass.footer[dialect.signature]}`} />

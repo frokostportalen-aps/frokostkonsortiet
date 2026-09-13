@@ -5,10 +5,11 @@ import { revalidateBrand } from './hooks/revalidateBrand'
 
 /**
  * A tenant-scoped global (one document per tenant, enforced by the multi-tenant
- * plugin's `isGlobal` option) holding a site's visual identity: its logo, an
- * optional light-on-dark logo variant, and an optional favicon. Kept separate
+ * plugin's `isGlobal` option) holding a site's own identity: its logo, an
+ * optional light-on-dark variant, a favicon, and the standing line its pages
+ * carry above their headings. Kept separate
  * from Header (navigation) and from the code-based theme (colours/typography),
- * so a site's own editors manage the brand assets while the design system stays
+ * so a site's own editors manage what is theirs while the design system stays
  * in code.
  *
  * Every field is optional — a site with nothing uploaded falls back to its text
@@ -50,6 +51,15 @@ export const Brand: CollectionConfig = {
       admin: {
         description:
           'Fanebladsikon. Brug en kvadratisk PNG/SVG. Uden favicon genereres et bogstavmærke ud fra temaets farver.',
+      },
+    },
+    {
+      name: 'tagline',
+      type: 'text',
+      label: 'Slogan',
+      admin: {
+        description:
+          'Den korte linje over overskriften på sitets sider – fx "Siden 1980 · sæsonens køkken". Står feltet tomt, bruges sitets standardlinje fra temaet.',
       },
     },
   ],

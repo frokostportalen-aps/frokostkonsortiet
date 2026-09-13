@@ -10,7 +10,7 @@
  *   • palette + surfaces  – injected as CSS variables by `TenantTheme`
  *   • typography          – see `themes/fonts.ts`
  *   • shape (radius)      – injected as `--radius`
- *   • personality         – `eyebrow` / `heroVariant` / `signature` / `tagline`,
+ *   • personality         – `eyebrow` / `heroVariant` / `signature`,
  *                           resolved as a site's *dialect* (see `themes/dialect.ts`)
  *
  * Colour values accept any CSS colour (oklch, hex, …). Brand colours
@@ -143,15 +143,11 @@ export type ThemeVars = {
   faviconFamily?: 'serif' | 'sans-serif'
 
   // ── personality (read by components, not injected as CSS) ──────────────────
-  /** A short brand line shown as the hero eyebrow, e.g. "Siden 1980". */
-  tagline?: string
   eyebrow?: EyebrowStyle
   chrome?: Chrome
   heroVariant?: HeroVariant
   signature?: Signature
   testimonials?: TestimonialsVariant
-  /** The site's standing call-to-action, shown as a button in the header. */
-  headerCta?: { label: string; url: string }
   /**
    * The `wordmark` hero's brand panel. Unlike the ambient surfaces these hold
    * in *both* modes — the panel is a fixed brand surface, so its own text
@@ -209,11 +205,9 @@ export const tenantThemes: Record<string, ThemeVars> = {
     radius: '0.5rem',
     heroTheme: 'dark',
     logo: { text: 'Frokost Konsortiet' },
-    tagline: 'Ét fællesskab af køkkener',
     eyebrow: 'uppercase',
     heroVariant: 'overlay',
     signature: 'block',
-    headerCta: { label: 'Kontakt os', url: '/kontakt' },
   },
 
   // ── Smagssans — refined editorial bistro. Deep dusty blue-green + warm cream,
@@ -245,11 +239,9 @@ export const tenantThemes: Record<string, ThemeVars> = {
     heroTheme: 'dark',
     logo: { text: 'Smagssans' },
     faviconFamily: 'serif',
-    tagline: 'Siden 1980 · sæsonens køkken',
     eyebrow: 'smallcaps',
     heroVariant: 'split',
     signature: 'rule',
-    headerCta: { label: 'Få et tilbud', url: '/om-os#tilbud' },
   },
 
   // ── Fra Jorden — the palette Audryn specifies, taken from the logo: sand
@@ -301,7 +293,6 @@ export const tenantThemes: Record<string, ThemeVars> = {
     // A round badge with type around its edge: it needs the height to be read.
     logo: { text: 'Fra Jorden', displayHeight: 56 },
     faviconFamily: 'serif',
-    tagline: 'Fra jorden til bordet',
     eyebrow: 'uppercase',
     // The round logo is drawn for light backgrounds, so header and footer stay
     // light in both modes — and the header is opaque, so nothing tucks under it.
@@ -312,7 +303,6 @@ export const tenantThemes: Record<string, ThemeVars> = {
     // dem én ad gangen med pile: læseren skal nå at læse hver enkelt færdig.
     testimonials: 'carousel',
     // Tilbudsformularen bor på Frokostordning-siden — om-os findes ikke længere.
-    headerCta: { label: 'Få et tilbud', url: '/frokost-ud-af-huset#tilbud' },
     // Warm olive-slate scrim so the hero photo reads earthy, not neutral black.
     heroScrim: '28% 0.02 82',
   },

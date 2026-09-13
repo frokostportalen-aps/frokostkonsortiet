@@ -7,7 +7,8 @@ import { revalidateHeader } from './hooks/revalidateHeader'
 /**
  * Formerly a global. Now a tenant-scoped collection (one document per tenant,
  * enforced by the multi-tenant plugin's `isGlobal` option) so each site has its
- * own navigation. The plugin hides the list view and injects the `tenant` field.
+ * own navigation and its own standing call-to-action. The plugin hides the list
+ * view and injects the `tenant` field.
  */
 export const Header: CollectionConfig = {
   slug: 'header',
@@ -77,6 +78,30 @@ export const Header: CollectionConfig = {
           RowLabel: '@/Header/RowLabel#RowLabel',
         },
       },
+    },
+    {
+      type: 'row',
+      fields: [
+        {
+          name: 'ctaLabel',
+          type: 'text',
+          label: 'Knap i menuen',
+          admin: {
+            width: '50%',
+            description:
+              'Teksten på sitets faste knap i menulinjen – fx "Få et tilbud". Står feltet tomt, bruges sitets standardknap.',
+          },
+        },
+        {
+          name: 'ctaUrl',
+          type: 'text',
+          label: 'Knappens link',
+          admin: {
+            width: '50%',
+            description: 'Hvor knappen fører hen, fx "/kontakt" eller "/om-os#tilbud".',
+          },
+        },
+      ],
     },
   ],
   hooks: {

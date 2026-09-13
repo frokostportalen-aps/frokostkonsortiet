@@ -14,6 +14,8 @@ export type TenantBrand = {
   logo: TenantLogo
   /** A favicon URL (uploaded image or the generated letter-mark data URI). */
   favicon: string | null
+  /** The standing line the heroes carry above their headings, if the site has one. */
+  tagline?: string
 }
 
 /** A populated upload field → its cache-busted media URL (or undefined). */
@@ -32,6 +34,9 @@ const mediaUrl = (value: Media | string | null | undefined): string | undefined 
  *
  *   favicon → uploaded image
  *           → the generated letter-mark from the theme colours
+ *
+ * The tagline has no such chain: the CMS owns it outright. A site whose editors
+ * have emptied the field shows no line, which is what they asked for.
  *
  * So a site always has something to show, whether or not its editors have
  * uploaded anything.
@@ -76,6 +81,7 @@ export const resolveTenantBrand = cache(async (tenantSlug: string): Promise<Tena
       { ...registry, ...(srcDark ? { srcDark } : {}), text }
 
   const favicon = mediaUrl(brand?.favicon) ?? getTenantFavicon(tenantSlug)
+  const tagline = brand?.tagline?.trim() || undefined
 
-  return { logo, favicon }
+  return { logo, favicon, tagline }
 })

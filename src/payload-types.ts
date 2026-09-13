@@ -1270,6 +1270,14 @@ export interface Header {
         id?: string | null;
       }[]
     | null;
+  /**
+   * Teksten på sitets faste knap i menulinjen – fx "Få et tilbud". Står feltet tomt, bruges sitets standardknap.
+   */
+  ctaLabel?: string | null;
+  /**
+   * Hvor knappen fører hen, fx "/kontakt" eller "/om-os#tilbud".
+   */
+  ctaUrl?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1322,6 +1330,10 @@ export interface Brand {
    * Fanebladsikon. Brug en kvadratisk PNG/SVG. Uden favicon genereres et bogstavmærke ud fra temaets farver.
    */
   favicon?: (string | null) | Media;
+  /**
+   * Den korte linje over overskriften på sitets sider – fx "Siden 1980 · sæsonens køkken". Står feltet tomt, bruges sitets standardlinje fra temaet.
+   */
+  tagline?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -2232,6 +2244,8 @@ export interface HeaderSelect<T extends boolean = true> {
             };
         id?: T;
       };
+  ctaLabel?: T;
+  ctaUrl?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -2267,6 +2281,7 @@ export interface BrandSelect<T extends boolean = true> {
   logo?: T;
   logoDark?: T;
   favicon?: T;
+  tagline?: T;
   updatedAt?: T;
   createdAt?: T;
 }

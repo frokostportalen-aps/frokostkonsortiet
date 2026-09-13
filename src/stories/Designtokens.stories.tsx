@@ -170,7 +170,6 @@ const Tokens: React.FC<{ tenant: string }> = ({ tenant }) => {
             ['eyebrow', dialect.eyebrow, 'Hvordan den lille linje over overskriften sættes'],
             ['signature', dialect.signature, 'Sitets gentagne grafiske markør'],
             ['chrome', dialect.chrome, 'Hvordan header og footer er klædt'],
-            ['tagline', dialect.tagline ?? '—', 'Brandlinjen, bl.a. som fallback i wordmark-heroen'],
           ].map(([k, v, note]) => (
             <React.Fragment key={k}>
               <dt className="opacity-70 font-mono text-xs pt-0.5">{k}</dt>

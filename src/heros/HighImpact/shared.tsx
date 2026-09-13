@@ -15,6 +15,8 @@ import { cn } from '@/utilities/ui'
 export type HeroProps = Page['hero'] & {
   heroTheme?: 'light' | 'dark'
   dialect?: Dialect
+  /** The site's standing line, resolved from the CMS by the page. */
+  tagline?: string
 }
 
 /**

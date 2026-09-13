@@ -14,8 +14,12 @@ export async function Header({ tenantSlug }: { tenantSlug: string }) {
     resolveTenantBrand(tenantSlug),
   ])
 
-  // Resolved server-side so the theme registry stays out of the client bundle.
-  const cta = getTenantTheme(tenantSlug)?.headerCta
+  // Both halves or nothing: a label with no destination is a button that goes
+  // nowhere. The CMS owns this outright — an empty pair means no button.
+  const cta =
+    headerData?.ctaLabel && headerData?.ctaUrl
+      ? { label: headerData.ctaLabel, url: headerData.ctaUrl }
+      : undefined
   const brandChrome = getDialect(tenantSlug).chrome === 'brand'
 
   return (

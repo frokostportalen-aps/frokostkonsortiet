@@ -257,7 +257,7 @@ export async function seedTenants(payload: Payload, opts: SeedOptions = {}): Pro
     slug: t.slug,
     isMain: t.isMain,
     domains: t.domains,
-    tagline: t.tagline,
+    listingLine: t.listingLine,
   }))
   // Absolute URL to another tenant's site (env-aware), for cross-site links.
   const tenantBySlug = new Map(TENANTS.map((t) => [t.slug, t]))
@@ -473,12 +473,22 @@ export async function seedTenants(payload: Payload, opts: SeedOptions = {}): Pro
     // favicon then falls back to the generated letter-mark.
     const { header, footer } = t.menu(pageCtx)
     const globals = {
-      header: { navItems: header },
+      header: {
+        navItems: header,
+        // Written like the navigation above, so `--force` resets the whole
+        // global rather than half of it.
+        ctaLabel: t.headerCta?.label ?? null,
+        ctaUrl: t.headerCta?.url ?? null,
+      },
       footer: { navItems: footer },
       brand: {
         logo: images['logo'] ?? null,
         logoDark: images['logo-dark'] ?? null,
         favicon: images['favicon'] ?? null,
+        // Written like the assets above, so `--force` means one thing for the
+        // whole global: an editor's line is restored to the site's own, not
+        // silently kept while their logo is replaced.
+        tagline: t.tagline,
       },
     } as const
     for (const collection of ['header', 'footer', 'brand'] as const) {

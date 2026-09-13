@@ -11,6 +11,7 @@ import { RenderBlocks } from '@/blocks/RenderBlocks'
 import { RenderHero } from '@/heros/RenderHero'
 import { getTenantTheme } from '@/themes/tenantThemes'
 import { getDialect } from '@/themes/dialect'
+import { resolveTenantBrand } from '@/themes/resolveTenantBrand'
 import { findPageBySlug } from '@/data/tenantContent'
 import { generateMeta } from '@/utilities/generateMeta'
 import PageClient from './page.client'
@@ -68,6 +69,9 @@ export default async function Page({ params: paramsPromise }: Args) {
   }
 
   const { hero, layout } = page
+  // The site's standing line. Cached alongside the layout's own call, so this
+  // adds no query.
+  const brand = await resolveTenantBrand(tenant)
 
   // No top padding here: each hero owns the space above it — the overlay pulls
   // up behind the header, the wordmark band runs edge to edge, and the rest set
@@ -89,8 +93,9 @@ export default async function Page({ params: paramsPromise }: Args) {
         {...hero}
         heroTheme={getTenantTheme(tenant)?.heroTheme}
         dialect={getDialect(tenant)}
+        tagline={brand.tagline}
       />
-      <RenderBlocks blocks={layout} tenantSlug={tenant} />
+      <RenderBlocks blocks={layout} tenantSlug={tenant} siteTagline={brand.tagline} />
     </article>
   )
 }
