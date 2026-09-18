@@ -76,6 +76,24 @@ export const list = (items: string[]): Node => ({
   version: 1,
 })
 
+/** An embedded block, the shape `BlocksFeature` stores in the editor. */
+export const block = (fields: Record<string, unknown>): Node => ({
+  type: 'block',
+  fields,
+  format: '',
+  version: 2,
+})
+
+/** The section header an editor can insert in a Content column. */
+export const sectionHeader = (title: string, eyebrow?: string): Node =>
+  block({ blockType: 'sectionHeader', heading: title, eyebrow })
+
+/** Set a node's alignment, as the editor's align buttons do. */
+export const align = <T extends Node>(
+  node: T,
+  format: 'center' | 'justify' | 'left' | 'right',
+): T => ({ ...node, format })
+
 /** Wrap children in a Lexical root (the value stored on a richText field). */
 export const richText = (...children: Node[]) => ({
   root: {
