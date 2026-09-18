@@ -7,6 +7,7 @@ import type { ContentBlock as ContentBlockProps } from '@/payload-types'
 import type { Signature } from '@/themes/dialect'
 
 import { getDialect } from '@/themes/dialect'
+import { hasSectionHeader } from '@/utilities/lexicalText'
 import { CMSLink } from '../../components/Link'
 import { Media } from '@/components/Media'
 import { SignatureCard } from '@/components/SignatureCard'
@@ -46,9 +47,10 @@ export const ContentBlock: React.FC<Props> = ({ background, columns, tenantSlug 
         const span = colsSpanClasses[size ?? 'full']
 
         // Full-width: prose. The first one, when it introduces cards, is the
-        // section header and gets the motif rule.
+        // section header and gets the motif rule — unless the editor inserted a
+        // section header of their own, which already carries one.
         if (size === 'full' || !size) {
-          const isSectionHeader = hasCards && index === 0
+          const isSectionHeader = hasCards && index === 0 && !hasSectionHeader(richText)
           return (
             <div className="prose-inset col-span-4 lg:col-span-12" key={index}>
               {richText && (

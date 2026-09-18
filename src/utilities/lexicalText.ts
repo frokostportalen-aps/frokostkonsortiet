@@ -1,5 +1,5 @@
 /**
- * Plain-text reads of a Lexical rich-text value.
+ * Reads of a Lexical rich-text value that a layout needs before it renders.
  *
  * Layouts that need the *words* rather than the markup — a hero that sets its
  * headline as a two-tone wordmark, say — can't render `<RichText>`: they have to
@@ -12,6 +12,7 @@ type LexicalNode = {
   type?: string
   tag?: string
   text?: string
+  fields?: { blockType?: string }
   children?: LexicalNode[]
 }
 
@@ -40,6 +41,12 @@ const rootOf = (data: unknown): LexicalNode | null => {
   const root = (data as { root?: unknown } | null | undefined)?.root
   return isNode(root) ? root : null
 }
+
+/** Whether the editor inserted a section header block into the value. */
+export const hasSectionHeader = (data: unknown): boolean =>
+  (rootOf(data)?.children ?? []).some(
+    (n) => n.type === 'block' && n.fields?.blockType === 'sectionHeader',
+  )
 
 /** Text of the first heading with `tag` (default `h1`), or '' when there is none. */
 export const headingText = (data: unknown, tag: 'h1' | 'h2' | 'h3' | 'h4' = 'h1'): string => {
