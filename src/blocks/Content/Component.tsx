@@ -34,7 +34,7 @@ const colsSpanClasses = {
  * look the same whether they stand on the page or on a picture.
  */
 export const ContentBlock: React.FC<Props> = ({ background, columns, tenantSlug }) => {
-  const { signature } = getDialect(tenantSlug)
+  const { eyebrow: eyebrowStyle, signature } = getDialect(tenantSlug)
   const cols = columns ?? []
   const hasCards = cols.some((c) => c.size && c.size !== 'full')
   const onPhoto = Boolean(background && typeof background === 'object')
@@ -56,6 +56,7 @@ export const ContentBlock: React.FC<Props> = ({ background, columns, tenantSlug 
                   className={cn(onPhoto && 'prose-invert')}
                   data={richText}
                   enableGutter={false}
+                  eyebrowStyle={eyebrowStyle}
                 />
               )}
               {isSectionHeader && (
@@ -83,9 +84,21 @@ export const ContentBlock: React.FC<Props> = ({ background, columns, tenantSlug 
                   // flex column: auto margins there make the block shrink to its
                   // content and centre, so a card with short copy sat indented
                   // beside its neighbours.
-                  className="w-full [&_h3]:mt-0 [&_h3]:mb-3 [&_h3]:text-xl [&_p]:text-muted-foreground"
+                  //
+                  // `h2` is tamed alongside `h3` because an inserted section
+                  // header brings the full display scale with it, which is a
+                  // page-width size inside a card.
+                  //
+                  // The paragraph rule is a child selector, not a descendant
+                  // one: an inserted section header's eyebrow is a `<p>` too,
+                  // and a descendant rule (0,1,1) outweighs its own
+                  // `text-primary` (0,1,0) — dimming the one line that carries
+                  // the brand colour. Body copy is a direct child; the eyebrow
+                  // is not.
+                  className="w-full [&_h2]:text-xl [&_h3]:mt-0 [&_h3]:mb-3 [&_h3]:text-xl [&>p]:text-muted-foreground"
                   data={richText}
                   enableGutter={false}
+                  eyebrowStyle={eyebrowStyle}
                 />
               )}
               {enableLink && (

@@ -1,5 +1,6 @@
 import type { TextFieldSingleValidation } from 'payload'
 import {
+  AlignFeature,
   BoldFeature,
   ItalicFeature,
   LinkFeature,
@@ -12,6 +13,12 @@ import {
 export const defaultLexical = lexicalEditor({
   features: [
     ParagraphFeature(),
+    // Alignment lives at the root so every editor that spreads `rootFeatures`
+    // inherits it — one line instead of a copy in each block config. The stored
+    // format needs no renderer of its own: Payload's converter turns it into
+    // `text-align` on the element, for every node type, unless a caller passes
+    // `disableTextAlign`.
+    AlignFeature(),
     UnderlineFeature(),
     BoldFeature(),
     ItalicFeature(),
