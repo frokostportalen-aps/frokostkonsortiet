@@ -5,6 +5,9 @@
  * a shared module: Storybook documents the components and must not depend on
  * the seed, which is content the client owns and may move or delete.
  *
+ * The int tests build their fixtures on this copy too, so it has a consumer
+ * outside Storybook.
+ *
  * Keep the two in step by copying, not by importing. Both are closed
  * descriptions of a node shape that Payload fixes — and if that shape ever
  * changes, the site's own RichText renderer breaks first and loudly.
