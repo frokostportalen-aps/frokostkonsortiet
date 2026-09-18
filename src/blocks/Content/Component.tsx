@@ -85,13 +85,17 @@ export const ContentBlock: React.FC<Props> = ({ background, columns, tenantSlug 
                   // content and centre, so a card with short copy sat indented
                   // beside its neighbours.
                   //
+                  // `h2` is tamed alongside `h3` because an inserted section
+                  // header brings the full display scale with it, which is a
+                  // page-width size inside a card.
+                  //
                   // The paragraph rule is a child selector, not a descendant
                   // one: an inserted section header's eyebrow is a `<p>` too,
                   // and a descendant rule (0,1,1) outweighs its own
                   // `text-primary` (0,1,0) — dimming the one line that carries
                   // the brand colour. Body copy is a direct child; the eyebrow
                   // is not.
-                  className="w-full [&_h3]:mt-0 [&_h3]:mb-3 [&_h3]:text-xl [&>p]:text-muted-foreground"
+                  className="w-full [&_h2]:text-xl [&_h3]:mt-0 [&_h3]:mb-3 [&_h3]:text-xl [&>p]:text-muted-foreground"
                   data={richText}
                   enableGutter={false}
                   eyebrowStyle={eyebrowStyle}
