@@ -16,6 +16,11 @@ import { cn } from '@/utilities/ui'
  * half of the title rather than a sentence, so it takes the site's own eyebrow
  * casing and stays out of the intro, which is running text.
  *
+ * `not-prose` because the component sets its own rhythm: dropped into a rich
+ * text — where an editor can now insert one — prose would otherwise stack its
+ * heading and paragraph margins on top of `mb-10`/`mt-3`. It generates no CSS
+ * of its own, so it is inert for the band blocks that sit outside prose.
+ *
  * Colour is inherited. A header on a coloured band would otherwise need to be
  * told which foreground to use, and the caller would have to keep that in sync
  * with the band's own — which is how a band on the eco colour ended up printing
@@ -38,7 +43,7 @@ export const SectionHeader: React.FC<{
   if (!heading && !intro && !eyebrow) return null
 
   return (
-    <div className={cn('mb-10 text-center', className)}>
+    <div className={cn('mb-10 text-center not-prose', className)}>
       {heading && <h2 className="section-heading font-semibold">{heading}</h2>}
       {eyebrow && (
         <Eyebrow style={eyebrowStyle} className="mt-3 justify-center">

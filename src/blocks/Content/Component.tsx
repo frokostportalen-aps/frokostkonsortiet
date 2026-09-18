@@ -34,7 +34,7 @@ const colsSpanClasses = {
  * look the same whether they stand on the page or on a picture.
  */
 export const ContentBlock: React.FC<Props> = ({ background, columns, tenantSlug }) => {
-  const { signature } = getDialect(tenantSlug)
+  const { eyebrow: eyebrowStyle, signature } = getDialect(tenantSlug)
   const cols = columns ?? []
   const hasCards = cols.some((c) => c.size && c.size !== 'full')
   const onPhoto = Boolean(background && typeof background === 'object')
@@ -56,6 +56,7 @@ export const ContentBlock: React.FC<Props> = ({ background, columns, tenantSlug 
                   className={cn(onPhoto && 'prose-invert')}
                   data={richText}
                   enableGutter={false}
+                  eyebrowStyle={eyebrowStyle}
                 />
               )}
               {isSectionHeader && (
@@ -86,6 +87,7 @@ export const ContentBlock: React.FC<Props> = ({ background, columns, tenantSlug 
                   className="w-full [&_h3]:mt-0 [&_h3]:mb-3 [&_h3]:text-xl [&_p]:text-muted-foreground"
                   data={richText}
                   enableGutter={false}
+                  eyebrowStyle={eyebrowStyle}
                 />
               )}
               {enableLink && (
