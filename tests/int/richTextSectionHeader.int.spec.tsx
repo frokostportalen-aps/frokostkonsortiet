@@ -44,6 +44,40 @@ describe('RichText section header block', () => {
     expect(container.querySelector('.uppercase')).toBeNull()
   })
 
+  // The card in Content dims its paragraphs with a child selector, so that the
+  // rule cannot reach past the header's own wrapper and grey out the eyebrow.
+  it("keeps the eyebrow out of the rich text's own paragraph flow", () => {
+    const { container } = render(
+      <RichText
+        data={
+          {
+            root: {
+              type: 'root',
+              version: 1,
+              children: [
+                {
+                  type: 'block',
+                  version: 2,
+                  fields: { blockType: 'sectionHeader', heading: 'H', eyebrow: 'E' },
+                },
+                {
+                  type: 'paragraph',
+                  format: '',
+                  version: 1,
+                  children: [{ type: 'text', text: 'Br\u00f8dtekst', version: 1 }],
+                },
+              ],
+            },
+          } as unknown as DefaultTypedEditorState
+        }
+      />,
+    )
+    const root = container.firstElementChild!
+
+    const directParagraphs = [...root.children].filter((el) => el.tagName === 'P')
+    expect(directParagraphs.map((el) => el.textContent)).toEqual(['Br\u00f8dtekst'])
+  })
+
   it('sets the eyebrow under the heading, in spaced capitals by default', () => {
     const { container } = render(
       <RichText data={doc({ heading: 'Overskrift', eyebrow: 'Fire grunde' })} />,
