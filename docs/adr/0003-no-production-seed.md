@@ -55,6 +55,12 @@ their content, so these tools stay — they just lose production as a target.
   throws on the multi-host replica-set form (`mongodb://a:27017,b:27017/db`) —
   and a throw meant "no host", which meant "not production". A guard whose one
   job is never to touch production must not open because it failed to parse.
+- **Where the guard and the driver could disagree, the guard refuses.** With an
+  unescaped `@` in the credentials there is no reading that matches the driver
+  for every input: `mongodb://u:p@prod.example.net@localhost/db` connects to
+  prod.example.net, while `mongodb://u:p@ss@host/db` connects to `ss`, a piece
+  of the password. Such a URL is refused, and the refusal message names no host
+  rather than print part of a password.
 - **The prune scripts get the same guard**, in place of their old
   `--apply --yes` gate. It runs before `getPayload()`, so not even their
   read-only dry run connects to a live database. `prune-versions` could not have

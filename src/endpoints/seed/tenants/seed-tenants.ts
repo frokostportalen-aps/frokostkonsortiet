@@ -19,9 +19,14 @@ const PORT = 3000
 
 /**
  * Which of a tenant's domains the cross-site menu should link to: shared
- * policy from `utilities/tenantDomains`. A local seed links to the
- * `*.localhost` dev domains; a production seed sets `SEED_LINK_DOMAIN=public`
- * to link to the public `new.*` domains instead.
+ * policy from `utilities/tenantDomains`. The seed links to the `*.localhost`
+ * dev domains unless `SEED_LINK_DOMAIN=public` asks for the public `new.*`
+ * ones.
+ *
+ * That flag existed for the production seed, which is gone (ADR 0003), so
+ * nothing sets it today. It is kept for a local database whose content is
+ * meant to be read with public links — say, building a new site before its
+ * editors take over.
  */
 const preferPublicLinks = process.env.SEED_LINK_DOMAIN === 'public'
 

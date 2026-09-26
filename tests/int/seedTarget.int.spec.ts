@@ -63,6 +63,10 @@ describe('isProduction', () => {
       ],
       ['an unset url', ''],
       ['an unparsable url', 'not a url at all'],
+      // The driver reads the host after the FIRST @, so this one connects to
+      // prod.example.net while a last-@ parse would see "localhost".
+      ['an unescaped @ in the credentials', 'mongodb://u:p@prod.example.net@localhost/db'],
+      ['an unescaped @ in front of a remote host', 'mongodb://u:p@ss@prod.example.net/db'],
     ])('%s', (_name, url) => {
       expect(target(url)).toBe(true)
     })
@@ -110,5 +114,12 @@ describe('targetLabel', () => {
 
   it('says so when nothing is set', () => {
     expect(label('')).toBe('(DATABASE_URL not set)')
+  })
+
+  it('never prints a password fragment from an ambiguous url', () => {
+    const shown = label('mongodb://u:p@ss@prod.example.net/db')
+    expect(shown).not.toContain('ss@')
+    expect(shown).not.toContain(':p')
+    expect(shown).toContain('flertydig')
   })
 })

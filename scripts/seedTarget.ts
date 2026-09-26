@@ -29,11 +29,32 @@ const splitUrl = (url: string): { scheme: string; authority: string; tail: strin
   }
 }
 
-/** Every host in a connection string, credentials and ports stripped. */
-const dbHosts = (url: string): string[] => {
-  const authority = splitUrl(url)?.authority.split('@').pop()
-  if (!authority) return []
-  return authority
+/**
+ * The host part of an authority: what follows the FIRST `@`, the way the Mongo
+ * driver reads it. Returns null when the string is ambiguous, which means we
+ * must not guess — see `dbHosts`.
+ */
+const hostPart = (authority: string): string | null => {
+  const at = authority.indexOf('@')
+  const hosts = at === -1 ? authority : authority.slice(at + 1)
+  // A second `@` means the credentials carry an unescaped one. Verified against
+  // the installed driver: `mongodb://u:p@prod.example.net@localhost/db`
+  // connects to prod.example.net, and `mongodb://u:p@ss@host/db` connects to
+  // "ss" — a fragment of the password. Any rule we pick disagrees with the
+  // driver for some input, so refuse the string instead of reading it.
+  return hosts.includes('@') ? null : hosts
+}
+
+/**
+ * Every host in a connection string, credentials and ports stripped. Null means
+ * "could not read this safely", which the caller must treat as production.
+ */
+const dbHosts = (url: string): string[] | null => {
+  const authority = splitUrl(url)?.authority
+  if (!authority) return null
+  const hosts = hostPart(authority)
+  if (hosts === null) return null
+  return hosts
     .split(',')
     .map((host) => host.trim().replace(/:\d+$/, '').toLowerCase())
     .filter(Boolean)
@@ -47,7 +68,8 @@ const dbHosts = (url: string): string[] => {
 export const isProduction = (): boolean => {
   if (/production/i.test(process.env.DOTENV_CONFIG_PATH ?? '')) return true
   const hosts = dbHosts(process.env.DATABASE_URL ?? '')
-  return hosts.length === 0 || !hosts.every((host) => LOCAL_HOSTS.includes(host))
+  if (hosts === null || hosts.length === 0) return true
+  return !hosts.every((host) => LOCAL_HOSTS.includes(host))
 }
 
 /**
@@ -61,7 +83,11 @@ export const targetLabel = (): string => {
   if (!url) return '(DATABASE_URL not set)'
   const parts = splitUrl(url)
   if (!parts) return url
-  return `${parts.scheme}://${parts.authority.replace(/^[^@]*@/, '')}${parts.tail}`
+  const hosts = hostPart(parts.authority)
+  // Ambiguous: printing what follows the first `@` would put the tail of the
+  // password on screen, and what follows the last one would name a host the
+  // driver doesn't use. Name neither.
+  return `${parts.scheme}://${hosts ?? '(flertydig vært — uescaped @ i credentials)'}${parts.tail}`
 }
 
 /**

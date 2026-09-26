@@ -93,7 +93,9 @@ volume: `docker compose exec app pnpm seed:tenants`.
   No flag turns that off. It **fails closed**: the run is allowed only when
   *every* host in `DATABASE_URL` is local, so an empty, malformed or
   partly-remote connection string — or a `DOTENV_CONFIG_PATH` pointing at a
-  production env file — counts as production and is refused.
+  production env file — counts as production and is refused. A URL the Mongo
+  driver and the guard could read differently (an unescaped `@` in the
+  credentials) is refused rather than interpreted.
 
 **Post author:** the engine reuses an existing super-admin as the post author
 and only creates the dev `admin@example.com` user on a database with **no users
