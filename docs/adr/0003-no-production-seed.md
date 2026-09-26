@@ -1,4 +1,4 @@
-# 3. The seed never runs against production
+# 3. No script touches production
 
 - Status: Accepted
 - Date: 2026-09-26
@@ -26,13 +26,19 @@ sites. Two things follow.
    missing, so the next additive run puts it back. The seed's idea of what a
    site should contain is simply no longer the truth about the live sites.
 
+The same reasoning reaches further than the seed. `prune-media` deletes every
+media **no document references** — which is exactly what an image an editor
+uploaded yesterday and has not placed on a page yet looks like. It deletes the
+R2 object too, so that is the customer's own work, gone, with nothing to restore
+from. "Delete-only" is not the same as "not content".
+
 The seed is still how a fresh local database and a not-yet-handed-over site get
-their content, so it stays — it just loses production as a target.
+their content, so these tools stay — they just lose production as a target.
 
 ## Decision
 
-- **Remove the `seed:tenants:prod` script.** There is no supported command for
-  seeding production.
+- **Remove every `:prod` script** — `seed:tenants:prod`, `prune:media:prod` and
+  `prune:versions:prod`. No command in this repo points at production.
 - **`scripts/seed-tenants.ts` refuses any non-local database**, before opening
   Payload and regardless of flags. Pointing the local command at prod by hand is
   caught too — the check reads `DATABASE_URL` itself, not just which env file
@@ -48,17 +54,29 @@ their content, so it stays — it just loses production as a target.
   throws on the multi-host replica-set form (`mongodb://a:27017,b:27017/db`) —
   and a throw meant "no host", which meant "not production". A guard whose one
   job is never to touch production must not open because it failed to parse.
-- **The prune scripts are unchanged.** `prune:media:prod` and
-  `prune:versions:prod` keep their `--apply --yes` gate: they delete only what
-  no document references, which is a maintenance question, not a content one.
+- **The prune scripts get the same guard**, in place of their old
+  `--apply --yes` gate. It runs before `getPayload()`, so not even their
+  read-only dry run connects to a live database. `prune-versions` could not have
+  harmed live content — it only removes version rows whose parent is already
+  gone — but a rule with one exception is a rule people have to remember, and
+  the diagnostic value of pointing it at production did not pay for that.
 
 Content for a live site is now created in the admin panel, like any other
 editorial change.
 
 ## Consequences
 
-- **Editor content cannot be overwritten by us.** The failure mode ADR 0002
-  mitigated is removed rather than mitigated.
+- **Editor content cannot be damaged by us from a terminal.** The failure mode
+  ADR 0002 mitigated is removed rather than mitigated.
+- **Orphaned media accumulates in R2.** Nothing sweeps it on production any
+  more. That is a storage-cost question, and a small one; if it ever matters,
+  the answer is a job running inside the deployed app — where it can tell a
+  fresh upload from an orphan by asking how old it is — not a developer's laptop
+  pointed at the live bucket.
+- **The exception is user administration.** Creating or resetting a super-admin
+  still means running the Local API against the production database by hand.
+  That is an account operation, not content, and it stays a throwaway script
+  rather than a committed command.
 - **Changing a live site's seed data no longer changes the live site.** Editing
   a `PageFactory` affects local databases and new sites only; the corresponding
   change on a live site is a manual edit in the admin. Expect the seed data and

@@ -4,10 +4,11 @@ The seed turns plain TypeScript data into each site's pages, posts, media,
 header and footer. It is **additive by default** and lives in
 `src/endpoints/seed/tenants/`.
 
-> ⚠️ **The seed only runs against a local database.** Editors write the content
-> on the live sites, so nothing on production may be created or overwritten from
-> seed data — `pnpm seed:tenants:prod` is gone, and the script refuses any
-> non-local `DATABASE_URL`. See [ADR 0003](adr/0003-no-production-seed.md).
+> ⚠️ **No script in this repo touches production.** Editors write the content on
+> the live sites, so nothing there may be created, overwritten or deleted from a
+> terminal — every `:prod` command is gone, and each script refuses a non-local
+> `DATABASE_URL` before it connects. See
+> [ADR 0003](adr/0003-no-production-seed.md).
 
 For the production-specific gotchas (R2 image storage, the import map landmine,
 restoring an admin login) see [operations.md](operations.md). The design
@@ -118,13 +119,18 @@ an image is renamed/removed, or a page an upload belonged to is deleted). It
 removes both the media document and the Cloudflare R2 object.
 
 ```
-pnpm prune:media                       # dry run — lists orphans, deletes nothing
-pnpm prune:media -- --apply            # delete (local)
-pnpm prune:media:prod -- --apply --yes # delete against prod (deliberate)
+pnpm prune:media               # dry run — lists orphans, deletes nothing
+pnpm prune:media -- --apply    # delete (local)
 ```
 
-It is safe by design: a media is an orphan only if its id appears in **no** other
-document (it scans every collection for referenced ObjectIds).
+**Local only.** "Orphan" means "no document references it" — which is also true
+of an image an editor uploaded yesterday and has not placed on a page yet. On a
+live site that is the customer's own work, so this never runs there; the guard
+refuses before connecting, so not even the dry run reaches production.
+
+Within a local database it is safe by design: a media is an orphan only if its
+id appears in **no** other document (it scans every collection for referenced
+ObjectIds).
 
 ## Clean up orphaned versions
 
@@ -135,10 +141,11 @@ when a draft-enabled page or post is removed outside Payload's own delete path
 (straight in MongoDB, say).
 
 ```
-pnpm prune:versions                       # dry run — lists orphans, deletes nothing
-pnpm prune:versions -- --apply            # delete (local)
-pnpm prune:versions:prod -- --apply --yes # delete against prod (deliberate)
+pnpm prune:versions             # dry run — lists orphans, deletes nothing
+pnpm prune:versions -- --apply  # delete (local)
 ```
+
+Local only, like everything else here.
 
 Payload's own delete cascades to versions, and a `--force` reseed sweeps what
 is left, so a healthy database reports nothing. Rows turning up here mean a

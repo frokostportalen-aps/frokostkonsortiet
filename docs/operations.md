@@ -1,9 +1,12 @@
 # Production operations
 
 Hard-won, non-obvious things about running this multi-tenant stack in
-production. See also [seeding.md](seeding.md) for the content seed itself —
-which is a **local-only** tool: production content is written by editors in the
-admin panel and is never seeded ([ADR 0003](adr/0003-no-production-seed.md)).
+production. See also [seeding.md](seeding.md) for the content seed itself.
+
+Note what is *not* here: a way to change production from a terminal. Content on
+the live sites is written by editors in the admin panel, and every script in
+this repo refuses a non-local database
+([ADR 0003](adr/0003-no-production-seed.md)).
 
 ## ⚠️ Import map must include the R2 upload handler
 
@@ -41,22 +44,28 @@ entry**. Production (R2 on) then can't resolve the component and renders blank.
 - Media goes to **Cloudflare R2** only when `R2_BUCKET` is set (it is in
   `.env.production`). Without it — the local container — uploads fall back to the
   on-disk `public/media` volume.
-- ⚠️ **Local `:prod` runs and the deployed app point at the same R2 bucket.**
-  Running `pnpm prune:media:prod` from your machine deletes from the **live**
-  bucket. It is the only script that may touch production media — the seed
-  refuses a non-local database entirely.
+- **Nothing you run locally can reach the live bucket.** Media is only ever
+  written or deleted there by the deployed app, acting on what an editor does in
+  the admin. `prune:media` — which deletes R2 objects — is local-only like
+  everything else, because an image an editor uploaded but has not placed on a
+  page yet looks exactly like an orphan to it.
 
-## Production content is editors' work — never seeded
+## Production is editors' work — no script touches it
 
-The customer writes content in the admin panel, so **no script may create or
-overwrite content on production**. `pnpm seed:tenants:prod` no longer exists,
-and `scripts/seed-tenants.ts` and `scripts/add-page.ts` both exit before writing
-anything if `DATABASE_URL` is not a local host. The rationale is
-[ADR 0003](adr/0003-no-production-seed.md).
+The customer writes content in the admin panel, so **no script may create,
+overwrite or delete anything on production**. Every `:prod` command is gone, and
+`seed-tenants`, `add-page`, `prune-media` and `prune-versions` all exit before
+connecting if `DATABASE_URL` is not a local host. No flag overrides it. The
+rationale is [ADR 0003](adr/0003-no-production-seed.md).
 
 New content for a live site is therefore a task in the admin, not a data file
 plus a deploy. Seed data is still what sets up a **fresh local database** and
 what a new site starts from before it is handed over.
+
+The one deliberate exception is **user administration** — creating or resetting
+a super-admin when mail is broken or you are locked out (see the last section).
+That is an account operation, not content, and it is done by hand with a
+throwaway script rather than a committed command.
 
 ## When production content refreshes
 
