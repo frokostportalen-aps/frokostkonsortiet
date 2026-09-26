@@ -116,7 +116,9 @@ created in the admin panel, not from a script.
 
 `prune-media` deletes media that **no document references** (orphans left when
 an image is renamed/removed, or a page an upload belonged to is deleted). It
-removes both the media document and the Cloudflare R2 object.
+removes the media document and its file — the one in the local `public/media`
+volume. It cannot reach the R2 bucket: the adapter is only active when
+`R2_BUCKET` is set, which it is not locally, and this never runs anywhere else.
 
 ```
 pnpm prune:media               # dry run — lists orphans, deletes nothing

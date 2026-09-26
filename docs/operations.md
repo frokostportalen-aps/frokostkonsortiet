@@ -46,9 +46,11 @@ entry**. Production (R2 on) then can't resolve the component and renders blank.
   on-disk `public/media` volume.
 - **Nothing you run locally can reach the live bucket.** Media is only ever
   written or deleted there by the deployed app, acting on what an editor does in
-  the admin. `prune:media` — which deletes R2 objects — is local-only like
-  everything else, because an image an editor uploaded but has not placed on a
-  page yet looks exactly like an orphan to it.
+  the admin. `prune:media` is local-only like every other script, so it deletes
+  from the `public/media` volume and never from R2 — with no `R2_BUCKET` set, it
+  has no bucket to reach. Keeping it that way is the point: an image an editor
+  uploaded but has not placed on a page yet looks exactly like an orphan to it,
+  and an R2 object deleted from a laptop is gone for good.
 
 ## Production is editors' work — no script touches it
 

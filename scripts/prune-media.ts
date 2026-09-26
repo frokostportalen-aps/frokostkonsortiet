@@ -7,8 +7,10 @@ import { assertLocalDatabase, targetLabel } from './seedTarget'
 /**
  * Delete media that no document references — orphans left behind when an image
  * is renamed/removed from a tenant's images/ folder, or when an editor deletes a
- * page that owned an upload. Deleting a media doc also removes its file from
- * Cloudflare R2 via the s3Storage adapter.
+ * page that owned an upload. Deleting a media doc removes its file too: the one
+ * in the local `public/media` volume, since this only ever runs against a local
+ * database and the R2 adapter is only active when `R2_BUCKET` is set, which it
+ * is not locally.
  *
  *   pnpm prune:media               # dry run — lists orphans, deletes nothing
  *   pnpm prune:media -- --apply    # actually delete (local)
@@ -93,14 +95,14 @@ const run = async () => {
 
   if (!apply) {
     payload.logger.info(
-      '\nTØR kørsel — intet slettet. Kør med --apply for at slette (også fra R2).',
+      '\nTØR kørsel — intet slettet. Kør med --apply for at slette (dokument og fil).',
     )
     process.exit(0)
   }
   for (const o of orphans) {
     await payload.delete({ collection: 'media', id: o.id })
   }
-  payload.logger.info(`\n✓ Slettede ${orphans.length} ubrugte billeder (også fra R2).`)
+  payload.logger.info(`\n✓ Slettede ${orphans.length} ubrugte billeder (dokument og fil).`)
   process.exit(0)
 }
 

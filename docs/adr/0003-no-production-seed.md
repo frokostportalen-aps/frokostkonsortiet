@@ -28,9 +28,10 @@ sites. Two things follow.
 
 The same reasoning reaches further than the seed. `prune-media` deletes every
 media **no document references** — which is exactly what an image an editor
-uploaded yesterday and has not placed on a page yet looks like. It deletes the
-R2 object too, so that is the customer's own work, gone, with nothing to restore
-from. "Delete-only" is not the same as "not content".
+uploaded yesterday and has not placed on a page yet looks like. Pointed at
+production it deletes the R2 object along with the document, so that is the
+customer's own work, gone, with nothing to restore from. "Delete-only" is not
+the same as "not content".
 
 The seed is still how a fresh local database and a not-yet-handed-over site get
 their content, so these tools stay — they just lose production as a target.
