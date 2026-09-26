@@ -211,6 +211,7 @@ export interface Page {
     | FormBlock
     | FAQBlock
     | IconRowBlock
+    | FlipCardsBlock
     | TestimonialsBlock
     | StatsBlock
     | PriceMenuBlock
@@ -964,6 +965,93 @@ export interface IconRowBlock {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "FlipCardsBlock".
+ */
+export interface FlipCardsBlock {
+  heading?: string | null;
+  /**
+   * Kort linje under overskriften, sat i sitets versaler – fx "Her er 3 regnestykker". Til den halve overskrift, ikke til en sætning.
+   */
+  eyebrow?: string | null;
+  intro?: string | null;
+  /**
+   * Op til tre kort står side om side. Fra det fjerde bliver rækken en slider, man kan swipe eller pile sig igennem. Hvert kort har en forside (billede eller ikon) og en bagside, der vendes frem.
+   */
+  cards?:
+    | {
+        /**
+         * Et billede fylder kortet ud med et farvet bånd nederst. Et ikon giver et roligt kort med stregtegning – til det, der ikke er et foto værd (fx "Mælk").
+         */
+        front: 'image' | 'icon';
+        image?: (string | null) | Media;
+        icon?:
+          | (
+              | 'leaf'
+              | 'sprout'
+              | 'wheat'
+              | 'milk'
+              | 'ham'
+              | 'beef'
+              | 'fish'
+              | 'egg'
+              | 'carrot'
+              | 'salad'
+              | 'soup'
+              | 'apple'
+              | 'croissant'
+              | 'chef-hat'
+              | 'heart'
+              | 'truck'
+              | 'utensils-crossed'
+            )
+          | null;
+        /**
+         * Kort – fx "Small" eller "Mælk". Sættes i sitets versaler.
+         */
+        label: string;
+        /**
+         * Farven på bagsiden og på forsidens bånd. "Skiftevis" giver kortene rækkens egen rytme – vælg kun en fast farve, hvis et bestemt kort skal skille sig ud.
+         */
+        tone?: ('auto' | 'brand' | 'ink' | 'sand' | 'muted') | null;
+        /**
+         * Fx "450 gram" eller "Vores mest populære".
+         */
+        title: string;
+        /**
+         * Én kort linje under overskriften – fx "Pr. person".
+         */
+        subtitle?: string | null;
+        body?: string | null;
+        /**
+         * Til de kort, der er et lille prisskilt. Står under teksten, med prikket linje ud til prisen. Lad feltet være tomt, hvis kortet bare fortæller noget.
+         */
+        lines?:
+          | {
+              name: string;
+              /**
+               * Valgfri linje under navnet – fx "Min- og skummetmælk".
+               */
+              note?: string | null;
+              /**
+               * Fx "13,-" eller "fra 22,-".
+               */
+              price: string;
+              id?: string | null;
+            }[]
+          | null;
+        /**
+         * Lille linje nederst på bagsiden – fx "Alle priser er ex moms".
+         */
+        note?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'flipCards';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "TestimonialsBlock".
  */
 export interface TestimonialsBlock {
@@ -1655,6 +1743,7 @@ export interface PagesSelect<T extends boolean = true> {
         formBlock?: T | FormBlockSelect<T>;
         faq?: T | FAQBlockSelect<T>;
         iconRow?: T | IconRowBlockSelect<T>;
+        flipCards?: T | FlipCardsBlockSelect<T>;
         testimonials?: T | TestimonialsBlockSelect<T>;
         stats?: T | StatsBlockSelect<T>;
         priceMenu?: T | PriceMenuBlockSelect<T>;
@@ -1827,6 +1916,39 @@ export interface IconRowBlockSelect<T extends boolean = true> {
         id?: T;
       };
   note?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "FlipCardsBlock_select".
+ */
+export interface FlipCardsBlockSelect<T extends boolean = true> {
+  heading?: T;
+  eyebrow?: T;
+  intro?: T;
+  cards?:
+    | T
+    | {
+        front?: T;
+        image?: T;
+        icon?: T;
+        label?: T;
+        tone?: T;
+        title?: T;
+        subtitle?: T;
+        body?: T;
+        lines?:
+          | T
+          | {
+              name?: T;
+              note?: T;
+              price?: T;
+              id?: T;
+            };
+        note?: T;
+        id?: T;
+      };
   id?: T;
   blockName?: T;
 }

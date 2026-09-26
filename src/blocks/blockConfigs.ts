@@ -5,6 +5,7 @@ import { CallToAction } from './CallToAction/config'
 import { ClientList } from './ClientList/config'
 import { Content } from './Content/config'
 import { FAQ } from './FAQ/config'
+import { FlipCards } from './FlipCards/config'
 import { FormBlock } from './Form/config'
 import { IconRow } from './IconRow/config'
 import { MediaBlock } from './MediaBlock/config'
@@ -40,6 +41,7 @@ export const blockConfigs: Block[] = [
   FormBlock,
   FAQ,
   IconRow,
+  FlipCards,
   Testimonials,
   Stats,
   PriceMenu,

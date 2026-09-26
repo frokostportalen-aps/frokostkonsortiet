@@ -6,6 +6,8 @@
  * The lexical helpers (`heading`, `p`, `list`, `richText`, `link`) are
  * re-exported here so a page file only needs one import.
  */
+import type { ToneName } from '@/blocks/FlipCards/options'
+
 import { heading, link, list, p, paragraph, richText, text } from '../lexical'
 
 export { heading, link, list, p, paragraph, richText, text }
@@ -288,6 +290,33 @@ export const iconRow = (
   blockName = 'Ikonrække',
 ) => ({
   blockType: 'iconRow',
+  blockName,
+  ...opts,
+})
+
+/** Cards with a front you see and a back you turn to. Up to three stand side
+ *  by side; from the fourth the row becomes a rail you swipe. */
+export const flipCards = (
+  opts: {
+    heading?: string
+    eyebrow?: string
+    intro?: string
+    cards: {
+      front: 'image' | 'icon'
+      image?: string
+      icon?: string
+      label: string
+      tone?: ToneName
+      title: string
+      subtitle?: string
+      body?: string
+      lines?: { name: string; note?: string; price: string }[]
+      note?: string
+    }[]
+  },
+  blockName = 'Vendekort',
+) => ({
+  blockType: 'flipCards',
   blockName,
   ...opts,
 })
