@@ -7,7 +7,7 @@ import type { RevalidateRef } from '@/endpoints/seed/tenants/seed-tenants'
 
 /**
  * On-demand revalidation for out-of-band content writes — chiefly
- * `pnpm seed:tenants[:prod]`, which runs outside the Next.js runtime and so
+ * `pnpm seed:tenants`, which runs outside the Next.js runtime and so
  * seeds with `context.disableRevalidate` (the afterChange hooks that normally
  * revalidate can't run there). After seeding, the CLI script POSTs the docs it
  * touched here so the static/ISR cache is purged immediately instead of waiting

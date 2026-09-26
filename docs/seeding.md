@@ -77,16 +77,22 @@ Run it **inside the container** so fetched media lands in the app's media
 volume: `docker compose exec app pnpm seed:tenants`.
 
 - **Additive** (default): pages/posts are upserted on `(tenant, slug)` and media
-  on filename. Existing documents — including editor edits — are never touched.
+  on filename. Existing pages, posts and media — including editor edits — are
+  never touched. The `tenants` documents themselves are the exception: `name`,
+  `domains`, `isMain` and `kitchenId` are written from the seed data on every
+  run, so the site's identity stays in code.
 - **`--force`** (alias `--reset`): wipes each tenant's `posts`/`pages`/`media`
   and rebuilds them from the seed. The `header`/`footer`/`brand` globals are
   rebuilt too — recreated rather than updated, so a field the seed data does
   not mention cannot survive the reset. Any orphaned version rows are swept at
-  the end (see below). It never touches `users` or `tenants`.
-- **Non-local databases are refused.** Before anything is written the script
-  checks the target (`scripts/seedTarget.ts` treats any non-local
-  `DATABASE_URL` host — or a `DOTENV_CONFIG_PATH` pointing at a production env
-  file — as production) and exits. No flag turns that off.
+  the end (see below). It never deletes `users` or `tenants` — the tenant
+  documents are updated in place, as above, not wiped.
+- **Non-local databases are refused.** Before anything is written,
+  `assertLocalDatabase()` (`scripts/seedTarget.ts`) checks the target and exits.
+  No flag turns that off. It **fails closed**: the run is allowed only when
+  *every* host in `DATABASE_URL` is local, so an empty, malformed or
+  partly-remote connection string — or a `DOTENV_CONFIG_PATH` pointing at a
+  production env file — counts as production and is refused.
 
 **Post author:** the engine reuses an existing super-admin as the post author
 and only creates the dev `admin@example.com` user on a database with **no users
