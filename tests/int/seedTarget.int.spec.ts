@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
-import { isProduction } from '../../scripts/seedTarget'
+import { isProduction, targetLabel } from '../../scripts/seedTarget'
 
 /**
  * `isProduction()` is what stops the content scripts (seed-tenants, add-page)
@@ -70,5 +70,45 @@ describe('isProduction', () => {
     it('a production env file, even with a local url', () => {
       expect(target('mongodb://localhost:27017/x', '.env.production')).toBe(true)
     })
+  })
+})
+
+/**
+ * The label goes in the refusal message, so it has to name the database that
+ * was actually refused. Stripping credentials with a plain `://…@` stops at the
+ * first `@` anywhere in the string — including one in the query — and would
+ * print `mongodb://localhost` for a production host.
+ */
+describe('targetLabel', () => {
+  const env = { ...process.env }
+  afterEach(() => {
+    process.env = { ...env }
+  })
+
+  const label = (url: string): string => {
+    process.env = { ...env, DATABASE_URL: url }
+    return targetLabel()
+  }
+
+  it('strips credentials', () => {
+    expect(label('mongodb+srv://user:pass@cluster0.example.mongodb.net/prod')).toBe(
+      'mongodb+srv://cluster0.example.mongodb.net/prod',
+    )
+  })
+
+  it('keeps the real host when an @ appears in the query (regression)', () => {
+    const url = 'mongodb://prod.example.net:27017/frokost-konsortiet-prod?appName=seed@localhost'
+    expect(label(url)).toContain('prod.example.net')
+    expect(label(url)).not.toBe('mongodb://localhost')
+  })
+
+  it('leaves a credential-free url alone', () => {
+    expect(label('mongodb://mongo:27017/frokost-konsortiet')).toBe(
+      'mongodb://mongo:27017/frokost-konsortiet',
+    )
+  })
+
+  it('says so when nothing is set', () => {
+    expect(label('')).toBe('(DATABASE_URL not set)')
   })
 })
