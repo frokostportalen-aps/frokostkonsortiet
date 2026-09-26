@@ -4,7 +4,7 @@ import config from '../src/payload.config'
 
 import { heading, p, richText } from '../src/endpoints/seed/tenants/lexical'
 import { upsertPage } from '../src/endpoints/seed/tenants/seed-tenants'
-import { isProduction, targetLabel } from './seedTarget'
+import { assertLocalDatabase } from './seedTarget'
 
 /**
  * Example of adding a single page programmatically — without touching the
@@ -35,20 +35,7 @@ const findTenantID = async (payload: Payload, slug: string): Promise<string> => 
 }
 
 const run = async () => {
-  // Same guard as the seed: pages on the live sites are the editors' to create.
-  if (isProduction()) {
-    console.error(
-      [
-        '',
-        '⛔  Afvist: målet er ikke en lokal database.',
-        `      DB: ${targetLabel()}`,
-        '',
-        '    Sider på de live sites oprettes i admin-panelet, ikke fra et script.',
-        '',
-      ].join('\n'),
-    )
-    process.exit(1)
-  }
+  assertLocalDatabase('Sider på de live sites oprettes i admin-panelet, ikke fra et script.')
 
   const payload = await getPayload({ config })
   const tenantID = await findTenantID(payload, TENANT_SLUG)
@@ -82,7 +69,9 @@ const run = async () => {
   }
 
   const { id, created } = await upsertPage(payload, tenantID, page, { force: false })
-  payload.logger.info(`${created ? '✓ oprettet' : '• fandtes allerede'}: ${TENANT_SLUG}/${page.slug} (${id})`)
+  payload.logger.info(
+    `${created ? '✓ oprettet' : '• fandtes allerede'}: ${TENANT_SLUG}/${page.slug} (${id})`,
+  )
   process.exit(0)
 }
 

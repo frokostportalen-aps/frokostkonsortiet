@@ -4,7 +4,7 @@ import config from '../src/payload.config'
 
 import { seedTenants, type RevalidateRef } from '../src/endpoints/seed/tenants/seed-tenants'
 import { getServerSideURL } from '../src/utilities/getURL'
-import { isProduction, targetLabel } from './seedTarget'
+import { assertLocalDatabase, targetLabel } from './seedTarget'
 
 /**
  * Seeding runs outside Next.js, so the afterChange hooks that normally purge the
@@ -80,26 +80,11 @@ const run = async () => {
   const target = targetLabel()
   const mode = force ? 'DESTRUKTIV reset' : 'additiv'
 
-  // Guard: the seed is a local-only tool. Editors own the content on the live
-  // sites, and even an additive run would recreate pages they deleted — so any
-  // non-local database is refused, whatever the flags say. The check reads
-  // DATABASE_URL, so a hand-set DOTENV_CONFIG_PATH is caught too.
-  if (isProduction()) {
-    console.error(
-      [
-        '',
-        '⛔  Seed afvist: målet er ikke en lokal database.',
-        `      DB: ${target}`,
-        '',
-        '    Seeden må kun køre mod en lokal database. Indholdet på de live sites',
-        '    er skrevet af redaktører og må ikke overskrives af seed-data.',
-        '',
-        '    Skal der nyt indhold på et live site, laves det i admin-panelet.',
-        '',
-      ].join('\n'),
-    )
-    process.exit(1)
-  }
+  // The seed is a local-only tool: editors own the content on the live sites,
+  // and even an additive run would recreate pages they deleted.
+  assertLocalDatabase(
+    'Indholdet på de live sites er redaktørernes. Skal der nyt indhold på et site, laves det i admin-panelet.',
+  )
 
   const payload = await getPayload({ config })
   payload.logger.info(`Seeding (${mode}) → ${target}`)
