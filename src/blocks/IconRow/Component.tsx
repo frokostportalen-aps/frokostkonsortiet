@@ -1,50 +1,11 @@
 import React from 'react'
-import {
-  Apple,
-  Beef,
-  Carrot,
-  ChefHat,
-  Croissant,
-  Egg,
-  Fish,
-  Ham,
-  Heart,
-  Leaf,
-  Milk,
-  Salad,
-  Soup,
-  Sprout,
-  Truck,
-  UtensilsCrossed,
-  Wheat,
-} from 'lucide-react'
-
 import type { IconRowBlock as IconRowBlockProps } from '@/payload-types'
-import type { IconName } from './options'
+
+import { ICON_COMPONENTS } from './icons'
 
 import { getDialect } from '@/themes/dialect'
 import { SectionHeader } from '@/components/SectionHeader'
 import { cn } from '@/utilities/ui'
-
-const icons: Record<IconName, React.ComponentType<{ className?: string; strokeWidth?: number }>> = {
-  leaf: Leaf,
-  sprout: Sprout,
-  wheat: Wheat,
-  milk: Milk,
-  ham: Ham,
-  beef: Beef,
-  fish: Fish,
-  egg: Egg,
-  carrot: Carrot,
-  salad: Salad,
-  soup: Soup,
-  apple: Apple,
-  croissant: Croissant,
-  'chef-hat': ChefHat,
-  heart: Heart,
-  truck: Truck,
-  'utensils-crossed': UtensilsCrossed,
-}
 
 /**
  * A row of pictograms with a label under each — the section that answers "what
@@ -87,7 +48,7 @@ export const IconRowBlock: React.FC<IconRowBlockProps & { tenantSlug?: string }>
 
       <ul className="flex flex-wrap items-start justify-center gap-x-8 gap-y-10 md:gap-x-14">
         {items.map((item, i) => {
-          const Icon = icons[item.icon]
+          const Icon = ICON_COMPONENTS[item.icon]
           return (
             <li key={i} className="flex w-32 flex-col items-center text-center md:w-36">
               <span
