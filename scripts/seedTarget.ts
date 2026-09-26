@@ -1,7 +1,9 @@
 /** Shared helpers for reasoning about which database a script targets. */
 
 // Host names that mean "this is a local/dev database" (docker service names and
-// loopback). Anything else is treated as production for the destructive guards.
+// loopback). Anything else counts as production: the content scripts
+// (seed-tenants, add-page) then refuse to run at all, and the prune scripts
+// require an explicit --yes.
 const LOCAL_HOSTS = ['localhost', '127.0.0.1', 'mongo', 'mongodb', 'db']
 
 const dbHost = (url: string): string => {

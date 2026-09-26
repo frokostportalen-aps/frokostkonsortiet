@@ -1,12 +1,17 @@
 # Seeding & content
 
 The seed turns plain TypeScript data into each site's pages, posts, media,
-header and footer. It is **additive by default** — safe to run after editors
-have written real content — and lives in `src/endpoints/seed/tenants/`.
+header and footer. It is **additive by default** and lives in
+`src/endpoints/seed/tenants/`.
+
+> ⚠️ **The seed only runs against a local database.** Editors write the content
+> on the live sites, so nothing on production may be created or overwritten from
+> seed data — `pnpm seed:tenants:prod` is gone, and the script refuses any
+> non-local `DATABASE_URL`. See [ADR 0003](adr/0003-no-production-seed.md).
 
 For the production-specific gotchas (R2 image storage, the import map landmine,
-cache/redeploy after a seed, restoring an admin login) see
-[operations.md](operations.md). The design rationale is
+restoring an admin login) see [operations.md](operations.md). The design
+rationale for the seed itself is
 [ADR 0002](adr/0002-additive-per-tenant-seed.md).
 
 ## Structure — one folder per tenant
@@ -64,14 +69,12 @@ The engine uploads every image in the folder once, keyed on filename
 ## Running the seed
 
 ```
-pnpm seed:tenants                       # additive (default) — local docker stack
-pnpm seed:tenants -- --force            # destructive reset — local
-pnpm seed:tenants:prod                  # additive — prod DB (.env.production)
-pnpm seed:tenants:prod -- --force --yes # destructive reset — prod (deliberate)
+pnpm seed:tenants              # additive (default) — local docker stack
+pnpm seed:tenants -- --force   # destructive reset — local
 ```
 
-Run the local variant **inside the container** so fetched media lands in the
-app's media volume: `docker compose exec app pnpm seed:tenants`.
+Run it **inside the container** so fetched media lands in the app's media
+volume: `docker compose exec app pnpm seed:tenants`.
 
 - **Additive** (default): pages/posts are upserted on `(tenant, slug)` and media
   on filename. Existing documents — including editor edits — are never touched.
@@ -80,8 +83,10 @@ app's media volume: `docker compose exec app pnpm seed:tenants`.
   rebuilt too — recreated rather than updated, so a field the seed data does
   not mention cannot survive the reset. Any orphaned version rows are swept at
   the end (see below). It never touches `users` or `tenants`.
-  Against production it additionally requires **`--yes`** (the guard treats any
-  non-local `DATABASE_URL` host as production — see `scripts/seedTarget.ts`).
+- **Non-local databases are refused.** Before anything is written the script
+  checks the target (`scripts/seedTarget.ts` treats any non-local
+  `DATABASE_URL` host — or a `DOTENV_CONFIG_PATH` pointing at a production env
+  file — as production) and exits. No flag turns that off.
 
 **Post author:** the engine reuses an existing super-admin as the post author
 and only creates the dev `admin@example.com` user on a database with **no users
@@ -96,6 +101,9 @@ test user.
 ```
 pnpm tsx scripts/add-page.ts
 ```
+
+It carries the same local-only guard as the seed — a page on a live site is
+created in the admin panel, not from a script.
 
 ## Clean up unused media
 

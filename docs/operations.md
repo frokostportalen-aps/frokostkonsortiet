@@ -1,7 +1,9 @@
 # Production operations
 
 Hard-won, non-obvious things about running this multi-tenant stack in
-production. See also [seeding.md](seeding.md) for the content seed itself.
+production. See also [seeding.md](seeding.md) for the content seed itself —
+which is a **local-only** tool: production content is written by editors in the
+admin panel and is never seeded ([ADR 0003](adr/0003-no-production-seed.md)).
 
 ## ⚠️ Import map must include the R2 upload handler
 
@@ -40,34 +42,32 @@ entry**. Production (R2 on) then can't resolve the component and renders blank.
   `.env.production`). Without it — the local container — uploads fall back to the
   on-disk `public/media` volume.
 - ⚠️ **Local `:prod` runs and the deployed app point at the same R2 bucket.**
-  Running `pnpm seed:tenants:prod` or `pnpm prune:media:prod` from your machine
-  writes to / deletes from the **live** bucket. `--force` deletes a tenant's R2
-  objects (via the s3Storage delete hook) before re-uploading.
+  Running `pnpm prune:media:prod` from your machine deletes from the **live**
+  bucket. It is the only script that may touch production media — the seed
+  refuses a non-local database entirely.
 
-## Content changes need a redeploy (or the ISR window)
+## Production content is editors' work — never seeded
 
-The seed is a CLI script that writes to the DB directly. It **cannot bust the
-running server's Next route cache** (and runs with `disableRevalidate`). So:
+The customer writes content in the admin panel, so **no script may create or
+overwrite content on production**. `pnpm seed:tenants:prod` no longer exists,
+and `scripts/seed-tenants.ts` and `scripts/add-page.ts` both exit before writing
+anything if `DATABASE_URL` is not a local host. The rationale is
+[ADR 0003](adr/0003-no-production-seed.md).
 
-- Pages that existed at the **last build** (home, om-os) stay **cached** with
-  their old content/media until something refreshes them.
-- **New slugs** (a brand-new page) render fresh on-demand and show immediately.
+New content for a live site is therefore a task in the admin, not a data file
+plus a deploy. Seed data is still what sets up a **fresh local database** and
+what a new site starts from before it is handed over.
 
-The `[tenant]`, `[tenant]/[slug]` and posts routes use ISR
-(`export const revalidate = 600`), so published pages self-refresh within ~10
-minutes. **After seeding production, trigger a redeploy** for an immediate
-refresh (a redeploy also rebuilds the admin import map cleanly).
+## When production content refreshes
 
-## Seeding production safely
+Edits made in the admin fire Payload's `afterChange` hooks, which call
+`revalidatePath`/`revalidateTag` in the running app — a published change is live
+right away, no deploy needed.
 
-```
-pnpm seed:tenants:prod -- --force --yes
-```
-
-Pre-flight worth doing first (read-only against the prod DB): confirm a
-super-admin exists and check how many pages/posts/media `--force` will delete.
-`--force` never touches `users` or `tenants`; it only wipes and rebuilds
-`pages`/`posts`/`media`. Redeploy afterwards (see above).
+The `[tenant]`, `[tenant]/[slug]` and posts routes also use ISR
+(`export const revalidate = 600`), which is the backstop: anything that reached
+the database **without** going through the running app (a direct MongoDB edit,
+say) shows up within ~10 minutes, or immediately after a redeploy.
 
 ## Ugens menu (frokostportalen)
 
