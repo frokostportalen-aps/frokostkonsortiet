@@ -1,5 +1,6 @@
 /**
- * The card tones an editor can pick from.
+ * The card tones an editor can pick from — shared by every block that draws
+ * the coloured card (vendekort, galleri), so the palette steps stay one list.
  *
  * Deliberately a short list of *theme tokens* rather than a colour picker: the
  * design asks for "skiftende farver", and on a platform where every site has
@@ -19,8 +20,8 @@ export const TONE_OPTIONS = [
 export type ToneName = (typeof TONE_OPTIONS)[number]['value']
 type FixedTone = Exclude<ToneName, 'auto'>
 
-/** Surface + text for each tone, as a pair — a card's back is a solid panel and
- *  everything on it (rules, footnote) inherits `currentColor`. */
+/** Surface + text for each tone, as a pair — a band or a card's back is a solid
+ *  panel and everything on it (rules, footnote) inherits `currentColor`. */
 export const toneClass: Record<FixedTone, string> = {
   brand: 'bg-primary text-primary-foreground',
   ink: 'bg-foreground text-background',

@@ -6,7 +6,7 @@
  * The lexical helpers (`heading`, `p`, `list`, `richText`, `link`) are
  * re-exported here so a page file only needs one import.
  */
-import type { ToneName } from '@/blocks/FlipCards/options'
+import type { ToneName } from '@/utilities/tones'
 
 import { heading, link, list, p, paragraph, richText, text } from '../lexical'
 
