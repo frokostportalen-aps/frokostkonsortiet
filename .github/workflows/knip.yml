@@ -1,0 +1,38 @@
+name: Knip
+
+# Unused files, dependencies and exports. tsc and ESLint only see one module at
+# a time, so code nothing imports any more — and packages nothing uses — slip
+# past them. Config lives in knip.json.
+#
+# Admin components wired by string path in the Payload config are only seen
+# through src/app/(payload)/admin/importMap.js, so knip is as current as the
+# committed import map.
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: knip-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  knip:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - run: pnpm knip
