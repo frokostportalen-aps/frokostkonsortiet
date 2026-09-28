@@ -1011,7 +1011,7 @@ export interface FlipCardsBlock {
          */
         label: string;
         /**
-         * Kortets farve – på båndet under billedet og på en eventuel bagside. "Skiftevis" giver kortene rækkens egen rytme – vælg kun en fast farve, hvis et bestemt kort skal skille sig ud.
+         * Farven på bagsiden og på forsidens bånd. "Skiftevis" giver kortene rækkens egen rytme – vælg kun en fast farve, hvis et bestemt kort skal skille sig ud.
          */
         tone?: ('auto' | 'brand' | 'ink' | 'sand' | 'muted') | null;
         /**
@@ -1073,7 +1073,7 @@ export interface GalleryBlock {
          */
         caption?: string | null;
         /**
-         * Kortets farve – på båndet under billedet og på en eventuel bagside. "Skiftevis" giver kortene rækkens egen rytme – vælg kun en fast farve, hvis et bestemt kort skal skille sig ud.
+         * Farven på båndet under billedet. "Skiftevis" giver kortene rækkens egen rytme – vælg kun en fast farve, hvis et bestemt kort skal skille sig ud.
          */
         tone?: ('auto' | 'brand' | 'ink' | 'sand' | 'muted') | null;
         id?: string | null;
