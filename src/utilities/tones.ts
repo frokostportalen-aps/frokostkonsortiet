@@ -35,7 +35,7 @@ export const toneClass: Record<FixedTone, string> = {
  * long band on the sites whose brand colour is already close to their ink, and
  * two of the three family palettes are exactly that.
  */
-export const TONE_CYCLE: FixedTone[] = ['brand', 'sand', 'ink', 'muted']
+const TONE_CYCLE: FixedTone[] = ['brand', 'sand', 'ink', 'muted']
 
 /** The tone a card actually renders in: its own choice, or its place in the row. */
 export const resolveTone = (tone: ToneName | null | undefined, index: number): FixedTone =>

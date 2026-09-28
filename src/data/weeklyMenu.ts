@@ -309,7 +309,7 @@ async function fetchWeek(kitchenId: string, week: IsoWeek): Promise<WeeklyMenu |
  * Weeks with nothing published are dropped, so an empty `weeks` means "nothing
  * published"; `unavailable` means the upstream itself couldn't be read.
  */
-export async function getWeeklyMenu(kitchenId: string): Promise<WeeklyMenuResult> {
+async function getWeeklyMenu(kitchenId: string): Promise<WeeklyMenuResult> {
   const start = currentIsoWeek()
   const wanted = Array.from({ length: WEEKS_AHEAD + 1 }, (_, i) => addWeeks(start, i))
 

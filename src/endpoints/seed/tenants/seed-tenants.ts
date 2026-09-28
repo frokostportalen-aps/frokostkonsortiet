@@ -94,7 +94,7 @@ async function upsertDoc(
 export const upsertPage = (payload: Payload, tenantID: string, data: SeedDoc, opts: UpsertOpts) =>
   upsertDoc(payload, 'pages', tenantID, data, opts)
 
-export const upsertPost = (payload: Payload, tenantID: string, data: SeedDoc, opts: UpsertOpts) =>
+const upsertPost = (payload: Payload, tenantID: string, data: SeedDoc, opts: UpsertOpts) =>
   upsertDoc(payload, 'posts', tenantID, data, opts)
 
 // ── images (loaded from each tenant's images/ folder) ──────────────────────—

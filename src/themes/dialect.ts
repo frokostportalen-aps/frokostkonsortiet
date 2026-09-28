@@ -33,7 +33,7 @@ export type Dialect = {
   testimonials: TestimonialsVariant
 }
 
-export type { Chrome, EyebrowStyle, HeroVariant, Signature, TestimonialsVariant }
+export type { EyebrowStyle, Signature }
 
 /** Family defaults, applied to any axis a site leaves unset. */
 const DIALECT_DEFAULTS: Dialect = {
