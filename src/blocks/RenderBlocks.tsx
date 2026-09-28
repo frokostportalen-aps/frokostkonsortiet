@@ -7,6 +7,7 @@ import { CallToActionBlock } from '@/blocks/CallToAction/Component'
 import { ClientListBlock } from '@/blocks/ClientList/Component'
 import { ContentBlock } from '@/blocks/Content/Component'
 import { FAQBlock } from '@/blocks/FAQ/Component'
+import { FlipCardsBlock } from '@/blocks/FlipCards/Component'
 import { FormBlock } from '@/blocks/Form/Component'
 import { IconRowBlock } from '@/blocks/IconRow/Component'
 import { MediaBlock } from '@/blocks/MediaBlock/Component'
@@ -36,6 +37,7 @@ const blockComponents: Record<BlockType, BlockRenderer> = {
   cta: CallToActionBlock,
   faq: FAQBlock,
   formBlock: FormBlock,
+  flipCards: FlipCardsBlock,
   iconRow: IconRowBlock,
   mediaBlock: MediaBlock,
   mediaContent: MediaContentBlock,
