@@ -321,6 +321,21 @@ export const flipCards = (
   ...opts,
 })
 
+/** Billedgalleri — the vendekort's look, with a lightbox instead of a back. */
+export const gallery = (
+  opts: {
+    heading?: string
+    eyebrow?: string
+    intro?: string
+    images: { image: string; caption?: string; tone?: ToneName }[]
+  },
+  blockName = 'Billedgalleri',
+) => ({
+  blockType: 'gallery',
+  blockName,
+  ...opts,
+})
+
 /** FAQ block from plain question/answer strings. */
 export const faq = (
   items: { q: string; a: string }[],

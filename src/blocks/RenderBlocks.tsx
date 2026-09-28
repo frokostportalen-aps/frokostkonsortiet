@@ -9,6 +9,7 @@ import { ContentBlock } from '@/blocks/Content/Component'
 import { FAQBlock } from '@/blocks/FAQ/Component'
 import { FlipCardsBlock } from '@/blocks/FlipCards/Component'
 import { FormBlock } from '@/blocks/Form/Component'
+import { GalleryBlock } from '@/blocks/Gallery/Component'
 import { IconRowBlock } from '@/blocks/IconRow/Component'
 import { MediaBlock } from '@/blocks/MediaBlock/Component'
 import { MediaContentBlock } from '@/blocks/MediaContent/Component'
@@ -38,6 +39,7 @@ const blockComponents: Record<BlockType, BlockRenderer> = {
   faq: FAQBlock,
   formBlock: FormBlock,
   flipCards: FlipCardsBlock,
+  gallery: GalleryBlock,
   iconRow: IconRowBlock,
   mediaBlock: MediaBlock,
   mediaContent: MediaContentBlock,
