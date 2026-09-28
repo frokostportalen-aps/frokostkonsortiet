@@ -1,9 +1,0 @@
-{
-  "$schema": "https://unpkg.com/knip@6/schema.json",
-  "entry": ["next-sitemap.config.cjs"],
-  "ignoreExportsUsedInFile": { "interface": true, "type": true },
-  "ignoreIssues": {
-    "src/components/ui/**": ["exports"],
-    "src/stories/lexical.ts": ["exports"]
-  }
-}

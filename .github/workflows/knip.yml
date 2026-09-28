@@ -2,7 +2,12 @@ name: Knip
 
 # Unused files, dependencies and exports. tsc and ESLint only see one module at
 # a time, so code nothing imports any more — and packages nothing uses — slip
-# past them. Config lives in knip.json.
+# past them. Config lives in knip.jsonc.
+#
+# The production run looks only at code the app, the build and the content
+# scripts reach, so an export that only tests import shows up there. A helper
+# its own module uses, but only tests import, is tagged `@internal` with the
+# name of its caller, and that run skips it.
 #
 # Admin components wired by string path in the Payload config are only seen
 # through src/app/(payload)/admin/importMap.js, so knip is as current as the
@@ -36,3 +41,5 @@ jobs:
       - run: pnpm install --frozen-lockfile
 
       - run: pnpm knip
+
+      - run: pnpm knip --production

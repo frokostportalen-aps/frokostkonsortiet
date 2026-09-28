@@ -1,0 +1,42 @@
+{
+  "$schema": "https://unpkg.com/knip@6/schema.json",
+
+  // A trailing `!` marks a production pattern: `knip --production` only follows
+  // those, so an export reached from nothing but tests shows up there.
+  "entry": [
+    // Only named on the postbuild command line, which knip does not parse.
+    "next-sitemap.config.cjs",
+    // The plugins below treat these as config files, which never count as
+    // production code; listing them here makes them ordinary modules.
+    "src/payload.config.ts!",
+    "next.config.ts!",
+    // The content scripts and the prebuild guard ship with the site too.
+    "scripts/{seed-tenants,prune-media,prune-versions,add-page}.ts!",
+    "scripts/assert-importmap.mjs!"
+  ],
+  "project": [
+    "**/*.{js,mjs,cjs,ts,tsx,css,mdx}!",
+    // Generated; the Payload plugin excluded these before we took over its config.
+    "!src/migrations/**",
+    "!src/payload-types.ts",
+    // Part of the project, not of production.
+    "!src/stories/**!",
+    "!tests/**!",
+    "!vitest.setup.ts!"
+  ],
+  // Keep the plugins' entry points, but let the entries above handle the
+  // config files themselves. The admin import map is still reached through
+  // the admin layout, which imports it.
+  "payload": { "config": [] },
+  "next": { "config": [] },
+
+  // A type that is part of another exported type in the same file stays
+  // exported, so consumers can name it.
+  "ignoreExportsUsedInFile": { "interface": true, "type": true },
+  "ignoreIssues": {
+    // Vendored shadcn components keep their full export lists.
+    "src/components/ui/**": ["exports"],
+    // Kept in step with the seed's copy, per its header comment.
+    "src/stories/lexical.ts": ["exports"]
+  }
+}

@@ -64,6 +64,8 @@ const dbHosts = (url: string): string[] | null => {
  * Treat the target as production unless it is clearly a local/dev database.
  * Fails CLOSED: an empty, malformed or partly-remote connection string counts
  * as production, so a format we didn't anticipate can never open the door.
+ *
+ * @internal Used by `assertLocalDatabase`; exported for its unit tests.
  */
 export const isProduction = (): boolean => {
   if (/production/i.test(process.env.DOTENV_CONFIG_PATH ?? '')) return true
