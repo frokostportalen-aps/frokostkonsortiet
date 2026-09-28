@@ -13,7 +13,7 @@ import { assertLocalDatabase } from './seedTarget'
  * already exists it is left untouched. Pass `{ force: true }` to overwrite a
  * single page in place.
  *
- *   pnpm tsx scripts/add-page.ts
+ *   pnpm add:page
  *
  * Edit TENANT_SLUG and the page below, then run it. LOCAL ONLY: like the seed
  * it refuses a non-local database, so seed-shaped content can never land on a
