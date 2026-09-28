@@ -39,7 +39,18 @@ const GalleryCard = memo<{
   eyebrowStyle?: EyebrowStyle
   imageSizes: string
   onOpen: (index: number) => void
-}>(function GalleryCard({ item, index, bandIndex, eyebrowStyle, imageSizes, onOpen }) {
+  /** The rail is being pulled — as on the vendekort, the cards the pointer
+   *  crosses on its way somewhere shouldn't react to it. */
+  railDragging: boolean
+}>(function GalleryCard({
+  item,
+  index,
+  bandIndex,
+  eyebrowStyle,
+  imageSizes,
+  onOpen,
+  railDragging,
+}) {
   return (
     <div className="group relative flex h-full flex-col overflow-hidden rounded-lg">
       {/* In a row that mixes captioned and bare pictures, the bare ones take the
@@ -52,7 +63,10 @@ const GalleryCard = memo<{
       >
         <Media
           fill
-          imgClassName="object-cover transition-transform duration-500 ease-(--ease-settle) group-hover:scale-[1.03] motion-reduce:transition-none"
+          imgClassName={cn(
+            'object-cover transition-transform duration-500 ease-(--ease-settle) motion-reduce:transition-none',
+            !railDragging && 'group-hover:scale-[1.03]',
+          )}
           resource={item.image}
           size={imageSizes}
         />
@@ -84,41 +98,35 @@ const NAV_BUTTON =
  * focus moved in and trapped, Esc to close — and the arrow keys step through
  * the set, wrapping at the ends since a lightbox has no reason to stop.
  *
+ * Open and index are separate on purpose: closing only drops `open`, so the
+ * picture is still there to fade out with the overlay.
+ *
  * Focus is handed back by hand: the dialog is opened from state rather than a
  * `Dialog.Trigger`, so Radix has no trigger to return to, and `onReturnFocus`
- * puts it back on the card that opened it.
+ * puts it back on the card of the picture last shown.
  */
 const Lightbox: React.FC<{
   items: Shown[]
-  index: number | null
-  onIndex: (index: number | null) => void
+  index: number
+  open: boolean
+  onStep: (index: number) => void
+  onClose: () => void
   onReturnFocus: (index: number) => void
-}> = ({ items, index, onIndex, onReturnFocus }) => {
-  // The last picture shown, kept through the close so the content fades out
-  // with the overlay instead of vanishing a frame ahead of it.
-  const [lastShown, setLastShown] = useState(0)
-  if (index !== null && index !== lastShown) setLastShown(index)
-  const shown = index ?? lastShown
-  const item = items[shown]
-
-  return (
-    <Dialog.Root onOpenChange={(open) => !open && onIndex(null)} open={index !== null}>
-      <Dialog.Portal>
-        <Dialog.Overlay className="fixed inset-0 z-50 bg-black/90 data-[state=closed]:animate-out data-[state=open]:animate-in data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0" />
-        {item && (
-          <LightboxContent
-            index={shown}
-            item={item}
-            onClose={() => onIndex(null)}
-            onReturnFocus={() => onReturnFocus(shown)}
-            onStep={(direction) => onIndex((shown + direction + items.length) % items.length)}
-            total={items.length}
-          />
-        )}
-      </Dialog.Portal>
-    </Dialog.Root>
-  )
-}
+}> = ({ items, index, open, onStep, onClose, onReturnFocus }) => (
+  <Dialog.Root onOpenChange={(next) => !next && onClose()} open={open}>
+    <Dialog.Portal>
+      <Dialog.Overlay className="fixed inset-0 z-50 bg-black/90 data-[state=closed]:animate-out data-[state=open]:animate-in data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0" />
+      <LightboxContent
+        index={index}
+        item={items[index]!}
+        onClose={onClose}
+        onReturnFocus={() => onReturnFocus(index)}
+        onStep={(direction) => onStep((index + direction + items.length) % items.length)}
+        total={items.length}
+      />
+    </Dialog.Portal>
+  </Dialog.Root>
+)
 
 /** Room the frame loses to its padding, the caption rows and the gap between them. */
 const FRAME_CHROME_HEIGHT = '10rem'
@@ -130,10 +138,21 @@ const FRAME_CHROME_HEIGHT = '10rem'
  * three times the pixels on every step.
  */
 const lightboxSizes = (image: MediaType) => {
-  const ratio = image.width && image.height ? (image.width / image.height).toFixed(3) : null
-  const fit = (frameWidth: string) =>
-    ratio ? `min(${frameWidth}, calc((100vh - ${FRAME_CHROME_HEIGHT}) * ${ratio}))` : frameWidth
-  return `(max-width: 640px) ${fit('calc(100vw - 2rem)')}, ${fit('calc(100vw - 12rem)')}`
+  const phone = 'calc(100vw - 2rem)'
+  const wide = 'calc(100vw - 12rem)'
+  if (!image.width || !image.height) return `(max-width: 640px) ${phone}, ${wide}`
+  // `svh` is the viewport with the mobile toolbars showing — the height the
+  // picture actually gets.
+  const byHeight = `calc((100svh - ${FRAME_CHROME_HEIGHT}) * ${(image.width / image.height).toFixed(3)})`
+  // A browser that can't parse `min()` or `svh` in `sizes` drops that entry
+  // and takes the next one, so each fitted size is followed by its plain
+  // frame width rather than letting the whole list fall back to 100vw.
+  return [
+    `(max-width: 640px) min(${phone}, ${byHeight})`,
+    `(max-width: 640px) ${phone}`,
+    `min(${wide}, ${byHeight})`,
+    wide,
+  ].join(', ')
 }
 
 /**
@@ -179,10 +198,16 @@ const LightboxContent: React.FC<{
         onReturnFocus()
       }}
       // The content covers the whole screen, so Radix never sees a click
-      // "outside" it. The dark space around the picture is closed by hand: a
-      // press on anything that isn't the picture, its text or a control.
+      // "outside" it. The dark space is closed by hand instead: the boxes that
+      // make it up are marked as backdrop, and a primary press landing on one
+      // of them — not on the picture, its text or a control — closes.
+      data-lightbox-backdrop=""
       onPointerDown={(event) => {
-        if (!(event.target as HTMLElement).closest('button, img, p')) onClose()
+        if (
+          event.button === 0 &&
+          (event.target as HTMLElement).hasAttribute('data-lightbox-backdrop')
+        )
+          onClose()
       }}
       onKeyDown={(event) => {
         if (event.key === 'ArrowRight') onStep(1)
@@ -191,13 +216,25 @@ const LightboxContent: React.FC<{
     >
       <Dialog.Title className="sr-only">{describe(item)}</Dialog.Title>
 
-      <div className="flex w-full min-h-0 flex-1 items-center gap-2 md:gap-4">
+      <div
+        className="flex w-full min-h-0 flex-1 items-center gap-2 md:gap-4"
+        data-lightbox-backdrop=""
+      >
         {arrow(-1)}
-        <div className="relative h-full min-h-0 flex-1">
+        {/* The picture is drawn at its own size inside the frame, not filled
+            across it, so the dark bars beside a portrait photo are the frame —
+            backdrop — rather than transparent parts of the image. */}
+        <div
+          className="flex h-full min-h-0 min-w-0 flex-1 items-center justify-center"
+          data-lightbox-backdrop=""
+        >
+          {/* No wrapper of Media's own: the <img> has to be the frame's direct
+              flex child for `max-h-full` to resolve against the frame. */}
           <Media
-            fill
-            imgClassName="object-contain"
+            htmlElement={null}
+            imgClassName="h-auto max-h-full w-auto max-w-full"
             key={item.image.id}
+            pictureClassName="contents"
             loading="eager"
             resource={item.image}
             size={lightboxSizes(item.image)}
@@ -208,10 +245,13 @@ const LightboxContent: React.FC<{
 
       {/* On a phone the arrows sit in this row's corners; the padding keeps
           the caption clear of them. */}
-      <div className="w-full max-w-3xl text-center text-white max-sm:min-h-11 max-sm:px-14">
-        {item.caption && <p className="text-sm md:text-base">{item.caption}</p>}
+      <div
+        className="w-full max-w-3xl text-center text-white max-sm:min-h-11 max-sm:px-14"
+        data-lightbox-backdrop=""
+      >
+        {item.caption && <p className="mx-auto w-fit text-sm md:text-base">{item.caption}</p>}
         {many && (
-          <p aria-live="polite" className="mt-1 text-xs tabular-nums text-white/60">
+          <p aria-live="polite" className="mx-auto mt-1 w-fit text-xs tabular-nums text-white/60">
             {index + 1} / {total}
           </p>
         )}
@@ -248,20 +288,27 @@ export const GalleryClient: React.FC<Props> = ({
       ),
     [images],
   )
-  // "Skiftevis" walks the bands that are actually drawn: counting the bare
-  // pictures too would skip steps and could set the two dark tones side by side.
-  const bandIndexes = useMemo(() => {
-    let n = 0
-    return items.map((item) => (item.caption ? n++ : n))
-  }, [items])
   const rowRef = useRef<HTMLDivElement>(null)
   const returnFocus = useCallback((index: number) => {
     rowRef.current?.querySelector<HTMLElement>(`[data-gallery-index="${index}"]`)?.focus()
   }, [])
   const rail = useRail(items.length)
-  const [open, setOpen] = useState<number | null>(null)
+  const [index, setIndex] = useState(0)
+  const [open, setOpen] = useState(false)
+  const openAt = useCallback((i: number) => {
+    setIndex(i)
+    setOpen(true)
+  }, [])
 
   if (!items.length) return null
+
+  // Clamped, because live preview can take pictures away under an open
+  // lightbox — and an index past the end would leave the overlay up with no
+  // content (and so no way to close it) on top of it.
+  const shown = Math.min(index, items.length - 1)
+  // "Skiftevis" walks the bands that are actually drawn: counting the bare
+  // pictures too would skip steps and could set the two dark tones side by side.
+  let band = 0
 
   return (
     <div className="container" ref={rowRef}>
@@ -281,10 +328,11 @@ export const GalleryClient: React.FC<Props> = ({
             <GalleryCard
               eyebrowStyle={eyebrowStyle}
               imageSizes={rail.imageSizes}
-              bandIndex={bandIndexes[i]!}
+              bandIndex={item.caption ? band++ : band}
               index={i}
               item={item}
-              onOpen={setOpen}
+              onOpen={openAt}
+              railDragging={rail.dragging}
             />
           </li>
         ))}
@@ -294,7 +342,14 @@ export const GalleryClient: React.FC<Props> = ({
         <RailArrows labels={{ prev: 'Forrige billeder', next: 'Næste billeder' }} rail={rail} />
       )}
 
-      <Lightbox index={open} items={items} onIndex={setOpen} onReturnFocus={returnFocus} />
+      <Lightbox
+        index={shown}
+        items={items}
+        onClose={() => setOpen(false)}
+        onReturnFocus={returnFocus}
+        onStep={setIndex}
+        open={open}
+      />
     </div>
   )
 }
