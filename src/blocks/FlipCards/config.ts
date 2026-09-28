@@ -2,7 +2,7 @@ import type { Block } from 'payload'
 
 import { eyebrowField } from '@/fields/eyebrow'
 import { ICON_OPTIONS } from '@/blocks/IconRow/options'
-import { TONE_OPTIONS } from './options'
+import { toneField } from '@/fields/tone'
 
 export const FlipCards: Block = {
   slug: 'flipCards',
@@ -79,17 +79,7 @@ export const FlipCards: Block = {
           label: 'Forsidetekst',
           admin: { description: 'Kort – fx "Small" eller "Mælk". Sættes i sitets versaler.' },
         },
-        {
-          name: 'tone',
-          type: 'select',
-          defaultValue: 'auto',
-          label: 'Farve',
-          options: [...TONE_OPTIONS],
-          admin: {
-            description:
-              'Farven på bagsiden og på forsidens bånd. "Skiftevis" giver kortene rækkens egen rytme – vælg kun en fast farve, hvis et bestemt kort skal skille sig ud.',
-          },
-        },
+        toneField({ description: 'Farven på bagsiden og på forsidens bånd.' }),
         {
           name: 'title',
           type: 'text',

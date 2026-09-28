@@ -7,6 +7,7 @@ import { Content } from './Content/config'
 import { FAQ } from './FAQ/config'
 import { FlipCards } from './FlipCards/config'
 import { FormBlock } from './Form/config'
+import { Gallery } from './Gallery/config'
 import { IconRow } from './IconRow/config'
 import { MediaBlock } from './MediaBlock/config'
 import { MediaContent } from './MediaContent/config'
@@ -42,6 +43,7 @@ export const blockConfigs: Block[] = [
   FAQ,
   IconRow,
   FlipCards,
+  Gallery,
   Testimonials,
   Stats,
   PriceMenu,

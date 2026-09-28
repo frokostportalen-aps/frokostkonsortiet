@@ -212,6 +212,7 @@ export interface Page {
     | FAQBlock
     | IconRowBlock
     | FlipCardsBlock
+    | GalleryBlock
     | TestimonialsBlock
     | StatsBlock
     | PriceMenuBlock
@@ -1052,6 +1053,38 @@ export interface FlipCardsBlock {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "GalleryBlock".
+ */
+export interface GalleryBlock {
+  heading?: string | null;
+  /**
+   * Kort linje under overskriften, sat i sitets versaler – fx "Her er 3 regnestykker". Til den halve overskrift, ikke til en sætning.
+   */
+  eyebrow?: string | null;
+  intro?: string | null;
+  /**
+   * Samme kort som vendekortene: op til tre står side om side, fra det fjerde bliver rækken en slider. Et klik åbner billedet i stor størrelse.
+   */
+  images?:
+    | {
+        image: string | Media;
+        /**
+         * Valgfri. Står i et farvet bånd under billedet og under det store billede. Uden tekst fylder billedet hele kortet.
+         */
+        caption?: string | null;
+        /**
+         * Farven på båndet under billedet. "Skiftevis" giver kortene rækkens egen rytme – vælg kun en fast farve, hvis et bestemt kort skal skille sig ud.
+         */
+        tone?: ('auto' | 'brand' | 'ink' | 'sand' | 'muted') | null;
+        id?: string | null;
+      }[]
+    | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'gallery';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "TestimonialsBlock".
  */
 export interface TestimonialsBlock {
@@ -1744,6 +1777,7 @@ export interface PagesSelect<T extends boolean = true> {
         faq?: T | FAQBlockSelect<T>;
         iconRow?: T | IconRowBlockSelect<T>;
         flipCards?: T | FlipCardsBlockSelect<T>;
+        gallery?: T | GalleryBlockSelect<T>;
         testimonials?: T | TestimonialsBlockSelect<T>;
         stats?: T | StatsBlockSelect<T>;
         priceMenu?: T | PriceMenuBlockSelect<T>;
@@ -1947,6 +1981,25 @@ export interface FlipCardsBlockSelect<T extends boolean = true> {
               id?: T;
             };
         note?: T;
+        id?: T;
+      };
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "GalleryBlock_select".
+ */
+export interface GalleryBlockSelect<T extends boolean = true> {
+  heading?: T;
+  eyebrow?: T;
+  intro?: T;
+  images?:
+    | T
+    | {
+        image?: T;
+        caption?: T;
+        tone?: T;
         id?: T;
       };
   id?: T;

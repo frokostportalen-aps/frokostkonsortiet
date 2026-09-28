@@ -6,7 +6,7 @@
  * The lexical helpers (`heading`, `p`, `list`, `richText`, `link`) are
  * re-exported here so a page file only needs one import.
  */
-import type { ToneName } from '@/blocks/FlipCards/options'
+import type { ToneName } from '@/utilities/tones'
 
 import { heading, link, list, p, paragraph, richText, text } from '../lexical'
 
@@ -317,6 +317,21 @@ export const flipCards = (
   blockName = 'Vendekort',
 ) => ({
   blockType: 'flipCards',
+  blockName,
+  ...opts,
+})
+
+/** Billedgalleri — the vendekort's look, with a lightbox instead of a back. */
+export const gallery = (
+  opts: {
+    heading?: string
+    eyebrow?: string
+    intro?: string
+    images: { image: string; caption?: string; tone?: ToneName }[]
+  },
+  blockName = 'Billedgalleri',
+) => ({
+  blockType: 'gallery',
   blockName,
   ...opts,
 })
