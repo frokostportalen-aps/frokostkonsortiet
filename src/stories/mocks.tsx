@@ -10,18 +10,7 @@ import type { Media } from '@/payload-types'
  * (`./assets`), so content the client owns can be moved or deleted without
  * touching the component documentation.
  */
-export {
-  align,
-  block,
-  heading,
-  link,
-  list,
-  p,
-  paragraph,
-  richText,
-  sectionHeader,
-  text,
-} from './lexical'
+export { align, heading, list, p, richText, sectionHeader } from './lexical'
 
 /**
  * Where this Storybook is served from: `/` locally, `/<repo>/` on GitHub Pages.
@@ -36,7 +25,7 @@ const basePath = typeof document === 'undefined' ? '/' : new URL('.', document.b
  * A Media document pointing at one of Storybook's own photos in
  * `stories/assets/`, served under `<base>img/`.
  */
-export const media = (
+const media = (
   filename: string,
   { width = 1600, height = 1067, alt = 'Eksempelbillede' } = {},
 ): Media =>

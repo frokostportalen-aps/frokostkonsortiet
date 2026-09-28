@@ -50,7 +50,7 @@ export type TenantFont = {
   headingVar?: string
 }
 
-export const tenantFonts: Record<string, TenantFont> = {
+const tenantFonts: Record<string, TenantFont> = {
   'frokost-konsortiet': { className: poppins.variable, sansVar: 'var(--font-poppins)' },
   smagssans: {
     className: mulish.variable,

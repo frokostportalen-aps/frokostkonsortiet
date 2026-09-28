@@ -4,12 +4,12 @@ import { unstable_cache } from 'next/cache'
 
 import { ownedByTenant } from '@/data/tenantScope'
 
-export async function getRedirects(tenantSlug: string, depth = 1) {
+async function getRedirects(tenantSlug: string) {
   const payload = await getPayload({ config: configPromise })
 
   const { docs: redirects } = await payload.find({
     collection: 'redirects',
-    depth,
+    depth: 1,
     limit: 0,
     pagination: false,
     where: ownedByTenant(tenantSlug),

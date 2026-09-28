@@ -108,7 +108,7 @@ test user.
 `upsertPage` helper, without touching the declarative data files:
 
 ```
-pnpm tsx scripts/add-page.ts
+pnpm add:page
 ```
 
 It carries the same local-only guard as the seed — a page on a live site is

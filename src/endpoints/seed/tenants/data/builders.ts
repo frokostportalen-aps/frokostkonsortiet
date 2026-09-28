@@ -215,7 +215,9 @@ export const steps = (
   items,
 })
 
-/** The people behind the food — portraits with a personal one-liner. */
+/** The people behind the food — portraits with a personal one-liner.
+ *
+ * @public No seed page uses it yet; kept for the first page that places this block. */
 export const team = (
   members: { image: string; name: string; role?: string; quote?: string }[],
   heading_?: string,
@@ -295,7 +297,9 @@ export const iconRow = (
 })
 
 /** Cards with a front you see and a back you turn to. Up to three stand side
- *  by side; from the fourth the row becomes a rail you swipe. */
+ *  by side; from the fourth the row becomes a rail you swipe.
+ *
+ * @public No seed page uses it yet; kept for the first page that places this block. */
 export const flipCards = (
   opts: {
     heading?: string
@@ -321,7 +325,9 @@ export const flipCards = (
   ...opts,
 })
 
-/** Billedgalleri — the vendekort's look, with a lightbox instead of a back. */
+/** Billedgalleri — the vendekort's look, with a lightbox instead of a back.
+ *
+ * @public No seed page uses it yet; kept for the first page that places this block. */
 export const gallery = (
   opts: {
     heading?: string

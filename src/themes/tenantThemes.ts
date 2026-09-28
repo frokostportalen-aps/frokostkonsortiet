@@ -175,7 +175,7 @@ export type ThemeVars = {
   heroScrim?: string
 }
 
-export const tenantThemes: Record<string, ThemeVars> = {
+const tenantThemes: Record<string, ThemeVars> = {
   // ── Frokost Konsortiet — the parent. Graphic, structural: near-black ink +
   //    a curry-yellow accent that echoes the photography's turmeric and brass.
   //    The parent is the "institution"; the kitchens carry the colour.

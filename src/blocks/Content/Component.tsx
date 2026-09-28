@@ -4,7 +4,6 @@ import React from 'react'
 import RichText from '@/components/RichText'
 
 import type { ContentBlock as ContentBlockProps } from '@/payload-types'
-import type { Signature } from '@/themes/dialect'
 
 import { getDialect } from '@/themes/dialect'
 import { hasSectionHeader } from '@/utilities/lexicalText'

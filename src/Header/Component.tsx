@@ -3,7 +3,6 @@ import type { Header as HeaderType } from '@/payload-types'
 import { HeaderClient } from './Component.client'
 import { getCachedGlobal } from '@/utilities/getGlobals'
 import { getDialect } from '@/themes/dialect'
-import { getTenantTheme } from '@/themes/tenantThemes'
 import { resolveTenantBrand } from '@/themes/resolveTenantBrand'
 import React from 'react'
 

@@ -19,4 +19,4 @@ import { fraJorden } from './frajorden'
 
 export const TENANTS: TenantDef[] = [frokostKonsortiet, smagssans, fraJorden]
 
-export type { NavFactory, PageContext, PageFactory, PostFactory, SeedDoc, TenantDef, TenantMeta } from './types'
+export type { TenantDef } from './types'

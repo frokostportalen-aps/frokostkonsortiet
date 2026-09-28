@@ -40,7 +40,7 @@ let preference: Preference | undefined
 export const readPreference = (): Preference => (preference ??= storedPreference())
 
 /** What the page should be dressed in: the choice, else the OS, else ours. */
-export const readTheme = (): Theme => {
+const readTheme = (): Theme => {
   const chosen = readPreference()
   if (chosen !== 'auto') return chosen
   // `matches` is false both for "prefers light" and for a browser with no

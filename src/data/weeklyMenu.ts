@@ -136,6 +136,8 @@ const capitalize = (value: string): string => value.charAt(0).toUpperCase() + va
  * "Gris. Svinekød". Splitting on the first ". " instead of parsing a number
  * covers both without a special case, and anything unsplittable keeps the whole
  * string as its own name rather than being dropped.
+ *
+ * @internal Used by `allergenLegend`; exported for its unit tests.
  */
 export const parseAllergen = (line: string): Allergen => {
   const trimmed = line.trim()
@@ -148,6 +150,8 @@ export const parseAllergen = (line: string): Allergen => {
  * A day's legend, keyed by lower-cased code so a dish's "gris" and a legend's
  * "Gris" still meet — while the entry keeps the kitchen's own casing for
  * rendering.
+ *
+ * @internal Used by `normalizeDay`; exported for its unit tests.
  */
 export const allergenLegend = (lines: string[] | null | undefined): Map<string, Allergen> => {
   const legend = new Map<string, Allergen>()
@@ -237,7 +241,11 @@ const normalizeDay = (day: ApiDay): MenuDay | null => {
   }
 }
 
-/** An upstream week payload → the days worth rendering, in date order. */
+/**
+ * An upstream week payload → the days worth rendering, in date order.
+ *
+ * @internal Used by `fetchWeek`; exported for its unit tests.
+ */
 export const normalizeWeek = (payload: unknown, week: IsoWeek): WeeklyMenu => {
   const days = (Array.isArray(payload) ? (payload as ApiDay[]) : [])
     .map(normalizeDay)
@@ -256,6 +264,8 @@ export const normalizeWeek = (payload: unknown, week: IsoWeek): WeeklyMenu => {
  *
  * The endpoint also serves `language=en`; every site here is Danish, so that
  * stays a constant until one of them isn't.
+ *
+ * @internal Used by `fetchWeek`; exported for its unit tests.
  */
 export const menuRequestUrl = ({
   kitchenId,
@@ -309,7 +319,7 @@ async function fetchWeek(kitchenId: string, week: IsoWeek): Promise<WeeklyMenu |
  * Weeks with nothing published are dropped, so an empty `weeks` means "nothing
  * published"; `unavailable` means the upstream itself couldn't be read.
  */
-export async function getWeeklyMenu(kitchenId: string): Promise<WeeklyMenuResult> {
+async function getWeeklyMenu(kitchenId: string): Promise<WeeklyMenuResult> {
   const start = currentIsoWeek()
   const wanted = Array.from({ length: WEEKS_AHEAD + 1 }, (_, i) => addWeeks(start, i))
 

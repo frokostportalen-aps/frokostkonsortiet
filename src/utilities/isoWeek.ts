@@ -45,6 +45,8 @@ export const todayIsoInCopenhagen = (now: Date = new Date()): string => ymdForma
 /**
  * The same day as a UTC midnight Date, so all the arithmetic below stays free
  * of daylight-saving offsets.
+ *
+ * @internal Used by `currentIsoWeek`; exported for its unit tests.
  */
 export const todayInCopenhagen = (now?: Date): Date =>
   new Date(`${todayIsoInCopenhagen(now)}T00:00:00.000Z`)
@@ -54,6 +56,8 @@ export const todayInCopenhagen = (now?: Date): Date =>
  *
  * Anchored on 4 January, which by definition always falls in ISO week 1 —
  * the standard trick, and the reason this needs no lookup table.
+ *
+ * @internal Used by `addWeeks`; exported for its unit tests.
  */
 export const mondayOfIsoWeek = ({ week, year }: IsoWeek): Date => {
   const jan4 = new Date(Date.UTC(year, 0, 4))
