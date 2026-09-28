@@ -10,6 +10,11 @@ import { cn } from '@/utilities/ui'
  *  swipe — the one number the design names ("flere end 3"). */
 const GRID_MAX = 3
 
+/** Every count a grid can hold. Typed off `GRID_MAX`'s tables below: raising
+ *  the break without adding their rows is a compile error, not a quiet
+ *  fallback to the three-card layout. */
+type GridCount = 1 | 2 | typeof GRID_MAX
+
 /** How far a mouse has to travel before the gesture counts as dragging the rail
  *  rather than pressing the card under it. Small enough that a deliberate pull
  *  takes hold at once, large enough that a click with an unsteady hand still
@@ -34,6 +39,9 @@ const DRAG_THRESHOLD = 6
  */
 export const useRail = (count: number) => {
   const enabled = count > GRID_MAX
+  // What the grid tables are keyed by. An empty row renders nothing, so 0 is
+  // folded into 1 only to keep the lookup total.
+  const gridCount = Math.min(Math.max(count, 1), GRID_MAX) as GridCount
   const ref = useRef<HTMLUListElement>(null)
   const [edges, setEdges] = useState({ start: true, end: false })
   // Only the *state* of dragging is React's — the scroll position itself is
@@ -147,6 +155,11 @@ export const useRail = (count: number) => {
     // room back and the matching negative margin keeps the section's spacing
     // exactly as it was.
     'flex gap-5 overflow-x-auto -mx-4 -my-8 px-4 py-8 md:gap-6',
+    // Snapping aligns a card's start with the scrollport's edge, which the
+    // padding above sits inside — without the matching scroll padding the
+    // first card snaps 16px in, the rail never rests at its start, and the
+    // "previous" arrow can't switch off.
+    'scroll-px-4',
     // The scrollbar is drawn along the bottom of the padding box — which the
     // negative margin has pulled the arrow row into — so on any platform with
     // classic scrollbars (macOS the moment a mouse is plugged in, Windows
@@ -180,18 +193,18 @@ export const useRail = (count: number) => {
           ref,
           tabIndex: 0,
         }
-      : { className: cn('grid gap-6 md:gap-8', GRID_COLS[count] ?? GRID_COLS[3]), ref },
+      : { className: cn('grid gap-6 md:gap-8', GRID_COLS[gridCount]), ref },
     /** For each `<li>`: a fixed width on the rail, the grid cell otherwise. */
     itemClassName: enabled ? RAIL_ITEM : undefined,
     /** What the browser should download for one card's photo (see `IMAGE_SIZES`). */
-    imageSizes: enabled ? IMAGE_SIZES.rail : (IMAGE_SIZES[count] ?? IMAGE_SIZES[3]),
+    imageSizes: enabled ? IMAGE_SIZES.rail : IMAGE_SIZES[gridCount],
   }
 }
 
 export type Rail = ReturnType<typeof useRail>
 
 /** One or two cards stay at a card's width, centred, rather than stretching. */
-const GRID_COLS: Record<number, string> = {
+const GRID_COLS: Record<GridCount, string> = {
   1: 'mx-auto max-w-[22rem]',
   2: 'mx-auto max-w-[46rem] sm:grid-cols-2',
   3: 'sm:grid-cols-2 lg:grid-cols-3',
@@ -206,7 +219,7 @@ const RAIL_ITEM = 'w-60 shrink-0 snap-start sm:w-68'
  * capped by `GRID_COLS` — asking for a share of the viewport there fetches two
  * to four times the pixels the card can show.
  */
-const IMAGE_SIZES: Record<number | 'rail', string> = {
+const IMAGE_SIZES: Record<GridCount | 'rail', string> = {
   rail: '(max-width: 640px) 240px, 272px',
   // The single card is capped at 22rem at every width, phones included.
   1: '(max-width: 390px) 90vw, 352px',
@@ -220,25 +233,23 @@ export const RailArrows: React.FC<{
   labels: { prev: string; next: string }
 }> = ({ rail: { edges, step }, labels }) => (
   <div className="mt-6 flex justify-center gap-3">
-    <Button
-      aria-label={labels.prev}
-      disabled={edges.start}
-      onClick={() => step(-1)}
-      size="icon"
-      type="button"
-      variant="outline"
-    >
-      <ChevronLeft aria-hidden className="size-5" />
-    </Button>
-    <Button
-      aria-label={labels.next}
-      disabled={edges.end}
-      onClick={() => step(1)}
-      size="icon"
-      type="button"
-      variant="outline"
-    >
-      <ChevronRight aria-hidden className="size-5" />
-    </Button>
+    {(
+      [
+        { direction: -1, label: labels.prev, disabled: edges.start, Icon: ChevronLeft },
+        { direction: 1, label: labels.next, disabled: edges.end, Icon: ChevronRight },
+      ] as const
+    ).map(({ direction, label, disabled, Icon }) => (
+      <Button
+        aria-label={label}
+        disabled={disabled}
+        key={direction}
+        onClick={() => step(direction)}
+        size="icon"
+        type="button"
+        variant="outline"
+      >
+        <Icon aria-hidden className="size-5" />
+      </Button>
+    ))}
   </div>
 )
