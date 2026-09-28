@@ -1,12 +1,18 @@
 # Seeding & content
 
 The seed turns plain TypeScript data into each site's pages, posts, media,
-header and footer. It is **additive by default** — safe to run after editors
-have written real content — and lives in `src/endpoints/seed/tenants/`.
+header and footer. It is **additive by default** and lives in
+`src/endpoints/seed/tenants/`.
+
+> ⚠️ **No script in this repo touches production.** Editors write the content on
+> the live sites, so nothing there may be created, overwritten or deleted from a
+> terminal — every `:prod` command is gone, and each script refuses a non-local
+> `DATABASE_URL` before it connects. See
+> [ADR 0003](adr/0003-no-production-seed.md).
 
 For the production-specific gotchas (R2 image storage, the import map landmine,
-cache/redeploy after a seed, restoring an admin login) see
-[operations.md](operations.md). The design rationale is
+restoring an admin login) see [operations.md](operations.md). The design
+rationale for the seed itself is
 [ADR 0002](adr/0002-additive-per-tenant-seed.md).
 
 ## Structure — one folder per tenant
@@ -64,24 +70,32 @@ The engine uploads every image in the folder once, keyed on filename
 ## Running the seed
 
 ```
-pnpm seed:tenants                       # additive (default) — local docker stack
-pnpm seed:tenants -- --force            # destructive reset — local
-pnpm seed:tenants:prod                  # additive — prod DB (.env.production)
-pnpm seed:tenants:prod -- --force --yes # destructive reset — prod (deliberate)
+pnpm seed:tenants              # additive (default) — local docker stack
+pnpm seed:tenants -- --force   # destructive reset — local
 ```
 
-Run the local variant **inside the container** so fetched media lands in the
-app's media volume: `docker compose exec app pnpm seed:tenants`.
+Run it **inside the container** so fetched media lands in the app's media
+volume: `docker compose exec app pnpm seed:tenants`.
 
 - **Additive** (default): pages/posts are upserted on `(tenant, slug)` and media
-  on filename. Existing documents — including editor edits — are never touched.
+  on filename. Existing pages, posts and media — including editor edits — are
+  never touched. The `tenants` documents themselves are the exception: `name`,
+  `domains`, `isMain` and `kitchenId` are written from the seed data on every
+  run, so the site's identity stays in code.
 - **`--force`** (alias `--reset`): wipes each tenant's `posts`/`pages`/`media`
   and rebuilds them from the seed. The `header`/`footer`/`brand` globals are
   rebuilt too — recreated rather than updated, so a field the seed data does
   not mention cannot survive the reset. Any orphaned version rows are swept at
-  the end (see below). It never touches `users` or `tenants`.
-  Against production it additionally requires **`--yes`** (the guard treats any
-  non-local `DATABASE_URL` host as production — see `scripts/seedTarget.ts`).
+  the end (see below). It never deletes `users` or `tenants` — the tenant
+  documents are updated in place, as above, not wiped.
+- **Non-local databases are refused.** Before anything is written,
+  `assertLocalDatabase()` (`scripts/seedTarget.ts`) checks the target and exits.
+  No flag turns that off. It **fails closed**: the run is allowed only when
+  *every* host in `DATABASE_URL` is local, so an empty, malformed or
+  partly-remote connection string — or a `DOTENV_CONFIG_PATH` pointing at a
+  production env file — counts as production and is refused. A URL the Mongo
+  driver and the guard could read differently (an unescaped `@` in the
+  credentials) is refused rather than interpreted.
 
 **Post author:** the engine reuses an existing super-admin as the post author
 and only creates the dev `admin@example.com` user on a database with **no users
@@ -97,20 +111,30 @@ test user.
 pnpm tsx scripts/add-page.ts
 ```
 
+It carries the same local-only guard as the seed — a page on a live site is
+created in the admin panel, not from a script.
+
 ## Clean up unused media
 
 `prune-media` deletes media that **no document references** (orphans left when
 an image is renamed/removed, or a page an upload belonged to is deleted). It
-removes both the media document and the Cloudflare R2 object.
+removes the media document and its file — the one in the local `public/media`
+volume. It cannot reach the R2 bucket: the adapter is only active when
+`R2_BUCKET` is set, which it is not locally, and this never runs anywhere else.
 
 ```
-pnpm prune:media                       # dry run — lists orphans, deletes nothing
-pnpm prune:media -- --apply            # delete (local)
-pnpm prune:media:prod -- --apply --yes # delete against prod (deliberate)
+pnpm prune:media               # dry run — lists orphans, deletes nothing
+pnpm prune:media -- --apply    # delete (local)
 ```
 
-It is safe by design: a media is an orphan only if its id appears in **no** other
-document (it scans every collection for referenced ObjectIds).
+**Local only.** "Orphan" means "no document references it" — which is also true
+of an image an editor uploaded yesterday and has not placed on a page yet. On a
+live site that is the customer's own work, so this never runs there; the guard
+refuses before connecting, so not even the dry run reaches production.
+
+Within a local database it is safe by design: a media is an orphan only if its
+id appears in **no** other document (it scans every collection for referenced
+ObjectIds).
 
 ## Clean up orphaned versions
 
@@ -121,10 +145,11 @@ when a draft-enabled page or post is removed outside Payload's own delete path
 (straight in MongoDB, say).
 
 ```
-pnpm prune:versions                       # dry run — lists orphans, deletes nothing
-pnpm prune:versions -- --apply            # delete (local)
-pnpm prune:versions:prod -- --apply --yes # delete against prod (deliberate)
+pnpm prune:versions             # dry run — lists orphans, deletes nothing
+pnpm prune:versions -- --apply  # delete (local)
 ```
+
+Local only, like everything else here.
 
 Payload's own delete cascades to versions, and a `--force` reseed sweeps what
 is left, so a healthy database reports nothing. Rows turning up here mean a

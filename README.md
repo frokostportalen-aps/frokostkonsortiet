@@ -226,15 +226,14 @@ That's it! The Docker instance will help you get up and running quickly while al
 
 ### Seed
 
-To seed the database with a few pages, posts, and projects you can click the 'seed database' link from the admin panel.
+This project replaced the template's 'seed database' admin link with a CLI seed
+of its own — `pnpm seed:tenants` — which fills a **local** database with every
+site's tenants, menus, pages, posts and media. See
+[docs/seeding.md](docs/seeding.md).
 
-The seed script will also create a demo user for demonstration purposes only:
-
-- Demo Author
-  - Email: `demo-author@payloadcms.com`
-  - Password: `password`
-
-> NOTICE: seeding the database is destructive because it drops your current database to populate a fresh one from the seed template. Only run this command if you are starting a new project or can afford to lose your current data.
+> NOTICE: the seed is local-only. Content on the live sites is written by
+> editors in the admin panel, and the script refuses to run against a non-local
+> database — see [ADR 0003](docs/adr/0003-no-production-seed.md).
 
 ## Production
 

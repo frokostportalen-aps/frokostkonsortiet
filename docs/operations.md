@@ -3,6 +3,11 @@
 Hard-won, non-obvious things about running this multi-tenant stack in
 production. See also [seeding.md](seeding.md) for the content seed itself.
 
+Note what is *not* here: a way to change production from a terminal. Content on
+the live sites is written by editors in the admin panel, and every script in
+this repo refuses a non-local database
+([ADR 0003](adr/0003-no-production-seed.md)).
+
 ## ⚠️ Import map must include the R2 upload handler
 
 **Symptom:** the production admin at `/admin` renders a completely **blank
@@ -39,35 +44,41 @@ entry**. Production (R2 on) then can't resolve the component and renders blank.
 - Media goes to **Cloudflare R2** only when `R2_BUCKET` is set (it is in
   `.env.production`). Without it — the local container — uploads fall back to the
   on-disk `public/media` volume.
-- ⚠️ **Local `:prod` runs and the deployed app point at the same R2 bucket.**
-  Running `pnpm seed:tenants:prod` or `pnpm prune:media:prod` from your machine
-  writes to / deletes from the **live** bucket. `--force` deletes a tenant's R2
-  objects (via the s3Storage delete hook) before re-uploading.
+- **Nothing you run locally can reach the live bucket.** Media is only ever
+  written or deleted there by the deployed app, acting on what an editor does in
+  the admin. `prune:media` is local-only like every other script, so it deletes
+  from the `public/media` volume and never from R2 — with no `R2_BUCKET` set, it
+  has no bucket to reach. Keeping it that way is the point: an image an editor
+  uploaded but has not placed on a page yet looks exactly like an orphan to it,
+  and an R2 object deleted from a laptop is gone for good.
 
-## Content changes need a redeploy (or the ISR window)
+## Production is editors' work — no script touches it
 
-The seed is a CLI script that writes to the DB directly. It **cannot bust the
-running server's Next route cache** (and runs with `disableRevalidate`). So:
+The customer writes content in the admin panel, so **no script may create,
+overwrite or delete anything on production**. Every `:prod` command is gone, and
+`seed-tenants`, `add-page`, `prune-media` and `prune-versions` all exit before
+connecting if `DATABASE_URL` is not a local host. No flag overrides it. The
+rationale is [ADR 0003](adr/0003-no-production-seed.md).
 
-- Pages that existed at the **last build** (home, om-os) stay **cached** with
-  their old content/media until something refreshes them.
-- **New slugs** (a brand-new page) render fresh on-demand and show immediately.
+New content for a live site is therefore a task in the admin, not a data file
+plus a deploy. Seed data is still what sets up a **fresh local database** and
+what a new site starts from before it is handed over.
 
-The `[tenant]`, `[tenant]/[slug]` and posts routes use ISR
-(`export const revalidate = 600`), so published pages self-refresh within ~10
-minutes. **After seeding production, trigger a redeploy** for an immediate
-refresh (a redeploy also rebuilds the admin import map cleanly).
+The one deliberate exception is **user administration** — creating or resetting
+a super-admin when mail is broken or you are locked out (see the last section).
+That is an account operation, not content, and it is done by hand with a
+throwaway script rather than a committed command.
 
-## Seeding production safely
+## When production content refreshes
 
-```
-pnpm seed:tenants:prod -- --force --yes
-```
+Edits made in the admin fire Payload's `afterChange` hooks, which call
+`revalidatePath`/`revalidateTag` in the running app — a published change is live
+right away, no deploy needed.
 
-Pre-flight worth doing first (read-only against the prod DB): confirm a
-super-admin exists and check how many pages/posts/media `--force` will delete.
-`--force` never touches `users` or `tenants`; it only wipes and rebuilds
-`pages`/`posts`/`media`. Redeploy afterwards (see above).
+The `[tenant]`, `[tenant]/[slug]` and posts routes also use ISR
+(`export const revalidate = 600`), which is the backstop: anything that reached
+the database **without** going through the running app (a direct MongoDB edit,
+say) shows up within ~10 minutes, or immediately after a redeploy.
 
 ## Ugens menu (frokostportalen)
 

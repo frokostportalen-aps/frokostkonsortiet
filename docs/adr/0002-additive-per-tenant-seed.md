@@ -1,6 +1,6 @@
 # 2. Additive, per-tenant seed with composable content
 
-- Status: Accepted
+- Status: Accepted — amended by [ADR 0003](0003-no-production-seed.md), which removes production as a target for every script
 - Date: 2026-06-30
 - Deciders: Kasper Birch
 

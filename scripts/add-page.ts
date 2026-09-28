@@ -4,6 +4,7 @@ import config from '../src/payload.config'
 
 import { heading, p, richText } from '../src/endpoints/seed/tenants/lexical'
 import { upsertPage } from '../src/endpoints/seed/tenants/seed-tenants'
+import { assertLocalDatabase } from './seedTarget'
 
 /**
  * Example of adding a single page programmatically — without touching the
@@ -14,8 +15,9 @@ import { upsertPage } from '../src/endpoints/seed/tenants/seed-tenants'
  *
  *   pnpm tsx scripts/add-page.ts
  *
- * Edit TENANT_SLUG and the page below, then run it. Safe to run against a live
- * database — it only creates what's missing.
+ * Edit TENANT_SLUG and the page below, then run it. LOCAL ONLY: like the seed
+ * it refuses a non-local database, so seed-shaped content can never land on a
+ * live site behind the editors' backs.
  */
 const TENANT_SLUG = 'smagssans'
 
@@ -33,6 +35,8 @@ const findTenantID = async (payload: Payload, slug: string): Promise<string> => 
 }
 
 const run = async () => {
+  assertLocalDatabase('Sider på de live sites oprettes i admin-panelet, ikke fra et script.')
+
   const payload = await getPayload({ config })
   const tenantID = await findTenantID(payload, TENANT_SLUG)
 
@@ -65,7 +69,9 @@ const run = async () => {
   }
 
   const { id, created } = await upsertPage(payload, tenantID, page, { force: false })
-  payload.logger.info(`${created ? '✓ oprettet' : '• fandtes allerede'}: ${TENANT_SLUG}/${page.slug} (${id})`)
+  payload.logger.info(
+    `${created ? '✓ oprettet' : '• fandtes allerede'}: ${TENANT_SLUG}/${page.slug} (${id})`,
+  )
   process.exit(0)
 }
 
