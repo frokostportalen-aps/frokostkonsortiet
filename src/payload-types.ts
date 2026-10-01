@@ -602,6 +602,10 @@ export interface MediaContentBlock {
    * Halvdelen: billedet fylder sin halvdel af båndet fra kant til kant. En tredjedel: et smallere billede med luft omkring og teksten i de resterende to tredjedele – til portrætter og motiver, der ikke skal fylde halvdelen.
    */
   mediaRatio?: ('half' | 'oneThird') | null;
+  /**
+   * Når billedet eller videoen beskæres for at fylde rammen: hvilken del skal blive i billedet? Vælg Top, hvis fx et hoved i toppen bliver skåret af.
+   */
+  mediaPosition?: ('top' | 'center' | 'bottom') | null;
   textAlign?: ('left' | 'center') | null;
   richText?: {
     root: {
@@ -1870,6 +1874,7 @@ export interface MediaContentBlockSelect<T extends boolean = true> {
   media?: T;
   imagePosition?: T;
   mediaRatio?: T;
+  mediaPosition?: T;
   textAlign?: T;
   richText?: T;
   links?:
