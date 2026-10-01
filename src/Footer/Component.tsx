@@ -14,6 +14,10 @@ import { getAllTenants } from '@/utilities/getTenant'
 import { getTenantCrossURL } from '@/utilities/getURL'
 import { signatureMarkClass } from '@/components/SignatureMark'
 
+// Temporarily hidden until all kitchens are live on their own domains.
+// Flip back to `true` to show the directory again.
+const SHOW_FAMILY = false
+
 // Shared link/heading recipes — used by both footer columns.
 const footerHeadingClass = 'text-xs font-semibold uppercase tracking-eyebrow text-muted-foreground'
 const footerLinkClass =
@@ -80,7 +84,7 @@ export async function Footer({ tenantSlug }: { tenantSlug: string }) {
         )}
 
         {/* The family directory — every kitchen on its own domain */}
-        {family.length > 1 && (
+        {SHOW_FAMILY && family.length > 1 && (
           <nav aria-label="Køkkener i familien" className="flex flex-col gap-3 md:col-span-3">
             <h2 className={footerHeadingClass}>Familien</h2>
             {family.map((t) =>
