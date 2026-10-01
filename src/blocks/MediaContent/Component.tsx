@@ -10,12 +10,22 @@ import { cn } from '@/utilities/ui'
 
 type Props = MediaContentBlockProps & { tenantSlug?: string }
 
+// Which part of the media survives the `object-cover` crop. Literal class
+// names, so Tailwind's scanner finds them; typed from the field's options, so
+// an option added in config.ts without a class fails to compile.
+const objectPosition: Record<NonNullable<MediaContentBlockProps['mediaPosition']>, string> = {
+  top: 'object-top',
+  center: 'object-center',
+  bottom: 'object-bottom',
+}
+
 export const MediaContentBlock: React.FC<Props> = ({
   media,
   richText,
   links,
   imagePosition,
   mediaRatio,
+  mediaPosition,
   textAlign,
   tenantSlug,
 }) => {
@@ -27,6 +37,7 @@ export const MediaContentBlock: React.FC<Props> = ({
   const narrow = mediaRatio === 'oneThird'
   const centred = textAlign === 'center'
   const { signature } = getDialect(tenantSlug)
+  const position = objectPosition[mediaPosition ?? 'center']
 
   return (
     // Outer wrapper owns max-width + side padding; the inner band owns the
@@ -65,7 +76,8 @@ export const MediaContentBlock: React.FC<Props> = ({
           {media && typeof media === 'object' && (
             <Media
               fill
-              imgClassName="object-cover"
+              imgClassName={cn('object-cover', position)}
+              videoClassName={position}
               resource={media}
               // The container caps at 96rem, so past that width the cell stops
               // growing — a bare vw hint would keep asking for a larger source.

@@ -47,6 +47,21 @@ export const MediaContent: Block = {
       ],
     },
     {
+      name: 'mediaPosition',
+      type: 'select',
+      defaultValue: 'center',
+      label: 'Beskæringsposition',
+      admin: {
+        description:
+          'Når billedet eller videoen beskæres for at fylde rammen: hvilken del skal blive i billedet? Vælg Top, hvis fx et hoved i toppen bliver skåret af.',
+      },
+      options: [
+        { label: 'Top', value: 'top' },
+        { label: 'Midt', value: 'center' },
+        { label: 'Bund', value: 'bottom' },
+      ],
+    },
+    {
       name: 'textAlign',
       type: 'select',
       defaultValue: 'left',
