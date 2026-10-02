@@ -1,0 +1,1 @@
+import{a}from"./iframe-Cmzd9uy6.js";const r={eyebrow:"uppercase",chrome:"default",heroVariant:"overlay",signature:"rule",testimonials:"marquee"},i=t=>{const e=a(t);return e?{eyebrow:e.eyebrow??r.eyebrow,chrome:e.chrome??r.chrome,heroVariant:e.heroVariant??r.heroVariant,signature:e.signature??r.signature,testimonials:e.testimonials??r.testimonials}:r};export{i as g};
