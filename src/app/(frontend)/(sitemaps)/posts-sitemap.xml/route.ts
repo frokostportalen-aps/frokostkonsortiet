@@ -4,10 +4,12 @@ import config from '@payload-config'
 import { unstable_cache } from 'next/cache'
 
 import { getTenantFromHost } from '@/utilities/getTenantFromHost'
-import { getTenantServerURL } from '@/utilities/getURL'
+import { getTenantServerURL, isTenantIndexable } from '@/utilities/getURL'
 import { ownedByTenant } from '@/data/tenantScope'
 
-const getPostsSitemap = (tenantSlug: string, siteUrl: string) =>
+// Only the documents are cached; their URLs are built per request from the
+// site's current origin, so a changed primary domain shows up immediately.
+const getPublishedPosts = (tenantSlug: string) =>
   unstable_cache(
     async () => {
       const payload = await getPayload({ config })
@@ -28,20 +30,10 @@ const getPostsSitemap = (tenantSlug: string, siteUrl: string) =>
         },
       })
 
-      const dateFallback = new Date().toISOString()
-
-      const sitemap = results.docs
-        ? results.docs
-            .filter((post) => Boolean(post?.slug))
-            .map((post) => ({
-              loc: `${siteUrl}/posts/${post?.slug}`,
-              lastmod: post.updatedAt || dateFallback,
-            }))
-        : []
-
-      return sitemap
+      return results.docs.filter((post) => Boolean(post?.slug))
     },
-    [`posts-sitemap-${tenantSlug}`],
+    // Distinct key from the old cached URL lists, so none of those is read back as docs.
+    [`posts-sitemap-docs-${tenantSlug}`],
     {
       tags: [`posts-sitemap-${tenantSlug}`],
     },
@@ -49,10 +41,17 @@ const getPostsSitemap = (tenantSlug: string, siteUrl: string) =>
 
 export async function GET() {
   const tenant = await getTenantFromHost()
-  if (!tenant?.slug) return getServerSideSitemap([])
+  // Sites that aren't live yet list nothing (see robots.txt).
+  if (!tenant || !isTenantIndexable(tenant)) return getServerSideSitemap([])
 
   const siteUrl = getTenantServerURL(tenant)
-  const sitemap = await getPostsSitemap(tenant.slug, siteUrl)()
+  const posts = await getPublishedPosts(tenant.slug)()
+  const dateFallback = new Date().toISOString()
 
-  return getServerSideSitemap(sitemap)
+  return getServerSideSitemap(
+    posts.map((post) => ({
+      loc: `${siteUrl}/posts/${post.slug}`,
+      lastmod: post.updatedAt || dateFallback,
+    })),
+  )
 }

@@ -29,17 +29,24 @@ export function resolveTenantSlug(host: string, data: TenantDomainData): string 
 }
 
 /**
- * The single source of truth for which of a tenant's domains a cross-site
- * link should target — shared by the seed's menu links and the footer's
- * family directory, so the policy can't drift between them.
+ * The single source of truth for which of a tenant's domains a link or
+ * canonical URL should target — shared by the seed's menu links, the footer's
+ * family directory and the site's own canonical/sitemap origin, so the policy
+ * can't drift between them.
  *
- * Public links prefer the `new.*` staging domains (the primary domains are
- * not live yet), then any non-localhost domain; local links prefer the
- * `*.localhost` dev domains.
+ * Public URLs use the domain an editor marked primary (the one the site is
+ * live on). A site without one isn't live yet: prefer its `new.*` staging
+ * domain, then any non-localhost domain. Local URLs prefer the `*.localhost`
+ * dev domains.
  */
-export const pickLinkDomain = (domains: string[], preferPublic: boolean): string | undefined =>
+export const pickLinkDomain = (
+  domains: string[],
+  preferPublic: boolean,
+  primary?: string,
+): string | undefined =>
   preferPublic
-    ? (domains.find((d) => d.startsWith('new.')) ??
+    ? (primary ??
+      domains.find((d) => d.startsWith('new.')) ??
       domains.find((d) => !d.includes('localhost')) ??
       domains[0])
     : (domains.find((d) => d.includes('localhost')) ?? domains[0])

@@ -47,11 +47,28 @@ export const Tenants: CollectionConfig = {
         description:
           'Hostnames that resolve to this site, e.g. "smagssans.dk". Add "www." and any aliases as separate rows. Editing this updates routing without a redeploy.',
       },
+      validate: (value: unknown) => {
+        const rows = Array.isArray(value) ? (value as { primary?: boolean | null }[]) : []
+        if (rows.filter((row) => row?.primary).length > 1) {
+          return 'Kun ét domæne kan være primært.'
+        }
+        return true
+      },
       fields: [
         {
           name: 'domain',
           type: 'text',
           required: true,
+        },
+        {
+          name: 'primary',
+          type: 'checkbox',
+          label: 'Primært domæne',
+          defaultValue: false,
+          admin: {
+            description:
+              'Sitets offentlige adresse: canonical-URL, sitemap og robots.txt bygges på den. Et site uden primært domæne regnes for ikke-live og holdes ude af Google (noindex). Sæt det først, når sitet er live på domænet.',
+          },
         },
       ],
     },

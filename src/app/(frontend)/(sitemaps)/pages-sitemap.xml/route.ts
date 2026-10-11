@@ -4,10 +4,12 @@ import config from '@payload-config'
 import { unstable_cache } from 'next/cache'
 
 import { getTenantFromHost } from '@/utilities/getTenantFromHost'
-import { getTenantServerURL } from '@/utilities/getURL'
+import { getTenantServerURL, isTenantIndexable } from '@/utilities/getURL'
 import { ownedByTenant } from '@/data/tenantScope'
 
-const getPagesSitemap = (tenantSlug: string, siteUrl: string) =>
+// Only the documents are cached; their URLs are built per request from the
+// site's current origin, so a changed primary domain shows up immediately.
+const getPublishedPages = (tenantSlug: string) =>
   unstable_cache(
     async () => {
       const payload = await getPayload({ config })
@@ -28,25 +30,10 @@ const getPagesSitemap = (tenantSlug: string, siteUrl: string) =>
         },
       })
 
-      const dateFallback = new Date().toISOString()
-
-      const defaultSitemap = [
-        { loc: `${siteUrl}/search`, lastmod: dateFallback },
-        { loc: `${siteUrl}/posts`, lastmod: dateFallback },
-      ]
-
-      const sitemap = results.docs
-        ? results.docs
-            .filter((page) => Boolean(page?.slug))
-            .map((page) => ({
-              loc: page?.slug === 'home' ? `${siteUrl}/` : `${siteUrl}/${page?.slug}`,
-              lastmod: page.updatedAt || dateFallback,
-            }))
-        : []
-
-      return [...defaultSitemap, ...sitemap]
+      return results.docs.filter((page) => Boolean(page?.slug))
     },
-    [`pages-sitemap-${tenantSlug}`],
+    // Distinct key from the old cached URL lists, so none of those is read back as docs.
+    [`pages-sitemap-docs-${tenantSlug}`],
     {
       tags: [`pages-sitemap-${tenantSlug}`],
     },
@@ -54,10 +41,19 @@ const getPagesSitemap = (tenantSlug: string, siteUrl: string) =>
 
 export async function GET() {
   const tenant = await getTenantFromHost()
-  if (!tenant?.slug) return getServerSideSitemap([])
+  // Sites that aren't live yet list nothing (see robots.txt).
+  if (!tenant || !isTenantIndexable(tenant)) return getServerSideSitemap([])
 
   const siteUrl = getTenantServerURL(tenant)
-  const sitemap = await getPagesSitemap(tenant.slug, siteUrl)()
+  const pages = await getPublishedPages(tenant.slug)()
+  const dateFallback = new Date().toISOString()
 
-  return getServerSideSitemap(sitemap)
+  return getServerSideSitemap([
+    { loc: `${siteUrl}/search`, lastmod: dateFallback },
+    { loc: `${siteUrl}/posts`, lastmod: dateFallback },
+    ...pages.map((page) => ({
+      loc: page.slug === 'home' ? `${siteUrl}/` : `${siteUrl}/${page.slug}`,
+      lastmod: page.updatedAt || dateFallback,
+    })),
+  ])
 }

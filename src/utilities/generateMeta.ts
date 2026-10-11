@@ -59,6 +59,10 @@ export const generateMeta = async (args: {
   const ogPath = !slug || slug === 'home' ? '/' : `${isPost ? '/posts' : ''}/${slug}`
 
   return {
+    // Resolved against the tenant layout's metadataBase (its primary domain), so
+    // aliases — www, new.*, preview URLs — all point Google at one address. A
+    // missing doc (404) gets none rather than claiming the front page.
+    alternates: doc ? { canonical: ogPath } : undefined,
     description: doc?.meta?.description,
     openGraph: mergeOpenGraph({
       description: doc?.meta?.description || '',

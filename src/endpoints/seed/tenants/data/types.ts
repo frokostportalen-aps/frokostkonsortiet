@@ -17,6 +17,11 @@ export type TenantMeta = {
   /** The main Frokost Konsortiet site (fallback for unknown hosts). */
   isMain: boolean
   domains: string[]
+  /**
+   * The domain the site is live on (one of `domains`), mirroring the admin's
+   * "Primært domæne" flag. Unset = not live yet, kept out of search engines.
+   */
+  primaryDomain?: string
   /** Short one-liner used when *other* sites list this tenant (the Partnere page). */
   listingLine: string
   /**
