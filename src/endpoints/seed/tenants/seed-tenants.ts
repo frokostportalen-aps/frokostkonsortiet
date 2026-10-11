@@ -270,13 +270,13 @@ export async function seedTenants(payload: Payload, opts: SeedOptions = {}): Pro
   const siteUrl = (slug: string): string => {
     const t = tenantBySlug.get(slug)
     if (!t) throw new Error(`siteUrl: unknown tenant '${slug}'`)
-    const domain = pickLinkDomain(t.domains, preferPublicLinks)
+    const domain = pickLinkDomain(t.domains, preferPublicLinks, t.primaryDomain)
     if (!domain) throw new Error(`siteUrl: tenant '${slug}' has no domains`)
     return urlForTenantDomain(domain, String(PORT))
   }
 
   for (const t of TENANTS) {
-    const domains = t.domains.map((domain) => ({ domain }))
+    const domains = t.domains.map((domain) => ({ domain, primary: domain === t.primaryDomain }))
 
     // Upsert tenant.
     const existingTenant = await payload.find({

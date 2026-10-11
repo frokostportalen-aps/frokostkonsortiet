@@ -1,9 +1,8 @@
 import type { Tenant } from '@/payload-types'
 
-import configPromise from '@payload-config'
-import { getPayload } from 'payload'
 import { headers } from 'next/headers'
 
+import { getAllTenants } from './getTenant'
 import { normalizeHost } from './tenantDomains'
 
 /**
@@ -16,13 +15,9 @@ export async function getTenantFromHost(): Promise<Tenant | null> {
   const headerList = await headers()
   const host = normalizeHost(headerList.get('host') || '')
 
-  const payload = await getPayload({ config: configPromise })
-  const { docs } = await payload.find({
-    collection: 'tenants',
-    depth: 0,
-    limit: 1000,
-    pagination: false,
-  })
+  // Cached and busted with the `tenant-domains` tag — crawlers hit robots.txt
+  // and the sitemaps often, and this runs on every one of those requests.
+  const docs = await getAllTenants()
 
   const match = docs.find((tenant) =>
     (tenant.domains || []).some((entry) => normalizeHost(entry?.domain || '') === host),

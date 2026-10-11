@@ -7,7 +7,7 @@ import { Header } from '@/Header/Component'
 import { TenantTheme } from '@/components/TenantTheme'
 import { mergeOpenGraph } from '@/utilities/mergeOpenGraph'
 import { getTenantBySlug } from '@/utilities/getTenant'
-import { getServerSideURL, getTenantServerURL } from '@/utilities/getURL'
+import { getServerSideURL, getTenantServerURL, isTenantIndexable } from '@/utilities/getURL'
 import { getTenantTheme } from '@/themes/tenantThemes'
 import { resolveTenantBrand } from '@/themes/resolveTenantBrand'
 import { getTenantFont } from '@/themes/fonts'
@@ -54,6 +54,9 @@ export async function generateMetadata({ params }: Args): Promise<Metadata> {
   return {
     metadataBase: new URL(tenant ? getTenantServerURL(tenant) : getServerSideURL()),
     title: tenant?.name ? { default: tenant.name, template: `%s | ${tenant.name}` } : undefined,
+    // A site without a primary domain isn't live yet — keep it out of search
+    // engines until an editor marks the domain it went live on.
+    robots: isTenantIndexable(tenant) ? undefined : { index: false, follow: false },
     // Overrides the root layout's shared fallback icon, so each site carries
     // its own mark in a row of browser tabs. An uploaded favicon (any image) or
     // the generated SVG letter-mark data URI.

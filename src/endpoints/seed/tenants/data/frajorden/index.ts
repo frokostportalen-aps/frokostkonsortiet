@@ -19,6 +19,7 @@ export const fraJorden: TenantDef = {
   isMain: false,
   kitchenId: '4e50466a-2be2-401f-37f8-08dde63b90bd',
   domains: ['frajorden.localhost', 'frajorden.dk', 'new.frajorden.dk'],
+  primaryDomain: 'frajorden.dk',
   listingLine: 'Fra jorden til jeres frokostbord',
   tagline: 'Fra jorden til bordet',
   headerCta: { label: 'Få et tilbud', url: '/frokostordning#tilbud' },

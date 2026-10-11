@@ -4,22 +4,20 @@ import canUseDOM from './canUseDOM'
 import { pickLinkDomain, urlForTenantDomain } from './tenantDomains'
 
 /**
- * The public origin for a given tenant, derived from its first configured
- * domain (e.g. "https://smagssans.dk"). Falls back to the shared server URL
- * when a tenant has no domain yet (local dev, freshly created sites).
+ * The domain an editor marked as the tenant's primary one — set only once the
+ * site is live there. No primary domain means the site isn't live yet.
  */
-export const getTenantServerURL = (tenant?: Tenant | null) => {
-  const domain = tenant?.domains?.[0]?.domain
-  if (domain) {
-    return domain.startsWith('http') ? domain : `https://${domain}`
-  }
-  return getServerSideURL()
-}
+const getTenantPrimaryDomain = (tenant?: Tenant | null): string | undefined =>
+  tenant?.domains?.find((d) => d?.primary)?.domain || undefined
+
+/** A site is open to search engines only once it has a primary domain. */
+export const isTenantIndexable = (tenant?: Tenant | null): boolean =>
+  Boolean(getTenantPrimaryDomain(tenant))
 
 /**
- * Environment-aware absolute URL to a tenant's own site, for cross-site links
- * (the footer's family directory). Shares the seed's domain policy via
- * `pickLinkDomain`, so the two can't drift.
+ * Environment-aware absolute URL to a tenant's own site (with a trailing
+ * slash), for cross-site links (the footer's family directory). Shares the
+ * seed's domain policy via `pickLinkDomain`, so the two can't drift.
  */
 export const getTenantCrossURL = (tenant: Tenant): string => {
   const domains = (tenant.domains ?? []).map((d) => d.domain)
@@ -33,7 +31,7 @@ export const getTenantCrossURL = (tenant: Tenant): string => {
     process.env.NODE_ENV !== 'production' &&
     (explicitServer ? /localhost|127\.0\.0\.1/.test(explicitServer) : true)
 
-  const domain = pickLinkDomain(domains, !isLocal)
+  const domain = pickLinkDomain(domains, !isLocal, getTenantPrimaryDomain(tenant))
   if (!domain) return server
 
   let port = ''
@@ -44,6 +42,15 @@ export const getTenantCrossURL = (tenant: Tenant): string => {
   }
   return urlForTenantDomain(domain, port)
 }
+
+/**
+ * The origin for a given tenant (e.g. "https://frajorden.dk"), for canonical
+ * URLs and sitemaps: the same domain cross-site links use, so its primary
+ * domain once it is live. Falls back to the shared server URL when there is no
+ * tenant.
+ */
+export const getTenantServerURL = (tenant?: Tenant | null) =>
+  tenant ? getTenantCrossURL(tenant).replace(/\/$/, '') : getServerSideURL()
 
 export const getServerSideURL = () => {
   return (

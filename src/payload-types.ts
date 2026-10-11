@@ -259,6 +259,10 @@ export interface Tenant {
   domains?:
     | {
         domain: string;
+        /**
+         * Sitets offentlige adresse: canonical-URL, sitemap og robots.txt bygges på den. Et site uden primært domæne regnes for ikke-live og holdes ude af Google (noindex). Sæt det først, når sitet er live på domænet.
+         */
+        primary?: boolean | null;
         id?: string | null;
       }[]
     | null;
@@ -2372,6 +2376,7 @@ export interface TenantsSelect<T extends boolean = true> {
     | T
     | {
         domain?: T;
+        primary?: T;
         id?: T;
       };
   kitchenId?: T;
