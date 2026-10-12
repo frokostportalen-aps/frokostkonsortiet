@@ -3,16 +3,16 @@ import type { Metadata } from 'next'
 import type { Media, Page, Post, Config } from '../payload-types'
 
 import { mergeOpenGraph } from './mergeOpenGraph'
-import { getServerSideURL } from './getURL'
 
 // Pages without a meta image get no og:image rather than a generic stand-in —
 // scrapers then fall back to the tenant layout's defaults.
+//
+// The media path is left relative, so Next resolves it against the tenant
+// layout's metadataBase: a site's share image is served from its own domain,
+// not the shared server URL, and survives that URL moving.
 const getImageURL = (image?: Media | Config['db']['defaultIDType'] | null) => {
   if (image && typeof image === 'object' && 'url' in image) {
-    const serverUrl = getServerSideURL()
-    const ogUrl = image.sizes?.og?.url
-
-    return ogUrl ? serverUrl + ogUrl : serverUrl + image.url
+    return image.sizes?.og?.url || image.url || null
   }
 
   return null
