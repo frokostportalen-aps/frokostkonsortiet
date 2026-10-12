@@ -62,6 +62,50 @@ export const Brand: CollectionConfig = {
           'Den korte linje over overskriften på sitets sider – fx "Siden 1980 · sæsonens køkken". Står feltet tomt, bruges sitets standardlinje fra temaet.',
       },
     },
+    {
+      name: 'organization',
+      type: 'group',
+      label: 'Virksomhedsoplysninger',
+      admin: {
+        description:
+          'Vises ikke på sitet, men fortæller Google (og AI-søgninger) hvem virksomheden er, via structured data på forsiden. Udfyld det, der er relevant – tomme felter udelades.',
+      },
+      fields: [
+        {
+          type: 'row',
+          fields: [
+            { name: 'telephone', type: 'text', label: 'Telefon' },
+            { name: 'email', type: 'email', label: 'E-mail' },
+          ],
+        },
+        {
+          type: 'row',
+          fields: [
+            { name: 'streetAddress', type: 'text', label: 'Adresse' },
+            { name: 'postalCode', type: 'text', label: 'Postnr.' },
+            { name: 'addressLocality', type: 'text', label: 'By' },
+          ],
+        },
+        {
+          name: 'areaServed',
+          type: 'text',
+          label: 'Leveringsområde',
+          admin: {
+            description: 'Hvor I leverer, fx "Storkøbenhavn" eller "Aarhus og omegn".',
+          },
+        },
+        {
+          name: 'sameAs',
+          type: 'array',
+          label: 'Profiler på andre sites',
+          labels: { singular: 'Profil', plural: 'Profiler' },
+          admin: {
+            description: 'Fulde links til fx LinkedIn, Facebook og Instagram.',
+          },
+          fields: [{ name: 'url', type: 'text', label: 'URL', required: true }],
+        },
+      ],
+    },
   ],
   hooks: {
     afterChange: [revalidateBrand],

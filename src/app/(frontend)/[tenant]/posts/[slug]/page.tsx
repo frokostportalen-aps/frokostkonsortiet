@@ -11,6 +11,9 @@ import RichText from '@/components/RichText'
 import { PostHero } from '@/heros/PostHero'
 import { getDialect } from '@/themes/dialect'
 import { generateMeta } from '@/utilities/generateMeta'
+import { getTenantBySlug } from '@/utilities/getTenant'
+import { buildArticle } from '@/utilities/structuredData'
+import { JsonLd } from '@/components/JsonLd'
 import PageClient from './page.client'
 import { LivePreviewListener } from '@/components/LivePreviewListener'
 import { findPostBySlug } from '@/data/tenantContent'
@@ -51,6 +54,8 @@ export default async function Post({ params: paramsPromise }: Args) {
 
   if (!post) return <PayloadRedirects tenantSlug={tenant} url={url} />
 
+  const tenantDoc = await getTenantBySlug(tenant)
+
   return (
     <article className="flow-root pb-16">
       <PageClient />
@@ -59,6 +64,7 @@ export default async function Post({ params: paramsPromise }: Args) {
       <PayloadRedirects disableNotFound tenantSlug={tenant} url={url} />
 
       {draft && <LivePreviewListener />}
+      {tenantDoc && <JsonLd data={buildArticle({ tenant: tenantDoc, post })} />}
 
       <PostHero post={post} floats={getDialect(tenant).chrome !== 'brand'} />
 

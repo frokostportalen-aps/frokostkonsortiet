@@ -10,7 +10,7 @@ import { mergeOpenGraph } from './mergeOpenGraph'
 // The media path is left relative, so Next resolves it against the tenant
 // layout's metadataBase: a site's share image is served from its own domain,
 // not the shared server URL, and survives that URL moving.
-const getImageURL = (image?: Media | Config['db']['defaultIDType'] | null) => {
+export const getImageURL = (image?: Media | Config['db']['defaultIDType'] | null) => {
   if (image && typeof image === 'object' && 'url' in image) {
     return image.sizes?.og?.url || image.url || null
   }
