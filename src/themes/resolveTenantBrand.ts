@@ -16,6 +16,8 @@ export type TenantBrand = {
   favicon: string | null
   /** The standing line the heroes carry above their headings, if the site has one. */
   tagline?: string
+  /** Contact details for the site's structured data (JSON-LD), as entered. */
+  organization?: Brand['organization']
 }
 
 /** A populated upload field → its cache-busted media URL (or undefined). */
@@ -83,5 +85,5 @@ export const resolveTenantBrand = cache(async (tenantSlug: string): Promise<Tena
   const favicon = mediaUrl(brand?.favicon) ?? getTenantFavicon(tenantSlug)
   const tagline = brand?.tagline?.trim() || undefined
 
-  return { logo, favicon, tagline }
+  return { logo, favicon, tagline, organization: brand?.organization }
 })

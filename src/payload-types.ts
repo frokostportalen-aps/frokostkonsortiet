@@ -1454,6 +1454,29 @@ export interface Brand {
    * Den korte linje over overskriften på sitets sider – fx "Siden 1980 · sæsonens køkken". Står feltet tomt, bruges sitets standardlinje fra temaet.
    */
   tagline?: string | null;
+  /**
+   * Vises ikke på sitet, men fortæller Google (og AI-søgninger) hvem virksomheden er, via structured data på forsiden. Udfyld det, der er relevant – tomme felter udelades.
+   */
+  organization?: {
+    telephone?: string | null;
+    email?: string | null;
+    streetAddress?: string | null;
+    postalCode?: string | null;
+    addressLocality?: string | null;
+    /**
+     * Hvor I leverer, fx "Storkøbenhavn" eller "Aarhus og omegn".
+     */
+    areaServed?: string | null;
+    /**
+     * Fulde links til fx LinkedIn, Facebook og Instagram.
+     */
+    sameAs?:
+      | {
+          url: string;
+          id?: string | null;
+        }[]
+      | null;
+  };
   updatedAt: string;
   createdAt: string;
 }
@@ -2458,6 +2481,22 @@ export interface BrandSelect<T extends boolean = true> {
   logoDark?: T;
   favicon?: T;
   tagline?: T;
+  organization?:
+    | T
+    | {
+        telephone?: T;
+        email?: T;
+        streetAddress?: T;
+        postalCode?: T;
+        addressLocality?: T;
+        areaServed?: T;
+        sameAs?:
+          | T
+          | {
+              url?: T;
+              id?: T;
+            };
+      };
   updatedAt?: T;
   createdAt?: T;
 }
