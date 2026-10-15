@@ -1,0 +1,72 @@
+name: Chromatic
+
+# Visual regression tests for the block library. Every story is snapshotted in
+# each site's theme, light and dark (the modes are set in .storybook/preview.tsx),
+# and compared against the last accepted baseline. Differences are reviewed and
+# accepted in Chromatic, which reports back on the pull request as the
+# "UI Tests" and "UI Review" checks.
+#
+# Free plan: 5,000 snapshots a month. Two things keep us under it:
+#   - TurboSnap (onlyChanged) re-snapshots only the stories whose files changed.
+#     The rest are billed at a fifth of a snapshot.
+#   - The paths filter below skips commits that cannot change how a story looks.
+#
+# Runs on push, not on pull_request, as Chromatic recommends: the merge commit a
+# pull_request run checks out confuses Chromatic's baselines. Every branch lives
+# in this repo, so a push to a PR's branch runs this anyway.
+on:
+  push:
+    paths:
+      - 'src/**'
+      - '.storybook/**'
+      - 'postcss.config.js'
+      - 'tailwind.config.mjs'
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+      - '.github/workflows/chromatic.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  chromatic:
+    runs-on: ubuntu-latest
+    # A newer push to the same branch makes this one moot.
+    concurrency:
+      group: chromatic-${{ github.ref }}
+      cancel-in-progress: true
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # Chromatic walks the git history to find the baseline for this commit,
+          # and TurboSnap diffs against it.
+          fetch-depth: 0
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - uses: chromaui/action@v18
+        with:
+          # Create the project at chromatic.com, then add its token as a
+          # repository secret under this name.
+          projectToken: ${{ secrets.CHROMATIC_PROJECT_TOKEN }}
+          # Chromatic runs the build itself and adds the stats flag that
+          # TurboSnap needs.
+          buildScriptName: build:storybook
+          onlyChanged: true
+          # Outside Vite's module graph, so TurboSnap cannot trace which stories
+          # use them. A change here re-snapshots everything.
+          externals: |
+            src/stories/assets/**
+          # A merge to main is the new baseline; it was reviewed on the PR.
+          autoAcceptChanges: main
+          # Visual changes are not a failed run. Chromatic reports them on the
+          # PR as its own check, which is where they get accepted or rejected.
+          exitZeroOnChanges: true

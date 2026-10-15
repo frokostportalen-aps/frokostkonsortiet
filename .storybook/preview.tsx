@@ -92,6 +92,23 @@ const preview: Preview = {
   },
 
   parameters: {
+    chromatic: {
+      // Every story is snapshotted once per site and per mode — the toolbar's
+      // whole matrix — so a change that only breaks one dialect still shows up.
+      // Each mode is a snapshot billed on its own: drop the dark half here if
+      // the monthly allowance gets tight.
+      modes: Object.fromEntries(
+        TENANTS.flatMap(({ value, title }) =>
+          (['light', 'dark'] as const).map((mode) => [
+            `${title} ${mode === 'light' ? 'lys' : 'mørk'}`,
+            { tenant: value, mode },
+          ]),
+        ),
+      ),
+      // The hero's entrance animates from `opacity: 0` (`animation-fill-mode:
+      // both`), so a snapshot of the first frame would be a hero without text.
+      pauseAnimationAtEnd: true,
+    },
     // Every block here comes from the App Router side of the app, and some of
     // them (the form's redirect, a post card's link) call `useRouter`. Without
     // this the adapter mounts no router and those stories throw.
